@@ -1,0 +1,15 @@
+[
+	{
+		"id": 1,
+		"action": {
+			"type": "redirect",
+			"redirect": {
+				"regexSubstitution": "\\1&whr=uclive.ac.nz\\2"
+			}
+		},
+		"condition": {
+			"regexFilter": "^(\\w+:\\/\\/login\\.microsoftonline\\.com\\/.*?\\?.*?RelayState=[^&]*canterbury\\.ac\\.nz.*?)&whr=[^u&][^c&][^&]*(&.*|$)",
+			"resourceTypes": ["main_frame"]
+		}
+	}
+]

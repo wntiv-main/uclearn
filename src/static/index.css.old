@@ -1,0 +1,850 @@
+:root {
+	--foreground: black;
+	--background: white;
+
+	background-attachment: fixed;
+	background-size: cover;
+	background-position: center;
+}
+
+
+:root.uclearn-dark-mode {
+	--foreground: white;
+	--background: #1e1e1e;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--foreground: white;
+		--background: #1e1e1e;
+	}
+}
+
+:root {
+	--placeholder-fg: color-mix(in hsl, var(--foreground) 60%, var(--background) 40%);
+	--bg-translucent: color-mix(in srgb, var(--background) 50%, transparent 50%);
+	--accent-hue: 210deg;
+	--accent-bg: hsl(var(--accent-hue), 100%, 50%);
+
+	--page-background: var(--bg-translucent);
+	--section-background: var(--bg-translucent);
+	--card-background: var(--bg-translucent);
+	--card-radius: 10px;
+
+	--radius: 10px;
+	--input-radius: 10px;
+	--float-bg-effect: blur(5px);
+
+	--color-error: #ff0000;
+	--color-warning: #ffff00;
+	--color-success: #00ff00;
+	--color-complete: #0060bf;
+	--color-action: hsl(var(--accent-hue), 100%, 50%);
+
+	--fg-error: color-mix(in hsl, var(--color-error) 50%, var(--foreground) 50%);
+	--bg-error: color-mix(in hsl, var(--color-error) 60%, var(--background) 40%);
+	--fg-warning: color-mix(in hsl, var(--color-warning) 50%, var(--foreground) 50%);
+	--bg-warning: color-mix(in hsl, var(--color-warning) 60%, var(--background) 40%);
+	--fg-success: color-mix(in hsl, var(--color-success) 50%, var(--foreground) 50%);
+	--bg-success: color-mix(in hsl, var(--color-success) 60%, var(--background) 40%);
+	--bg-complete: color-mix(in hsl, var(--color-complete) 60%, var(--background) 40%);
+	--fg-complete: color-mix(in hsl, var(--color-complete) 50%, var(--foreground) 50%);
+	--bg-action: color-mix(in hsl, var(--color-action) 60%, var(--background) 40%);
+	--fg-action: color-mix(in hsl, var(--color-action) 50%, var(--foreground) 50%);
+
+	/* --link-color-hover: color-mix(in hsl, var(--color-action) 50%, var(--foreground-color) 50%);
+	--link-color: color-mix(in hsl, var(--link-color-hover) 80%, var(--foreground-color) 20%);
+	--bg-action-hover: color-mix(in hsl, var(--color-action) 50%, transparent 50%);
+	--bg-action-active: color-mix(in hsl, var(--color-action) 60%, transparent 40%); */
+
+	--hover-highlight: color-mix(in srgb, var(--foreground) 20%, transparent 80%);
+	--active-highlight: color-mix(in srgb, var(--foreground) 40%, transparent 60%);
+	/* --hover-fg: color-mix(in hsl, var(--foreground-color) 90%, var(--background) 10%); */
+	/* --active-fg: color-mix(in hsl, var(--foreground-color) 80%, var(--background) 20%); */
+
+}
+
+/* Custom stuff */
+
+#uclearn-inspectors-list {
+	background-color: var(--bg-translucent);
+	padding: var(--radius);
+	border-top-left-radius: var(--radius);
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	width: fit-content;
+	z-index: 9999;
+	border-top: 1px solid currentColor;
+	border-left: 1px solid currentColor;
+}
+
+/* Resets */
+
+:root body {
+	color: var(--foreground);
+	background-color: transparent;
+}
+
+:root .bg-white {
+	background-color: transparent !important;
+}
+
+#region-main, section#region-main {
+	background: transparent;
+}
+
+:root .que .formulation {
+	background-color: transparent !important;
+	color: inherit !important;
+}
+
+:root .bg-light {
+	background-color: var(--bg-translucent) !important;
+}
+
+:root .bg-secondary {
+	background-color: var(--bg-translucent);
+}
+
+:root .moremenu {
+	opacity: 1;
+}
+
+:root :is(.drawer,
+	#page.drawers .main-inner,
+	.btn,
+	pre,
+	.navigation,
+	.secondary-navigation nav.navigation,
+	.moremenu .nav-tabs,
+	.que.stack input[type="text"],
+	.block_custom_course_menu input[type="text"],
+	.uclearn-mathquillField,
+	.message-app .footer-container textarea,
+	table.generaltable,
+	table.generaltable tbody :is(td, th, tr:hover),
+	section.card) {
+	background-color: transparent;
+	color: inherit;
+}
+
+:root table.generaltable tbody :is(td, th) {
+	border: none;
+	padding: 0.25rem 1rem;
+}
+
+:root table.quizreviewsummary {
+	padding-inline: 0;
+}
+
+:root .activity:hover {
+	background-color: transparent !important;
+}
+
+:root :is(#page, #page.drawers), .theme-boost-union-smartmenu .navbar.fixed-top~div#page.drawers {
+	margin-top: 0px;
+	padding-top: calc(60px - 0.8rem);
+	height: auto;
+	overflow-y: auto;
+}
+
+:root .que.stack div:is(.matrixsquarebrackets, .matrixroundbrackets) {
+	border-color: currentColor;
+}
+
+:root .que.stack div.matrixsquarebrackets {
+	background-image: linear-gradient(currentColor, currentColor),
+		linear-gradient(currentColor, currentColor),
+		linear-gradient(currentColor, currentColor),
+		linear-gradient(currentColor, currentColor);
+}
+
+.JXGtext {
+	color: inherit !important;
+}
+
+:root .que .formulation hr {
+	border-color: currentColor;
+}
+
+:root .block.block_ace {
+	margin-inline: 15px;
+}
+
+:has(.block.block_ace)+*>.block {
+	margin-inline: 15px;
+	margin-top: 1rem;
+}
+
+:root .drawer {
+	z-index: 1;
+}
+
+:root hr {
+	border-color: currentColor;
+}
+
+:root .editmode-switch-form {
+	margin: 0;
+}
+
+/* Float background effects */
+
+:root .modal-content,
+:root #MathJax_Zoom,
+:is(.main-inner, .navbar, .dropdown-menu, .drawer, section.card:not(.block_multiblock:has(.block)))::before,
+:root .drawer-toggles .drawer-toggler .btn {
+	background-color: var(--bg-translucent) !important;
+	backdrop-filter: var(--float-bg-effect);
+}
+
+:is(.main-inner, .navbar, .dropdown-menu, .drawer, section.card:not(.block_multiblock:has(.block))) {
+	position: relative;
+}
+
+:is(.main-inner, .navbar, .dropdown-menu, .drawer, section.card:not(.block_multiblock:has(.block)))::before {
+	content: "";
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	border-radius: inherit;
+	z-index: -1;
+}
+
+.navbar::before {
+	/* Counter .navbar padding */
+	margin-inline: -1rem;
+}
+
+.main-inner::before {
+	/* Counter .main-inner padding */
+	margin: -1.5rem -0.5rem;
+}
+
+.bg-pulse-grey {
+	background-color: var(--bg-translucent) !important;
+	border-radius: 5px;
+}
+
+/* Navbar */
+
+:root :is(.navbar-brand,
+	.navbar.fixed-top,
+	.navbar .logo,
+	.primary-navigation .navigation,
+	.primary-navigation .navigation .nav-link,
+	.moremenu,
+	.moremenu .nav-link) {
+	/* Content-aware navbar height */
+	height: auto;
+}
+
+:root .primary-navigation .navbar-nav {
+	flex-wrap: nowrap;
+}
+
+:root .navbar .logo {
+	/* TODO: do we like this? */
+	/* width: calc(285px - 2rem); */
+}
+
+:root.uclearn-dark-mode :is(nav.navbar img, img.icon) {
+	/* TODO: where does this go */
+	filter: invert(1);
+}
+
+:root .primary-navigation {
+	flex-basis: auto;
+	min-width: 0;
+	/* TODO: magic */
+	/* overflow: hidden; */
+}
+
+:root .primary-navigation .navigation {
+	height: 100%;
+}
+
+:root .primary-navigation .navigation .nav-link {
+	padding-inline: 1rem;
+}
+
+:root .primary-navigation .navigation .nav-link {
+	color: var(--foreground);
+}
+
+:root .navbar {
+	background-color: var(--bg-translucent) !important;
+	/* TODO: magic here https://stackoverflow.com/a/78351221/13160456??? */
+	margin-right: 10px;
+}
+
+:root :has(.drawer-right.show, .drawer[data-region=right-hand-drawer][aria-expanded=true]) .navbar {
+	margin-right: 0;
+}
+
+/* Drawers */
+
+:root #page.drawers .drawer-right-toggle {
+	margin-right: 0;
+}
+
+:root .drawer-toggles .drawer-right-toggle {
+	right: 10px;
+	clip-path: inset(-100% 0 -100% -100%);
+}
+
+:root .drawer-toggles .drawer-toggler .btn {
+	/* TODO: buttons */
+	/* --accent-bg: var(--bg-translucent);
+	background-color: var(--accent-bg); */
+	/* backdrop-filter: var(--bg-effect); */
+}
+
+/* Dropdown menu */
+
+.dropdown-menu {
+	overflow: hidden;
+}
+
+:root .dropdown-menu {
+	background-color: var(--bg-translucent);
+	color: var(--foreground);
+	padding-block: 0;
+}
+
+:root .nav-tabs .dropdown-menu {
+	top: 1px !important;
+}
+
+:root .dropdown-divider {
+	margin: 0;
+}
+
+:root .dropdown-item {
+	color: inherit;
+	overflow: hidden auto;
+}
+
+/* TODO: is this good */
+:root :is(.dropdown-item, .loggedinas):first-child {
+	border-top-left-radius: inherit;
+	border-top-right-radius: inherit;
+}
+
+:root :is(.dropdown-item, .loggedinas):last-child {
+	border-bottom-left-radius: inherit;
+	border-bottom-right-radius: inherit;
+}
+
+:root .dropdown-item:first-child,
+:root .dropdown-divider+.dropdown-item {
+	padding-top: .5rem;
+}
+
+:root .dropdown-item:is(:last-child, :has(+ .dropdown-divider)) {
+	padding-bottom: .5rem;
+}
+
+:root .navbar.fixed-top .usermenu .dropdown-menu .dropdown-item:first-child,
+:root .navbar.fixed-top .usermenu #user-action-menu.dropdown-menu .loggedinas:first-child,
+:root .navbar.fixed-top .usermenu .dropdown-menu .dropdown-divider+.dropdown-item {
+	padding-top: .75rem;
+}
+
+:root .navbar.fixed-top .usermenu #user-action-menu.dropdown-menu .loggedinas:is(:last-child, :has(+ .dropdown-divider)),
+:root .navbar.fixed-top .usermenu .dropdown-menu .dropdown-item:is(:last-child, :has(+ .dropdown-divider)) {
+	padding-bottom: .75rem;
+}
+
+:root .theme-boost-union-smartmenu .navbar.fixed-top .usermenu .dropdown-menu .dropdown-item.carousel-navigation-link::after {
+	top: 0;
+}
+
+/* Module media */
+
+.img-fluid,
+.que :is(img, .video-js:has(canvas.uclearn-video-canvas), video, svg) {
+	border-radius: var(--radius);
+}
+
+:root.dark-mode {
+	& .que :is(img, video, svg, iframe[title*="JSXGraph"]) {
+		filter: invert(0.95) hue-rotate(180deg);
+	}
+
+	& .que canvas.uclearn-video-canvas {
+		/* TODO: why drop shadow??? */
+		filter: invert(0.75) blur(0.5px) drop-shadow(1px 2px 3px #00000080) hue-rotate(180deg) brightness(1.5) saturate(1.5);
+	}
+}
+
+.que .video-js:has(canvas.uclearn-video-canvas) {
+	background-color: var(--bg-translucent);
+	border: 1px solid currentColor;
+	position: relative;
+}
+
+.que canvas.uclearn-video-canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+
+	&+video {
+		opacity: 0;
+	}
+}
+
+.ln-svg-figure {
+	max-width: 100%;
+}
+
+/* Message app */
+
+:root .message-app .footer-container textarea {
+	flex-grow: 1;
+}
+
+/* Course Index */
+
+:root .courseindex .courseindex-item .courseindex-link,
+:root .courseindex .courseindex-item .courseindex-chevron {
+	color: inherit;
+}
+
+:root .courseindex .courseindex-item:is(:hover, :focus) {
+	color: color-mix(in srgb, var(--foreground) 70%, var(--placeholder-fg) 30%);
+}
+
+:root .courseindex .courseindex-item:active {
+	color: color-mix(in srgb, var(--foreground) 50%, var(--placeholder-fg) 50%);
+}
+
+/* Quiz nav */
+
+/* TODO: hard refactor? */
+:root .path-mod-quiz #mod_quiz_navblock h3.mod_quiz-section-heading {
+	font-weight: normal;
+	font-size: 1.15rem;
+	letter-spacing: 0.5px;
+	margin-bottom: 0.2rem;
+	border-bottom: 1px solid currentColor;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton {
+	margin-right: 0;
+	border-radius: var(--radius);
+	background-color: transparent;
+	height: auto;
+	padding-block: calc(var(--radius) / 2);
+	overflow: hidden;
+	color: var(--foreground) !important;
+	text-shadow: 1px 1px 6px black;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton:is(:hover, :focus) {
+	background-color: var(--hover-highlight);
+
+	& .trafficlight {
+		background-position: 50% 105%;
+	}
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton:active {
+	background-color: var(--active-highlight);
+}
+
+:root .path-mod-quiz .qnbutton.thispage .thispageholder,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.thispage .thispageholder {
+	border: 2px solid var(--color-action);
+	border-radius: var(--radius);
+	width: 100%;
+	height: 100%;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton+.qnbutton {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+
+	& .thispageholder {
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton:has(+.qnbutton) {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+
+	& .thispageholder {
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.thispage+.qnbutton.thispage .thispageholder {
+	border-left: none;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.thispage:has(+.qnbutton.thispage) .thispageholder {
+	border-right: none;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton .thispageholder {
+	border: none;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton .trafficlight {
+	--accent-bg: var(--background);
+	margin-top: 0;
+	background-color: color-mix(in hsl, color-mix(in hsl, var(--accent-bg) 60%, var(--background) 40%), transparent 50%) !important;
+	background-position: 50% 75%;
+	width: 100%;
+	height: 100%;
+	border-radius: 0;
+	z-index: -1;
+	transition: color 0.15s ease-in-out,
+		background-color 0.15s ease-in-out,
+		border-color 0.15s ease-in-out,
+		box-shadow 0.15s ease-in-out,
+		background-position 0.15s ease-in-out;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.notyetanswered .trafficlight {
+	--accent-bg: var(--background);
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.complete .trafficlight,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.answersaved .trafficlight,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.requiresgrading .trafficlight {
+	--accent-bg: var(--color-complete);
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.correct .trafficlight {
+	--accent-bg: var(--color-success);
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.partiallycorrect .trafficlight,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.invalidanswer .trafficlight {
+	--accent-bg: var(--color-warning);
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.notanswered .trafficlight,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.incorrect .trafficlight {
+	--accent-bg: var(--color-error);
+}
+
+/* Layout */
+
+#page-footer, #footnote {
+	display: none;
+}
+
+:root #page-header {
+	max-width: unset !important;
+	margin-inline: -0.5rem;
+	padding-inline: calc(15px + 0.5rem);
+	padding-bottom: 8px;
+}
+
+:root #page-header:has(+ .secondary-navigation) {
+	margin-bottom: 0;
+}
+
+:root #page-wrapper {
+	display: grid;
+	grid: [navbar] max-content [page] 1fr [page-end] / [far-left drawer-left] max-content [drawer-left-end page-left] 1fr [page-right drawer-right] max-content [drawer-right-end far-right];
+	overflow: hidden;
+	width: 100%;
+}
+
+:root :is(.drawer, .drawer[data-region], #page, .navbar) {
+	position: relative !important;
+	top: unset;
+	left: unset;
+	right: unset;
+	min-height: 0;
+}
+
+:root .drawer, :root [data-region].drawer {
+	height: auto;
+	transition: margin-left 0.2s ease, margin-right 0.2s ease, visibility 0.2s ease;
+}
+
+:root .navbar {
+	grid-area: navbar / far-left / navbar / far-right;
+}
+
+:root .drawer-left,
+[data-region=left-hand-drawer].drawer {
+	grid-area: page / drawer-left;
+	border-right: var(--border-style) currentColor;
+}
+
+:root .drawer-right,
+[data-region=right-hand-drawer].drawer {
+	grid-area: page / drawer-right;
+	border-left: var(--border-style) currentColor;
+}
+
+:root .drawer-left:not(.show) {
+	margin-left: -285px;
+}
+
+:root .drawer-right:not(.show) {
+	margin-right: -315px;
+}
+
+.drawer.hidden[data-region=right-hand-drawer] {
+	/* TODO */
+	margin-left: -320px;
+}
+
+.drawer.hidden[data-region=right-hand-drawer] {
+	margin-right: -320px;
+}
+
+:root #page.drawers, :root .drawercontent {
+	scrollbar-color: var(--foreground-color) var(--bg-translucent);
+}
+
+:root #page {
+	grid-area: navbar / page-left / page-end / page-right;
+	margin-inline: 0 !important;
+}
+
+@media (max-width: var(--breakpoint-lg, 992px)) {
+	:root #page {
+		grid-area: navbar / far-left / page-end / far-right;
+		margin-inline: 0 !important;
+	}
+}
+
+/* Cards */
+
+:root .card {
+	border: none;
+}
+
+section.card::before {
+	background-color: var(--section-background);
+	/* backdrop-filter: var(--float-bg-effect); */
+}
+
+:root .dashboard-card-deck .dashboard-card {
+	background-color: transparent;
+	background-image: linear-gradient(var(--card-background), var(--card-background));
+	transition: box-shadow 200ms ease, background-color 200ms ease, transform 100ms ease;
+
+	&:hover {
+		background-color: #00000040;
+		box-shadow: 3px 5px 1rem #00000080 !important;
+		transform: translate(-1px, -3px);
+
+		& a {
+			text-decoration: underline;
+		}
+	}
+}
+
+:root .card-deck.dashboard-card-deck {
+	overflow: auto hidden !important;
+	margin: -1rem;
+	padding: 1rem;
+}
+
+/* Links */
+
+/* :root a, :root .formulation a {
+	color: var(--accent-fg) !important;
+} */
+
+/* :root a:hover, :root .formulation a:hover {
+	color: var(--link-color-hover) !important;
+} */
+
+.btn.btn-link {
+	/* TODO: more specific? */
+	text-wrap: balance;
+}
+
+:root :is(a, .formulation a) {
+	/* --accent-fg: var(--color-action);
+	--highlight-fg: var(--foreground);
+	--override-bg: transparent; */
+	color: var(--fg-action);
+}
+
+:root :is(:is(a, .formulation a):is(:hover, :focus-visible),
+	.dashboard-card-deck .dashboard-card:is(:hover, :focus-within) a) {
+	color: color-mix(in srgb, currentColor 80%, var(--foreground) 20%);
+}
+
+:root :is(:is(a, .formulation a):active,
+	.dashboard-card-deck .dashboard-card:active a) {
+	color: color-mix(in srgb, currentColor 70%, var(--foreground) 30%);
+}
+
+/* Buttons */
+
+:root .custom-select {
+	/* --accent-bg: transparent; */
+	/* background-color: var(--accent-bg); */
+}
+
+:root :is(.dropdown-item,
+	.btn.btn-icon,
+	.maincalendar .calendarmonth td .day-number-circle,
+	section:not(#region-main) .block.block_calendar_month .maincalendar .calendartable.calendarmonth td.clickable:not(.today) .day-number-circle,
+	.pagination .page-link) {
+	background-color: var(--action-bg);
+}
+
+/* TODO: what why how where */
+@media (min-width: 768px) {
+	section:not(#region-main) .block.block_calendar_month .maincalendar .calendartable.calendarmonth td.clickable:not(.today) .day-number-circle {
+		border-radius: 50%;
+	}
+}
+
+/* :root section:not(#region-main) .block.block_calendar_month .maincalendar .calendartable.calendarmonth td.clickable:not(.today):is(:hover, :focus) .day-number-circle, */
+:root :is(#inst4883681 ~ #inst4918530 .card-text a,
+	.pagination .page-link,
+	.btn,
+	.block_alp_player a,
+	.block_ucpreviousexams a,
+	.card-body.block_ucskills a,
+	.btn.btn-icon,
+	.dropdown-item,
+	table.quizreviewsummary tbody tr,
+	.moremenu .nav-link) {
+	--outline-size: 0px;
+	--highlight-color: transparent;
+	box-shadow: inset 0 0 0 100vmax var(--highlight-color),
+		0 0 0 var(--outline-size) color-mix(in srgb, var(--color-action) 50%, transparent 50%),
+		0 0 0 calc(var(--outline-size) / 2) var(--color-action);
+	transition: box-shadow 200ms ease;
+	/* background-color: var(--override-bg, color-mix(in srgb, var(--accent-bg) 60%, var(--background) 40%));
+	color: var(--override-fg, color-mix(in srgb, var(--accent-fg, var(--foreground)) 60%, var(--foreground) 40%)); */
+
+	&:focus {
+		--outline-size: 7px;
+	}
+
+	&:is(:hover, :focus-visible) {
+		--highlight-color: var(--hover-highlight);
+		color: color-mix(in srgb, currentColor 80%, var(--placeholder-fg) 20%);
+		/* background-color: var(--override-bg, color-mix(in srgb,
+				color-mix(in srgb, var(--accent-bg) 60%, var(--background) 40%) 70%,
+				color-mix(in srgb, var(--foreground) 20%, transparent 80%) 30%));
+		color: var(--override-fg,
+				color-mix(in srgb,
+					color-mix(in srgb, var(--accent-fg, var(--foreground)) 60%, var(--foreground) 40%) 70%,
+					var(--highlight-fg, var(--foreground)) 50%)); */
+	}
+
+	&:active {
+		--highlight-color: var(--active-highlight);
+		color: color-mix(in srgb, currentColor 70%, var(--placeholder-fg) 30%);
+		/* background-color: var(--override-bg,
+				color-mix(in srgb,
+					color-mix(in srgb, var(--accent-bg) 60%, var(--background) 40%) 50%,
+					color-mix(in srgb, var(--foreground) 20%, transparent 80%) 50%));
+		color: var(--override-fg,
+				color-mix(in srgb,
+					color-mix(in srgb, var(--accent-fg, var(--foreground)) 60%, var(--foreground) 40%) 50%,
+					var(--highlight-fg, var(--foreground)) 50%)); */
+	}
+}
+
+/* :root a:is(:hover, :focus),
+:root .formulation a:is(:hover, :focus),
+:root #inst4883681~#inst4918530 .card-text a:is(:hover, :focus), */
+:root section:not(#region-main) .block.block_calendar_month .maincalendar .calendartable.calendarmonth td.clickable:not(.today):is(:hover, :focus) .day-number-circle
+
+/* :root .pagination .page-link:is(:hover, :focus),
+:root :is(.btn, .block_alp_player a, .block_ucpreviousexams a, .card-body.block_ucskills a):is(:hover, :focus),
+:root .btn.btn-icon:is(:hover, :focus),
+:root .dropdown-item:is(:hover, :focus, :focus-visible),
+:root table.quizreviewsummary tbody tr:is(:hover, :focus),
+:root .moremenu .nav-link:is(:hover, :focus) */
+	{
+	background-color: var(--override-bg, color-mix(in srgb,
+				color-mix(in srgb, var(--accent-bg) 60%, var(--background) 40%) 70%,
+				color-mix(in srgb, var(--foreground) 20%, transparent 80%) 30%));
+	/* color: var(--override-fg,
+			color-mix(in srgb, var(--foreground) 70%, var(--placeholder-fg) 30%)); */
+	color: var(--override-fg,
+			color-mix(in srgb,
+				color-mix(in srgb, var(--accent-fg, var(--foreground)) 60%, var(--foreground) 40%) 70%,
+				var(--highlight-fg, var(--foreground)) 50%)) !important;
+}
+
+/* :root #inst4883681~#inst4918530 .card-text a:active, */
+:root .maincalendar .calendarmonth td.today .day-number-circle,
+:root section:not(#region-main) .block.block_calendar_month .maincalendar .calendartable.calendarmonth td.clickable:not(.today):active .day-number-circle,
+/* :root .pagination .page-link:active, */
+:root .pagination .page-item.active .page-link,
+/* :root :is(.btn, .block_alp_player a, .block_ucpreviousexams a, .card-body.block_ucskills a):active, */
+/* :root .btn.btn-icon:active, */
+/* :root .dropdown-item:active, */
+/* :root table.quizreviewsummary tbody tr:active, */
+:root .nav-tabs .nav-item.show .nav-link,
+:root .nav-tabs .nav-link.active,
+:root .moremenu .nav-link.active:focus,
+:root .moremenu .nav-link.active:hover,
+:root .dashboard-card-deck .dashboard-card:active a {
+	background-color: var(--override-bg,
+			color-mix(in srgb,
+				color-mix(in srgb, var(--accent-bg) 60%, var(--background) 40%) 50%,
+				color-mix(in srgb, var(--foreground) 20%, transparent 80%) 50%));
+	color: var(--override-fg,
+			color-mix(in srgb,
+				color-mix(in srgb, var(--accent-fg, var(--foreground)) 60%, var(--foreground) 40%) 50%,
+				var(--highlight-fg, var(--foreground)) 50%));
+	/* color: var(--override-fg,
+			color-mix(in srgb, var(--foreground) 50%, var(--placeholder-fg) 50%));
+	color: color-mix(in srgb, var(--foreground) 50%, var(--placeholder-fg) 50%)); */
+}
+
+/* Inputs */
+
+:root .que.stack input[type=text],
+:root .block_custom_course_menu input[type='text'],
+.uclearn-mathquillField,
+:root .message-app .footer-container textarea {
+	border: 1px solid currentColor;
+	border-radius: var(--input-radius);
+	padding: var(--input-radius);
+}
+
+.que.stack .uclearn-mathquillField+input,
+.que.stack .uclearn-mathquillField~.stackinputfeedback,
+.que.stack p:has(> .uclearn-mathquillField)+.stackinputfeedback,
+.que.stack table *:has(> .uclearn-mathquillField)+*>.stackinputfeedback {
+	display: none !important;
+}
+
+.que.stack .uclearn-mathquillField:active~.stackinputfeedback,
+.que.stack p:has(> .uclearn-mathquillField:active)+.stackinputfeedback,
+.que.stack table *:has(> .uclearn-mathquillField:active)+*>.stackinputfeedback {
+	display: revert !important;
+}
+
+.uclearn-mathquillField,
+.uclearn-mathquillField .mq-cursor {
+	border-color: currentColor !important;
+}
+
+/* Accent backgrounds */
+
+:root #page-mod-quiz-view table.quizattemptsummary tr.bestrow td {
+	--accent-bg: var(--color-success);
+}
+
+:root #page-mod-quiz-view table.quizattemptsummary tr.bestrow td {
+	/* Translucent background */
+	background-color: color-mix(in hsl, color-mix(in hsl, var(--accent-bg) 60%, var(--background) 40%), transparent 50%);
+}

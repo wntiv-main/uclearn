@@ -1,0 +1,60 @@
+{
+	"$schema": "https://json.schemastore.org/chrome-manifest",
+	"manifest_version": 3,
+	"name": "uclearn",
+	"version": "0.1",
+	"description": "University of Canterbury AKO|Learn feature upgrades",
+	"permissions": [
+		"storage",
+		"scripting",
+		"declarativeNetRequestWithHostAccess"
+	],
+	"host_permissions": [
+		"*://learn.canterbury.ac.nz/*",
+		"*://login.microsoftonline.com/*"
+	],
+	"web_accessible_resources": [
+		{
+			"resources": [
+				"background.png",
+				"mathlive/dist/fonts/*",
+				"mathlive/dist/sounds/*",
+				// "mathquill/mathquill.min.js",
+				"index.js"
+			],
+			"matches": ["*://learn.canterbury.ac.nz/*"]
+		},
+		{
+			"resources": ["inspector.css", "highlightjs/*.css"],
+			"matches": ["*://learn.canterbury.ac.nz/*"],
+			"match_about_blank": true
+		}
+	],
+	"icons": {
+		"16": "images/get_started16.png",
+		"32": "images/get_started32.png",
+		"48": "images/get_started48.png",
+		"128": "images/get_started128.png"
+	},
+	"content_scripts": [
+		{
+			"matches": ["*://learn.canterbury.ac.nz/*"],
+			"css": [
+				"index.css",
+				"mathlive/dist/mathlive-static.css",
+				"mathlive/dist/mathlive-fonts.css"
+			],
+			"js": ["bootload.js"],
+			"run_at": "document_start"
+		}
+	],
+	"declarative_net_request": {
+		"rule_resources": [
+			{
+				"id": "login_page",
+				"enabled": true,
+				"path": "login_redirect_rules.json"
+			}
+		]
+	}
+}

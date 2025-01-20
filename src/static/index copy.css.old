@@ -1,0 +1,1214 @@
+:root {
+	--foreground-color: white;
+	--background: #101010;
+	--dimmed-fg: color-mix(in hsl, var(--foreground-color) 60%, var(--background) 40%);
+	--color-error: #ff0000;
+	--color-warning: #ffff00;
+	--color-success: #00ff00;
+	--color-complete: #0060bf;
+
+	--accent-hue: 210deg;
+	--color-action: color-mix(in hsl, hsl(var(--accent-hue), 100%, 50%) 75%, var(--background) 25%);
+
+	--bg-error: color-mix(in hsl, color-mix(in hsl, var(--color-error) 60%, var(--background) 40%), transparent 50%);
+	--bg-warning: color-mix(in hsl, color-mix(in hsl, var(--color-warning) 60%, var(--background) 40%), transparent 50%);
+	--fg-success: color-mix(in hsl, var(--color-success) 50%, var(--foreground-color) 50%);
+	--bg-success: color-mix(in hsl, color-mix(in hsl, var(--color-success) 60%, var(--background) 40%), transparent 50%);
+	--bg-complete: color-mix(in hsl, color-mix(in hsl, var(--color-complete) 60%, var(--background) 40%), transparent 50%);
+
+	--link-color-hover: color-mix(in hsl, var(--color-action) 50%, var(--foreground-color) 50%);
+	--link-color: color-mix(in hsl, var(--link-color-hover) 80%, var(--foreground-color) 20%);
+	--bg-action-hover: color-mix(in hsl, var(--color-action) 50%, transparent 50%);
+	--bg-action-active: color-mix(in hsl, var(--color-action) 60%, transparent 40%);
+
+	--bg-translucent: color-mix(in hsl, var(--background) 50%, transparent 50%);
+	--hover-bg: color-mix(in hsl, var(--foreground-color) 10%, transparent 90%);
+	--hover-fg: color-mix(in hsl, var(--foreground-color) 90%, var(--background) 10%);
+	--active-bg: color-mix(in hsl, var(--foreground-color) 20%, transparent 80%);
+	--active-fg: color-mix(in hsl, var(--foreground-color) 80%, var(--background) 20%);
+
+	--bg-effect: blur(5px);
+	--radius: 10px;
+	--border-style: 1px solid;
+}
+
+:root {
+	background-attachment: fixed;
+	background-size: cover;
+	background-position: center;
+}
+
+:root body {
+	color: var(--foreground-color);
+	background-color: transparent;
+}
+
+:root .bg-white {
+	background-color: transparent !important;
+}
+
+:root .bg-light {
+	background-color: var(--bg-translucent) !important;
+}
+
+:root .bg-secondary {
+	background-color: var(--bg-translucent);
+}
+
+:root .bg-secondary:is(:hover, :focus) {
+	background-color: var(--hover-bg);
+}
+
+:root .bg-secondary:active {
+	background-color: var(--active-bg);
+}
+
+.drawer {
+	background-color: var(--bg-translucent) !important;
+	backdrop-filter: var(--bg-effect);
+}
+
+.main-inner, #page.drawers div.main-inner {
+	background-color: var(--bg-translucent) !important;
+	border-radius: calc(2 * var(--radius)) !important;
+	position: relative;
+	overflow: hidden;
+}
+
+:is(.main-inner, .navbar, .dropdown-menu)::before {
+	content: "";
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	backdrop-filter: var(--bg-effect);
+	border-radius: inherit;
+	z-index: -1;
+}
+
+:root .moremenu {
+	opacity: 1;
+}
+
+:root .navbar-brand,
+:root .navbar.fixed-top,
+:root .navbar .logo,
+:root .primary-navigation .navigation,
+:root .primary-navigation .navigation .nav-link,
+:root .moremenu,
+:root .moremenu .nav-link {
+	height: auto;
+}
+
+:root .primary-navigation .navbar-nav {
+	flex-wrap: nowrap;
+}
+
+.navbar::before {
+	margin-inline: -1rem;
+}
+
+:root .navbar .logo {
+	width: calc(285px - 2rem);
+}
+
+.main-inner::before {
+	margin: -1.5rem -0.5rem;
+}
+
+.que :is(img, canvas.uclearn-video-canvas, video, svg) {
+	border-radius: var(--radius);
+}
+
+body:not(.light-mode) {
+	& .que :is(img, video, svg, iframe[title*="JSXGraph"]) {
+		filter: invert(0.95) hue-rotate(180deg);
+	}
+
+	& .que canvas.uclearn-video-canvas {
+		filter: invert(0.75) blur(0.5px) drop-shadow(1px 2px 3px #00000080) hue-rotate(180deg) brightness(1.5) saturate(1.5);
+	}
+
+	& nav.navbar img, img.icon {
+		filter: invert(1);
+	}
+}
+
+.video-js video {
+	opacity: 0;
+}
+
+:root .video-js {
+	background-color: var(--bg-translucent);
+	border: var(--border-style) currentColor;
+	border-radius: var(--radius);
+}
+
+.que *:has(canvas.uclearn-video-canvas + video, canvas.uclearn-video-canvas + * video) {
+	position: relative;
+}
+
+.que canvas.uclearn-video-canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.img-fluid {
+	border-radius: var(--radius);
+}
+
+#region-main, section#region-main {
+	background: transparent;
+}
+
+:root .que .formulation {
+	background-color: transparent !important;
+	color: inherit !important;
+}
+
+/* TODO: */
+:root .que .info {
+	background-color: transparent;
+	border: solid currentColor;
+	border-width: 0 0 1px 1px;
+	border-radius: 0 0 0 var(--radius);
+	margin: calc(-0.5 * var(--radius)) calc(-0.5 * var(--radius)) 0 0;
+	padding: var(--radius);
+	float: inline-end;
+	text-align: end;
+	position: relative;
+	z-index: 1;
+}
+
+:root .que .content {
+	margin-left: 0;
+}
+
+/* :root a, :root .formulation a {
+	color: var(--link-color) !important;
+}
+
+:root a:hover, :root .formulation a:hover {
+	color: var(--link-color-hover) !important;
+} */
+
+:root .que.multichoice .answer .specificfeedback {
+	background-color: transparent;
+}
+
+:root .que, :root .que.stack input[type=text], :root .block_custom_course_menu input[type='text'] {
+	border: var(--border-style);
+}
+
+:root .que.stack .formulation .stackprtfeedback {
+	vertical-align: middle;
+	margin: 0 0 0 2ch;
+	border: var(--border-style);
+	display: inline-block;
+}
+
+:root .que.stack .formulation p:has(+ :is(.stackinputfeedback, .stackprtfeedback)) {
+	display: inline-block;
+}
+
+:root .que,
+:root .que .outcome,
+:root .que .comment,
+:root .que.stack .formulation .stackprtfeedback,
+:root .description .course-description-item,
+:root .description .course-description-item,
+:root .ln-important-box,
+:root .que.stack .stackinputfeedback.compact,
+:root .que.stack .stackinputfeedback.standard,
+/* :root .que.stack input[type=text],
+:root .block_custom_course_menu input[type='text'],
+.__qol-uclearn-mathquillField, */
+:root .ln-optional,
+:root .forumpost,
+:root .modal-content,
+span#MathJax_Zoom,
+:root .ln-important-box-definition,
+:root .que.ddwtos .draghome,
+:root table.quizreviewsummary,
+:root .stack-hint,
+/* :root .message-app .footer-container textarea, */
+:root .popover-region-container {
+	background-color: transparent;
+	color: inherit;
+	border-color: currentColor;
+	border-radius: var(--radius);
+	padding: calc(var(--radius) - 5px);
+}
+
+:root .que .outcome,
+:root .que .comment,
+:root .que.stack .formulation .stackprtfeedback,
+:root .description .course-description-item,
+:root table.quizreviewsummary,
+:root .stack-hint,
+:root .popover-region-container,
+:root .message-app {
+	background-color: var(--bg-translucent);
+	padding: var(--radius);
+	overflow: hidden;
+}
+
+:root .que .outcome,
+:root .que .comment,
+:root .que.stack .formulation .stackprtfeedback,
+:root .description .course-description-item,
+:root table.quizreviewsummary,
+:root .stack-hint {
+	width: fit-content;
+}
+
+/* :root .message-app .footer-container textarea {
+	flex-grow: 1;
+} */
+
+:root details.stack-hint:not([open]) {
+	background-color: transparent;
+	border: none;
+}
+
+/* div.modal-content, span#MathJax_Zoom {
+	background-color: var(--bg-translucent);
+	backdrop-filter: var(--bg-effect);
+} */
+
+/* table.generaltable {
+	color: inherit;
+} */
+
+/* :root table.generaltable tbody :is(td, th) {
+	background-color: transparent;
+	color: inherit;
+	border: none;
+	padding: 0.25rem 1rem;
+} */
+
+/* :root table.generaltable tbody tr:hover {
+	color: inherit;
+	background-color: transparent;
+} */
+
+/* :root table.quizreviewsummary {
+	padding-inline: 0;
+} */
+
+:root table.quizreviewsummary tbody :is(td, th):not(:last-child) {
+	border-right: var(--border-style) currentColor;
+	width: auto;
+}
+
+/* :root #page-mod-quiz-view table.quizattemptsummary tr.bestrow td {
+	background-color: var(--bg-success);
+} */
+
+div.que.multichoice .answer div.r0, div.que.multichoice .answer div.r1 {
+	align-items: baseline;
+}
+
+div.que .answer div.r0 span:has(.icon), div.que .answer div.r1 span:has(.icon) {
+	flex-grow: 1;
+	text-align: right;
+	margin-left: 20px;
+}
+
+div.que .answer {
+	max-width: max-content;
+}
+
+#mod_quiz_navblock {
+	background-color: transparent;
+	border: none;
+}
+
+.icon.text-success {
+	color: var(--fg-success) !important;
+}
+
+/* :root .primary-navigation {
+	flex-basis: auto;
+	min-width: 0;
+	/* TODO: magic */
+/* overflow: hidden; */
+/* } */
+
+/* :root .courseindex .courseindex-item .courseindex-link,
+:root .courseindex .courseindex-item .courseindex-chevron,
+:root .primary-navigation .navigation .nav-link {
+	color: var(--foreground-color);
+} */
+
+/* :root .primary-navigation .navigation .nav-link {
+	padding-inline: 1rem;
+} */
+
+/* :root .courseindex .courseindex-item:is(:hover, :focus),
+:root .courseindex .courseindex-item:is(:hover, :focus) .courseindex-link,
+:root .courseindex .courseindex-item:is(:hover, :focus) .courseindex-chevron {
+	color: var(--hover-fg);
+} */
+
+:root .custom-select {
+	--accent-bg: var(--bg-translucent);
+	background-color: var(--accent-bg);
+}
+
+:root .dropdown-item,
+:root .btn.btn-icon,
+:root .maincalendar .calendarmonth td .day-number-circle,
+:root section:not(#region-main) .block.block_calendar_month .maincalendar .calendartable.calendarmonth td.clickable:not(.today) .day-number-circle,
+:root .pagination .page-link {
+	--accent-bg: var(--color-action);
+}
+
+:root #inst4883681~#inst4918530 .card-text a:is(:hover, :focus),
+:root section:not(#region-main) .block.block_calendar_month .maincalendar .calendartable.calendarmonth td.clickable:not(.today):is(:hover, :focus) .day-number-circle,
+:root .pagination .page-link:is(:hover, :focus),
+:root :is(.btn, .block_alp_player a, .block_ucpreviousexams a, .card-body.block_ucskills a):is(:hover, :focus),
+:root .btn.btn-icon:is(:hover, :focus),
+:root .dropdown-item:is(:hover, :focus, :focus-visible),
+:root table.quizreviewsummary tbody tr:is(:hover, :focus),
+:root .moremenu .nav-link:is(:hover, :focus) {
+	background-color: color-mix(in hsl, var(--accent-bg, transparent) 50%, color-mix(in hsl, var(--foreground-color) 20%, transparent 80%) 50%);
+	color: var(--hover-fg);
+}
+
+:root #inst4883681~#inst4918530 .card-text a:active,
+:root .maincalendar .calendarmonth td.today .day-number-circle,
+:root section:not(#region-main) .block.block_calendar_month .maincalendar .calendartable.calendarmonth td.clickable:not(.today):active .day-number-circle,
+:root .pagination .page-link:active,
+:root .pagination .page-item.active .page-link,
+:root :is(.btn, .block_alp_player a, .block_ucpreviousexams a, .card-body.block_ucskills a):active,
+:root .btn.btn-icon:active,
+:root .dropdown-item:active,
+:root table.quizreviewsummary tbody tr:active,
+:root .nav-tabs .nav-link.active,
+:root .nav-tabs .nav-item.show .nav-link,
+:root .moremenu .nav-link.active:focus,
+:root .moremenu .nav-link.active:hover {
+	background-color: color-mix(in hsl, var(--accent-bg, transparent) 70%, color-mix(in hsl, var(--foreground-color) 20%, transparent 80%) 30%);
+	color: var(--active-fg);
+}
+
+/* #page-footer, #footnote {
+	display: none;
+} */
+
+/* .card, section.card, div.card {
+	background-color: transparent;
+	border: var(--border-style) currentColor;
+} */
+
+/* .card.dashboard-card {
+	background-color: var(--bg-translucent);
+} */
+
+/* .card-body {
+	overflow: hidden;
+} */
+
+/* .card-deck.overflow-hidden {
+	overflow: visible !important;
+} */
+
+/* :root .navigation, .secondary-navigation nav.navigation {
+	background-color: transparent;
+}
+
+:root .moremenu .nav-tabs {
+	background-color: transparent;
+} */
+
+/* :root .navbar {
+	background-color: var(--bg-translucent) !important;
+	margin-right: 10px;
+} */
+
+/* :root :has(.drawer-right.show, .drawer[data-region=right-hand-drawer][aria-expanded=true]) .navbar {
+	margin-right: 0;
+} */
+
+/* :root .activity:hover {
+	background-color: transparent !important;
+} */
+
+.path-mod div.activity-header:not(:empty) {
+	background-color: transparent;
+	margin: 0;
+	padding: 0;
+}
+
+/* .que.stack .__qol-uclearn-mathquillField+input,
+.que.stack .__qol-uclearn-mathquillField~.stackinputfeedback,
+.que.stack p:has(> .__qol-uclearn-mathquillField)+.stackinputfeedback,
+.que.stack table *:has(> .__qol-uclearn-mathquillField)+*>.stackinputfeedback {
+	display: none !important;
+}
+
+.que.stack .__qol-uclearn-mathquillField:active~.stackinputfeedback,
+.que.stack p:has(> .__qol-uclearn-mathquillField:active)+.stackinputfeedback,
+.que.stack table *:has(> .__qol-uclearn-mathquillField:active)+*>.stackinputfeedback {
+	display: revert !important;
+}
+
+.__qol-uclearn-mathquillField, .__qol-uclearn-mathquillField .mq-cursor {
+	border-color: currentColor !important;
+} */
+
+/* :root :is(#page, #page.drawers), .theme-boost-union-smartmenu .navbar.fixed-top~div#page.drawers {
+	margin-top: 0px;
+	padding-top: calc(60px - 0.8rem);
+	height: auto;
+	overflow-y: auto;
+} */
+
+/* .ln-svg-figure {
+	max-width: 100%;
+} */
+
+:root .activity-item :is(.activity-info, .activity-actions) {
+	align-self: center;
+}
+
+.activity:not(.label) .activity-item {
+	border-radius: var(--radius) !important;
+}
+
+.activity:not(.label) .activity-item:hover {
+	background-color: var(--bg-translucent);
+}
+
+/* :root .que.stack div:is(.matrixsquarebrackets, .matrixroundbrackets) {
+	border-color: currentColor;
+} */
+
+/* :root .que.stack div.matrixsquarebrackets {
+	background-image: linear-gradient(currentColor, currentColor),
+		linear-gradient(currentColor, currentColor),
+		linear-gradient(currentColor, currentColor),
+		linear-gradient(currentColor, currentColor);
+} */
+
+/* .JXGtext {
+	color: inherit !important;
+} */
+/* 
+.dropdown-menu {
+	overflow: hidden;
+}
+
+:root .dropdown-menu {
+	background-color: var(--bg-translucent);
+	color: var(--foreground-color);
+	padding-block: 0;
+}
+
+:root .nav-tabs .dropdown-menu {
+	top: 1px !important;
+}
+
+:root .dropdown-divider {
+	margin: 0;
+}
+
+:root .dropdown-item {
+	color: inherit;
+	overflow: hidden auto;
+}
+
+:root :is(.dropdown-item, .loggedinas):first-child {
+	border-top-left-radius: inherit;
+	border-top-right-radius: inherit;
+}
+
+:root :is(.dropdown-item, .loggedinas):last-child {
+	border-bottom-left-radius: inherit;
+	border-bottom-right-radius: inherit;
+}
+
+:root .dropdown-item:first-child,
+:root .dropdown-divider+.dropdown-item {
+	padding-top: .5rem;
+}
+
+:root .dropdown-item:is(:last-child, :has(+ .dropdown-divider)) {
+	padding-bottom: .5rem;
+} */
+
+/* :root .navbar.fixed-top .usermenu .dropdown-menu .dropdown-item:first-child,
+:root .navbar.fixed-top .usermenu #user-action-menu.dropdown-menu .loggedinas:first-child,
+:root .navbar.fixed-top .usermenu .dropdown-menu .dropdown-divider+.dropdown-item {
+	padding-top: .75rem;
+}
+
+:root .navbar.fixed-top .usermenu #user-action-menu.dropdown-menu .loggedinas:is(:last-child, :has(+ .dropdown-divider)),
+:root .navbar.fixed-top .usermenu .dropdown-menu .dropdown-item:is(:last-child, :has(+ .dropdown-divider)) {
+	padding-bottom: .75rem;
+} */
+
+/* :root .theme-boost-union-smartmenu .navbar.fixed-top .usermenu .dropdown-menu .dropdown-item.carousel-navigation-link::after {
+	top: 0;
+} */
+
+.carousel-item {
+	outline: none;
+}
+
+:root .que .formulation hr {
+	border-color: currentColor;
+}
+
+/* :root .custom-select {
+	--accent-bg: var(--bg-translucent);
+	--final-bg: var(--accent-bg);
+	color: inherit;
+	background-color: var(--background);
+	background-clip: text;
+	box-shadow: inset 0 0 0 20px var(--final-bg);
+}
+
+:root .custom-select:is(:hover, :focus) {
+	--final-bg: color-mix(in hsl, var(--accent-bg) 50%, color-mix(in hsl, var(--foreground-color) 50%, transparent 50%) 50%);
+}
+
+:root .custom-select:active {
+	--final-bg: color-mix(in hsl, var(--accent-bg) 40%, color-mix(in hsl, var(--foreground-color) 50%, transparent 50%) 60%);
+}
+
+:root .custom-select:focus {
+	box-shadow: inset 0 0 0 20px var(--final-bg),
+		0 0 0 .2rem rgba(15, 108, 191, .75)
+} */
+
+/* :root pre {
+	color: inherit;
+}
+
+:root .btn {
+	color: inherit;
+} */
+
+/* :root .btn-secondary {
+	background-color: var(--bg-translucent);
+} */
+
+/* :root #page.drawers .drawer-right-toggle {
+	margin-right: 0;
+} */
+
+/* :root .drawer-toggles .drawer-right-toggle {
+	right: 10px;
+	clip-path: inset(-100% 0 -100% -100%);
+} */
+
+/* :root .drawer-toggles .drawer-toggler .btn {
+	--accent-bg: var(--bg-translucent);
+	background-color: var(--accent-bg);
+	backdrop-filter: var(--bg-effect);
+} */
+
+/* :root #page-header {
+	max-width: unset !important;
+	margin-inline: -0.5rem;
+	padding-inline: calc(15px + 0.5rem);
+	padding-bottom: 8px;
+} */
+
+/* :root #page-header:has(+ .secondary-navigation) {
+	margin-bottom: 0;
+} */
+
+.page-context-header {
+	align-items: center;
+}
+
+.page-context-header h1 {
+	margin: 0;
+}
+
+/* .btn.btn-link {
+	text-wrap: balance;
+} */
+
+/* :root .path-mod-quiz #mod_quiz_navblock h3.mod_quiz-section-heading {
+	font-weight: normal;
+	font-size: 1.15rem;
+	letter-spacing: 0.5px;
+	margin-bottom: 0.2rem;
+	border-bottom: var(--border-style) currentColor;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton {
+	margin-right: 0;
+	border-radius: var(--radius);
+	background-color: transparent;
+	height: auto;
+	padding-block: calc(var(--radius) / 2);
+	overflow: hidden;
+	color: var(--foreground-color) !important;
+	text-shadow: 1px 1px 6px black;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton:is(:hover, :focus) {
+	background-color: var(--hover-bg);
+
+	& .trafficlight {
+		background-position: 50% 105%;
+	}
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton:active {
+	background-color: var(--active-bg);
+}
+
+:root .path-mod-quiz .qnbutton.thispage .thispageholder,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.thispage .thispageholder {
+	border: 2px solid var(--color-action);
+	border-radius: var(--radius);
+	width: 100%;
+	height: 100%;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton+.qnbutton {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+
+	& .thispageholder {
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton:has(+.qnbutton) {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+
+	& .thispageholder {
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.thispage+.qnbutton.thispage .thispageholder {
+	border-left: none;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.thispage:has(+.qnbutton.thispage) .thispageholder {
+	border-right: none;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton .thispageholder {
+	border: none;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton .trafficlight {
+	--current-background: var(--bg-translucent);
+	margin-top: 0;
+	background-color: var(--current-background) !important;
+	background-position: 50% 75%;
+	width: 100%;
+	height: 100%;
+	border-radius: 0;
+	z-index: -1;
+	transition: color 0.15s ease-in-out,
+		background-color 0.15s ease-in-out,
+		border-color 0.15s ease-in-out,
+		box-shadow 0.15s ease-in-out,
+		background-position 0.15s ease-in-out;
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.notyetanswered .trafficlight {
+	--current-background: var(--bg-translucent);
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.complete .trafficlight,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.answersaved .trafficlight,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.requiresgrading .trafficlight {
+	--current-background: var(--bg-complete);
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.correct .trafficlight {
+	--current-background: var(--bg-success);
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.partiallycorrect .trafficlight,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.invalidanswer .trafficlight {
+	--current-background: var(--bg-warning);
+}
+
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.notanswered .trafficlight,
+:root .path-mod-quiz #mod_quiz_navblock .qnbutton.incorrect .trafficlight {
+	--current-background: var(--bg-error);
+} */
+
+:root :is(.aalink, a.autolink, #page-footer a:not([class]), .arrow_link, a:not([class]), .activityinstance>a):is(.focus, :focus) {
+	background-color: transparent;
+	outline: none;
+	box-shadow: none;
+}
+
+div:has(>.course-description-item h2:empty),
+div:has(>.course-description-item h2 > br:only-child) {
+	display: none;
+}
+
+.section-navigation {
+	gap: 2rem;
+	align-items: center;
+}
+
+:root .drawercontent {
+	height: 100%;
+}
+
+:root .drawerheader {
+	height: 0;
+	align-items: flex-start;
+}
+
+:root .drawer .drawertoggle {
+	margin-top: 5px;
+	z-index: 1;
+}
+
+:root .drawer.drawer-left .drawertoggle {
+	margin-left: auto;
+	margin-right: 5px;
+}
+
+:root .drawer.drawer-right .drawertoggle {
+	margin-left: 5px;
+	margin-right: auto;
+}
+
+/* layout */
+/* :root #page-wrapper {
+	display: grid;
+	grid: [navbar] max-content [page] 1fr [page-end] / [far-left drawer-left] max-content [drawer-left-end page-left] 1fr [page-right drawer-right] max-content [drawer-right-end far-right];
+	overflow: hidden;
+	width: 100%;
+}
+
+:root :is(.drawer, .drawer[data-region], #page, .navbar) {
+	position: relative !important;
+	top: unset;
+	left: unset;
+	right: unset;
+	min-height: 0;
+}
+
+:root .drawer, :root [data-region].drawer {
+	height: auto;
+	transition: margin-left 0.2s ease, margin-right 0.2s ease, visibility 0.2s ease;
+}
+
+:root .navbar {
+	grid-area: navbar / far-left / navbar / far-right;
+}
+
+:root .drawer-left,
+[data-region=left-hand-drawer].drawer {
+	grid-area: page / drawer-left;
+	border-right: var(--border-style) currentColor;
+}
+
+:root .drawer-right,
+[data-region=right-hand-drawer].drawer {
+	grid-area: page / drawer-right;
+	border-left: var(--border-style) currentColor;
+}
+
+:root .drawer-left:not(.show) {
+	margin-left: -285px;
+}
+
+:root .drawer-right:not(.show) {
+	margin-right: -315px;
+}
+
+.drawer.hidden[data-region=right-hand-drawer] {
+	/* TODO */
+margin-left: -320px;
+}
+
+.drawer.hidden[data-region=right-hand-drawer] {
+	margin-right: -320px;
+}
+
+:root #page.drawers, :root .drawercontent {
+	scrollbar-color: var(--foreground-color) var(--bg-translucent);
+}
+
+:root #page {
+	grid-area: navbar / page-left / page-end / page-right;
+	margin-inline: 0 !important;
+}
+
+@media (max-width: var(--breakpoint-lg, 992px)) {
+	:root #page {
+		grid-area: navbar / far-left / page-end / far-right;
+		margin-inline: 0 !important;
+	}
+}
+
+*/:root div:has(a[href="#maincontent"]) {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+:root ul.pagination {
+	margin-block: 5px;
+	background-color: var(--bg-translucent);
+	border-radius: var(--radius);
+}
+
+:root .pagination .page-link {
+	background-color: transparent;
+	border: none;
+	margin: 0;
+	border-radius: 0;
+}
+
+:root .pagination:first-of-type .page-item:first-child .page-link {
+	border-top-left-radius: var(--radius);
+	border-bottom-left-radius: var(--radius);
+}
+
+:root .pagination:last-of-type .page-item:last-child .page-link {
+	border-top-right-radius: var(--radius);
+	border-bottom-right-radius: var(--radius);
+}
+
+:root .page-item.disabled .page-link {
+	color: var(--dimmed-fg);
+	background-color: var(--active-bg);
+}
+
+:root .pagination .page-link:is(:hover, :focus),
+:root .pagination .page-link:active,
+:root .pagination .page-item.active .page-link {
+	border: none;
+}
+
+:root .editmode-switch-form {
+	margin: 0;
+}
+
+:root .block_custom_course_menu #searchbutton {
+	margin-left: calc(-1rem - var(--radius));
+}
+
+:root .list-group-item {
+	background-color: transparent;
+}
+
+.bg-pulse-grey {
+	background-color: var(--bg-translucent) !important;
+	border-radius: 5px;
+}
+
+#inst4883681 .card {
+	border: none;
+	padding: none;
+}
+
+#inst4883681 .card-header {
+	padding: 0;
+	background-color: transparent;
+	border: none;
+}
+
+#inst4883681 .card-header a,
+:root .card .card-body:is(.block_alp_player, .block_ucpreviousexams) a,
+:root #inst4883681~#inst4918530 .card-text a {
+	text-align: center;
+	display: inline-block;
+	width: 100%;
+	padding: var(--radius);
+	border-radius: var(--radius);
+}
+
+:root #inst4883681 .card .card-body.block_ucskills a {
+	padding: var(--radius);
+	border-radius: var(--radius);
+}
+
+:root :is(.path-grade-report-user, .grade-report-user) .user-grade th.category a.toggle-category i,
+:root .block .block-cards span.categoryname,
+:root .block .block-cards .btn-link {
+	color: inherit;
+}
+
+:root .block .block-cards .btn.btn-link.btn-icon:is(:hover, :focus) {
+	background-color: var(--hover-bg);
+}
+
+:root .block .block-cards .btn.btn-link.btn-icon:active {
+	background-color: var(--active-bg);
+}
+
+:root :is(.path-grade-report-user, .grade-report-user) .user-report-container {
+	background-color: transparent;
+}
+
+:root :is(.path-grade-report-user, .grade-report-user) .user-grade tbody tr,
+:root :is(.path-grade-report-user, .grade-report-user) .user-grade th.category,
+:root :is(.path-grade-report-user, .grade-report-user) .user-grade thead th,
+:root :is(.path-grade-report-user, .grade-report-user) .user-grade th.column-itemname:not(.header, .category, .baggt, .baggb),
+:root :is(.path-grade-report-user, .grade-report-user) .user-grade td.item,
+:root :is(.path-grade-report-user, .grade-report-user) .user-grade :is(.baggt, .baggb) {
+	background-color: transparent;
+}
+
+:root :is(.path-grade-report-user, .grade-report-user) .user-grade th.category a.toggle-category {
+	place-content: center;
+}
+
+:root a.dimmed:any-link, :root a.dimmed_text:any-link,
+:root .dimmed_text, :root .dimmed_text a:any-link,
+:root .usersuspended, :root .usersuspended a:any-link,
+:root .dimmed_category, :root .dimmed_category a:any-link {
+	color: var(--dimmed-fg);
+}
+
+:root .initial-bar {
+	align-items: center;
+}
+
+#participants th>* {
+	display: inline-block;
+}
+
+#participants th .commands {
+	float: left;
+}
+
+:root hr {
+	border-color: currentColor;
+}
+
+:root .card .card-header:has(+ :is(.collapse, .collapsing) .card-body:is(.block_alp_player, .block_ucpreviousexams)) {
+	display: none;
+}
+
+:root .card :is(.collapse, .collapsing):has(.card-body:is(.block_alp_player, .block_ucpreviousexams, .block_ucskills)) {
+	display: unset;
+}
+
+:root .card .card-body:is(.block_alp_player, .block_ucpreviousexams, .block_ucskills) {
+	padding: 0 !important;
+}
+
+:root .card .card-body .block_alp_player a {
+	display: flex;
+	align-items: center;
+	column-gap: 1rem;
+	justify-content: center;
+}
+
+:root .block_alp_player a img {
+	height: calc(1rem + 2 * var(--radius));
+	margin-block: calc(0px - var(--radius));
+}
+
+:root .block_alp_player a br {
+	display: none;
+}
+
+:root #inst4883681 .card:has(.card-body.block_ucskills) {
+	display: grid;
+	grid-template-columns: [img-start] minmax(max-content, 1fr) [img-end link-start] minmax(max-content, 2fr) [link-end end];
+	column-gap: 1rem;
+	align-items: center;
+	justify-content: center;
+}
+
+:root #inst4883681 .card:has(.card-body.block_ucskills) .card-header {
+	grid-area: 1 / link-start / 1 / link-end;
+	justify-self: start;
+}
+
+:root #inst4883681 .card:has(.card-body.block_ucskills) .card-header a:is(*, :focus) {
+	padding: 0;
+	border-radius: 0;
+	background-color: transparent;
+	transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+	pointer-events: none;
+	user-select: none;
+	text-decoration: none;
+}
+
+:root #inst4883681 .card:has(.card-body.block_ucskills):is(:hover, :focus) .card-header a {
+	text-decoration: underline;
+	color: var(--link-color-hover) !important;
+}
+
+:root #inst4883681 .card :has(.card-body.block_ucskills),
+:root #inst4883681 .card .card-body.block_ucskills,
+:root #inst4883681 .card .card-body.block_ucskills :has(a) {
+	display: contents;
+}
+
+:root #inst4883681 .card .card-body.block_ucskills a {
+	display: grid;
+	grid-template-columns: subgrid;
+	grid-area: 1 / img-start / 1 / end;
+}
+
+:root #inst4883681 .card .card-body.block_ucskills a img {
+	grid-area: 1 / img-start / 1 / img-end;
+	justify-self: end;
+	width: unset;
+	height: calc(1.5rem + 2 * var(--radius));
+	margin-block: calc(0px - var(--radius));
+}
+
+:root #inst4883681:has(~ #inst4918530) {
+	margin-bottom: 0 !important;
+	border-bottom: none;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	padding-bottom: 0;
+}
+
+:root #inst4883681:has(~ #inst4918530)>.card-body {
+	padding-bottom: 0 !important;
+}
+
+:root #inst4883681~#inst4918530 {
+	border-top: none;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	margin-top: 0;
+}
+
+:root #inst4883681~#inst4918530>.card-body {
+	padding-top: 0 !important;
+}
+
+:root #inst4883681~#inst4918530 .card-title {
+	display: none !important;
+}
+
+:root #inst4883681~#inst4918530 .card-text {
+	margin-top: 0 !important;
+}
+
+:root #inst4883681~#inst4918530 .card-text :has(a) {
+	padding: 0;
+}
+
+:root #inst4883681~#inst4918530 .card-text a {
+	background-color: transparent;
+	border: none;
+
+	&:is(:hover, :focus) {
+		text-decoration: underline;
+	}
+}
+
+form {
+	margin: 0;
+}
+
+:root .activityiconcontainer {
+	border-radius: var(--radius);
+}
+
+.mediaplugin, .mediaplugin video {
+	height: auto;
+}
+
+/* @property --slide-transition {
+	syntax: "<length>";
+	inherit: false;
+} */
+
+[class^="video-attr-"] {
+	position: absolute;
+	right: -190px;
+	transform: translateY(calc(-100% - 45px));
+	clip-path: inset(0 190px 0 0);
+	opacity: 0;
+	transition: right 0.15s ease, clip-path 0.15s ease, opacity 0.15s ease;
+	pointer-events: none;
+}
+
+.mediaplugin:has(.vjs-user-active, .vjs-paused)~[class^="video-attr-"],
+:has(> .mediaplugin :is(.vjs-user-active, .vjs-paused))+[class^="video-attr-"] {
+	right: 1px;
+	clip-path: inset(0 -1px 0 0);
+	opacity: 1;
+}
+
+/* #uclearn-inspectors-list {
+	background-color: var(--bg-translucent);
+	padding: var(--radius);
+	border-top-left-radius: var(--radius);
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	width: fit-content;
+	z-index: 9999;
+	border-top: 1px solid currentColor;
+	border-left: 1px solid currentColor;
+} */
+
+:root .ln-example {
+	border-radius: var(--radius);
+	padding: var(--radius);
+	background-color: #00ff0020;
+}
+
+:root :is(.ln-example-question, .ln-example-solution) {
+	background-color: transparent;
+}
+
+:root .ln-section-heading {
+	border-color: currentColor;
+	border-radius: 5px;
+	border-bottom-width: 5px;
+	background-color: transparent;
+}
+
+:root .ln-definition {
+	background-color: #ffff0020;
+	border-radius: 0.2em;
+	box-shadow: 0 0 0 0.2em #ffff0020;
+}
+
+:root .ln-theorem {
+	background-color: transparent;
+}
+
+.ln-important-box:has(.ln-theorem) {
+	background-color: #ff000020;
+}
+
+#MathJax_Zoom {
+	clip-path: margin-box;
+}
+
+#block_ace-live {
+	filter: invert(1) hue-rotate(var(--accent-hue)) saturate(2);
+}
+
+[data-region="no-events-empty-message"] {
+	filter: brightness(0.3) contrast(1.5);
+	opacity: 0.5;
+}
+
+:root :is(.input-group, .form-control) {
+	background-color: transparent;
+	color: var(--foreground-color);
+}
+
+input::placeholder {
+	color: var(--dimmed-fg);
+}

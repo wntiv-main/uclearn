@@ -1,0 +1,39 @@
+{
+	"name": "uclearn",
+	"type": "commonjs",
+	"scripts": {
+		"dev": "run-s dev:static dev:scripts",
+		"dev:static": "cmd /C \"rd build & mklink /J build src\\static & mklink /J build\\highlight.js node_modules\\highlight.js & mklink /J build\\mathlive node_modules\\mathlive\"",
+		"dev:scripts": "bun build --outfile=build/index.js src/index.ts --watch",
+		"build": "run-s clean:build bundle build:scripts",
+		"build:scripts": "bun build --outfile=dist/index.js src/index.ts --minify",
+		"bundle": "mkdir dist && cp -R src/static/* dist && cp -R node_modules/mathlive/ dist && cp -R node_modules/highlight.js/ dist",
+		"clean:build": "rm -r -f dist",
+		"clean:dev": "rm -f src/static/index.js && cmd /C \"rd src\\static\\mathlive & rd src\\static\\highlight.js\""
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/requirejs": "^2.1.37",
+		"npm-run-all": "^4.1.5"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"@types/jquery": "^3.5.31",
+		"@types/js-beautify": "^1.14.3",
+		"@types/mathjax": "^0.0.40",
+		"@types/video.js": "^7.3.58",
+		"@types/yui": "^3.14.31",
+		"asciimath": "^0.0.0",
+		"highlight.js": "^11.10.0",
+		"js-beautify": "^1.15.1",
+		"mathlive": "^0.103.0",
+		"mathquill": "^0.10.1-a"
+	},
+	"patchedDependencies": {
+		"asciimath@0.0.0": "patches/asciimath@0.0.0.patch",
+		"@types/mathjax@0.0.40": "patches/@types%2Fmathjax@0.0.40.patch",
+		"@types/yui@3.14.31": "patches/@types%2Fyui@3.14.31.patch"
+	}
+}

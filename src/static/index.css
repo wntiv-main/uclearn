@@ -1,0 +1,173 @@
+:root:root:root:root:root {
+	--uclearn-foreground: light-dark(black, white);
+	--uclearn-background: light-dark(white, #1e1e1e);
+
+	--uclearn-translucent-bg: hsla(from var(--uclearn-background) h s l / 0.6);
+	--uclearn-bg-effect: blur(10px);
+
+	--uclearn-hover-tint: #80808060;
+
+	--uclearn-accent-color: #ce3e2e;
+
+	background-image: linear-gradient(0deg, var(--uclearn-translucent-bg), var(--uclearn-translucent-bg)), var(--uclearn-bg-url);
+	background-attachment: fixed;
+	background-size: cover;
+	background-position: center;
+
+	/* Theme */
+	&.uclearn-dark-mode {
+		color-scheme: dark;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.navbar img {
+			filter: invert(1) hue-rotate(180deg);
+		}
+	}
+
+	/* Resets */
+	body {
+		color: var(--uclearn-foreground);
+		background-color: transparent;
+	}
+
+	.bg-white {
+		background-color: transparent !important;
+	}
+
+	#page.drawers .drawer-right-toggle {
+		margin-right: 0;
+	}
+
+	.drawer-toggler .btn {
+		border: none;
+	}
+
+	.btn {
+		color: inherit;
+	}
+
+	.navigation,
+	#region-main,
+	.drawer {
+		background-color: transparent;
+	}
+
+	#page .main-inner {
+		background-color: transparent;
+		padding: 15px 0;
+	}
+
+	/* Shape Buttons */
+
+	.navbar :where(.nav-item, .dropdown, #usernavigation .nav-link),
+	.drawer-toggler .btn {
+		background-color: transparent;
+		box-shadow: inset 0 0 transparent, inset 0 0 0 100vmax transparent;
+		transition: box-shadow 250ms ease;
+
+		&:is(:hover, :focus-visible) {
+			box-shadow: inset 0 0 transparent, inset 0 0 0 100vmax var(--uclearn-hover-tint);
+		}
+	}
+
+	.navbar .nav-item:has(.nav-link:focus-visible),
+	#usernavigation .nav-link:focus-visible {
+		box-shadow:
+			inset 0 0 0 .2rem var(--uclearn-accent-color),
+			inset 0 0 0 100vmax var(--uclearn-hover-tint) !important;
+	}
+
+	.drawer-toggler .btn:focus-visible {
+		box-shadow:
+			0 0 0 .2rem var(--uclearn-accent-color),
+			inset 0 0 0 100vmax var(--uclearn-hover-tint) !important;
+
+		&.drawer-right-toggle {
+			clip-path: inset(-100vmax 0 -100vmax -100vmax);
+		}
+	}
+
+	/* Frosted */
+	.drawer-toggler .btn {
+		background-color: var(--uclearn-translucent-bg);
+		backdrop-filter: var(--uclearn-bg-effect);
+	}
+
+	.navbar,
+	#page .main-inner {
+		background-color: transparent;
+
+		&:not(.navbar) {
+			position: relative;
+		}
+
+		&::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			z-index: -1;
+			background-color: var(--uclearn-translucent-bg);
+			backdrop-filter: var(--uclearn-bg-effect);
+			border-radius: inherit;
+		}
+	}
+
+	/* Navigation */
+	.navbar, .moremenu,
+	.navigation .nav-link {
+		height: auto;
+	}
+
+	.navbar :is(.navbar-brand, .logo) {
+		width: auto !important;
+		height: 100% !important;
+		max-width: unset;
+	}
+
+	.navbar .nav-link {
+		padding-inline: 1em;
+		background-color: transparent;
+	}
+
+	.navigation .nav-link:focus {
+		box-shadow: none !important;
+	}
+
+	.navbar :is(.nav-link, .dropdown) {
+		color: var(--uclearn-foreground);
+	}
+
+	.navbar .edit-mode-switch-form .input-group {
+		margin-top: 3px;
+
+		.custom-control-label::before,
+		.custom-control-label::after {
+			top: 0;
+		}
+	}
+
+	.drawer-toggler .btn {
+		transition: padding 250ms ease, box-shadow 250ms ease;
+	}
+
+	/* Sectioning */
+	.block-region {
+		display: flex;
+		flex-flow: column;
+		gap: 8px;
+
+		>:empty {
+			display: none;
+		}
+	}
+
+	.card:not(.block_multiblock), .card:has(.multiblock-tabbed-list) {
+		background-color: var(--uclearn-translucent-bg);
+		margin: 0;
+	}
+
+	#footnote {
+		display: none;
+	}
+}
