@@ -1,11 +1,12 @@
 
 async function loadScript(script: HTMLScriptElement) {
-	console.log("loading", script);
 	if (script.src) {
 		try {
-			return `${await (await fetch(script.src, {
+			const content = await (await fetch(script.src, {
 				priority: script.getAttribute("priority") as RequestPriority ?? undefined,
-			})).text()}//# sourceURL=${script.src}`;
+			})).text();
+			return `document.currentScript.setAttribute("src", ${JSON.stringify(script.src)});\
+				${content}//# sourceURL=${script.src}`;
 		} catch (e) {
 			console.warn(e);
 			return '';

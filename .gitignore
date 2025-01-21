@@ -3,7 +3,7 @@ build/
 node_modules/
 bun.lockb
 # dev script builds script in here
-src/static/index.ts
+src/static/index.js
 src/static/mathlive/
 src/static/highlight.js/
 

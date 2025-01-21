@@ -1,6 +1,7 @@
 // stop();
 const parser = new DOMParser();
 (async () => {
+	if(/\.(?!html?|php)\w+$/.test(location.pathname)) return;
 	document.write("<!doctype html>");
 	document.close();
 	const response = await fetch(location.href, {
