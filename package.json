@@ -9,7 +9,7 @@
 		"build:scripts": "bun build --outfile=dist/index.js src/index.ts --minify",
 		"bundle": "mkdir dist && cp -R src/static/* dist && cp -R node_modules/mathlive/ dist && cp -R node_modules/highlight.js/ dist",
 		"clean:build": "rm -r -f dist",
-		"clean:dev": "(rm -f src/static/index.js || true) && cmd /C \"rd src\\static\\mathlive & rd src\\static\\highlight.js\""
+		"clean:dev": "(rm -f src/static/index.js || true) && cmd /C \"rd src\\static\\mathlive & rd src\\static\\highlight.js\" || true"
 	},
 	"devDependencies": {
 		"@trevorhanus/mathquill-types": "https://github.com/trevorhanus/mathquill-types",
