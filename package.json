@@ -9,9 +9,10 @@
 		"build:scripts": "bun build --outfile=dist/index.js src/index.ts --minify",
 		"bundle": "mkdir dist && cp -R src/static/* dist && cp -R node_modules/mathlive/ dist && cp -R node_modules/highlight.js/ dist",
 		"clean:build": "rm -r -f dist",
-		"clean:dev": "rm -f src/static/index.js && cmd /C \"rd src\\static\\mathlive & rd src\\static\\highlight.js\""
+		"clean:dev": "rm -f src/static/index.js && cmd /C \"rd src\\static\\mathlive & rd src\\statichighlight.js\""
 	},
 	"devDependencies": {
+		"@trevorhanus/mathquill-types": "https://github.com/trevorhanus/mathquill-types",
 		"@types/bun": "latest",
 		"@types/requirejs": "^2.1.37",
 		"npm-run-all": "^4.1.5"

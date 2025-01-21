@@ -9,7 +9,7 @@
 		"allowJs": true,
 
 		"types": ["requirejs"],
-		"typeRoots": ["node_modules/@types", "lib/types"],
+		"typeRoots": ["node_modules/@types"],
 		"baseUrl": "./node_modules",
 		"esModuleInterop": true,
 
