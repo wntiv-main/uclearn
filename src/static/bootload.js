@@ -14,6 +14,11 @@ const parser = new DOMParser();
 	document.documentElement.replaceWith(document.adoptNode(dom.documentElement));
 
 	const root = document.documentElement;
+	const font = document.createElement("link");
+	font.rel = "stylesheet";
+	font.href = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap';
+	root.prepend(font);
+
 	root.style.setProperty("--uclearn-bg-url",
 		`url("${chrome.runtime.getURL("background.png")}")`);
 
