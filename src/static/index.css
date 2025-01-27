@@ -171,6 +171,9 @@
 	.custom-select,
 	.course-section .sectionname>a,
 	.yui3-button,
+	.table,
+	.generaltable,
+	.generaltable tr,
 	.block-cards .categoryname {
 		color: inherit;
 	}
@@ -197,6 +200,8 @@
 		margin: 0 !important;
 	}
 
+	.generaltable .sticky-column,
+	.generaltable tr,
 	.navigation,
 	#region-main,
 	.message-app,
@@ -259,6 +264,7 @@
 	.closewidget .btn-link,
 	.message-app [data-route="view-contacts"],
 	.moodle-dialogue-base .closebutton,
+	.generaltable tr,
 	.drawertoggle.btn {
 		--uclearn-background-tint: transparent;
 		background-color: transparent;
