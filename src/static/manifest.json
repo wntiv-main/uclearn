@@ -11,6 +11,7 @@
 	],
 	"host_permissions": [
 		"*://learn.canterbury.ac.nz/*",
+		"*://preuc.canterbury.ac.nz/*",
 		"*://login.microsoftonline.com/*"
 	],
 	"web_accessible_resources": [
@@ -19,14 +20,22 @@
 				"background.png",
 				"mathlive/dist/fonts/*",
 				"mathlive/dist/sounds/*",
+				"fonts/**/*.woff",
+				"filters.svg",
 				// "mathquill/mathquill.min.js",
 				"index.js"
 			],
-			"matches": ["*://learn.canterbury.ac.nz/*"]
+			"matches": [
+				"*://learn.canterbury.ac.nz/*",
+				"*://preuc.canterbury.ac.nz/*"
+			]
 		},
 		{
 			"resources": ["inspector.css", "highlightjs/*.css"],
-			"matches": ["*://learn.canterbury.ac.nz/*"],
+			"matches": [
+				"*://learn.canterbury.ac.nz/*",
+				"*://preuc.canterbury.ac.nz/*"
+			],
 			"match_about_blank": true
 		}
 	],
@@ -38,7 +47,10 @@
 	},
 	"content_scripts": [
 		{
-			"matches": ["*://learn.canterbury.ac.nz/*"],
+			"matches": [
+				"*://learn.canterbury.ac.nz/*",
+				"*://preuc.canterbury.ac.nz/*"
+			],
 			"css": [
 				"index.css",
 				"mathlive/dist/mathlive-static.css",

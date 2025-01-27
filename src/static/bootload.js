@@ -1,8 +1,10 @@
 // stop();
 const parser = new DOMParser();
 (async () => {
+	// TODO: replace with document.contentType check?
 	if(/\.(?!html?|php)\w+$/.test(location.pathname)) return;
-	document.write("<!doctype html>");
+	document.open();
+	document.writeln("<!doctype html>");
 	document.close();
 	const response = await fetch(location.href, {
 		method: 'GET',
@@ -14,10 +16,10 @@ const parser = new DOMParser();
 	document.documentElement.replaceWith(document.adoptNode(dom.documentElement));
 
 	const root = document.documentElement;
-	const font = document.createElement("link");
-	font.rel = "stylesheet";
-	font.href = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap';
-	root.prepend(font);
+	// const font = document.createElement("link");
+	// font.rel = "stylesheet";
+	// font.href = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap';
+	// root.prepend(font);
 
 	root.style.setProperty("--uclearn-bg-url",
 		`url("${chrome.runtime.getURL("background.png")}")`);
