@@ -170,6 +170,7 @@
 	.popover-body,
 	.custom-select,
 	.course-section .sectionname>a,
+	.yui3-button,
 	.block-cards .categoryname {
 		color: inherit;
 	}
@@ -257,6 +258,7 @@
 	.activity,
 	.closewidget .btn-link,
 	.message-app [data-route="view-contacts"],
+	.moodle-dialogue-base .closebutton,
 	.drawertoggle.btn {
 		--uclearn-background-tint: transparent;
 		background-color: transparent;
@@ -278,7 +280,8 @@
 	:is(.block-add.btn,
 		.custom-select,
 		.closewidget .btn-link,
-		.message-app [data-route="view-contacts"]):focus-visible {
+		.message-app [data-route="view-contacts"],
+		.moodle-dialogue-base .closebutton):focus-visible {
 		box-shadow: inset 0 0 0 100vmax var(--uclearn-background-tint), var(--uclearn-focus-shadow) !important;
 	}
 
@@ -449,6 +452,7 @@
 	.popover .arrow,
 	.tooltip-inner,
 	.tooltip .arrow,
+	.moodle-dialogue-base .moodle-dialogue-wrap,
 	.card.emoji-picker {
 		background-color: var(--uclearn-translucent-bg);
 		backdrop-filter: var(--uclearn-bg-effect);
@@ -1537,6 +1541,10 @@
 
 	/* Modals */
 
+	.moodle-dialogue-base .moodle-dialogue-wrap {
+		border: none;
+	}
+
 	.modal-dialog {
 		.modal-content {
 			box-shadow: none;
@@ -1559,6 +1567,10 @@
 			content: unset;
 			display: none;
 		}
+	}
+
+	.tooltip.show {
+		opacity: 1;
 	}
 
 	.bs-tooltip-top>.arrow, .bs-tooltip-auto[x-placement^="top"]>.arrow,
