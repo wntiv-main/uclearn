@@ -1,0 +1,203 @@
+:root:root:root:root:root:root:root:root {
+	/* Shape Buttons */
+
+	.navigation .nav-item:not(.dropdown),
+	.navbar .dropdown .dropdown-toggle,
+	#usernavigation .nav-link,
+	.drawer-toggler .btn,
+	.editmode-switch-form .input-group,
+	.message-app :is(.view-overview-body, [data-region="view-contacts"]) :is(.list-group-item, .overview-section-toggle),
+	.block-add.btn,
+	.custom-select,
+	.activity,
+	.closewidget .btn-link,
+	.message-app [data-route="view-contacts"],
+	.moodle-dialogue-base .closebutton,
+	.generaltable tr,
+	.notification,
+	.courseindex-item,
+	.drawertoggle.btn {
+		--uclearn-background-tint: transparent;
+		background-color: transparent;
+		box-shadow: var(--uclearn-pre-shadow, ) inset 0 0 0 100vmax var(--uclearn-background-tint) !important;
+		transition: box-shadow var(--uclearn-transition-short);
+
+		&:is(:hover, :focus-visible, .focus),
+		&.nav-item:has(>.nav-link:focus-visible),
+		&.input-group:has(input:focus-visible) {
+			--uclearn-background-tint: var(--uclearn-hover-tint);
+			color: var(--uclearn-foreground-muted);
+		}
+
+		&:is(:active, .active) {
+			--uclearn-background-tint: var(--uclearn-active-tint);
+		}
+	}
+
+	:is(.block-add.btn,
+		.custom-select,
+		.closewidget .btn-link,
+		.message-app [data-route="view-contacts"],
+		.courseindex-item,
+		.moodle-dialogue-base .closebutton):focus-visible {
+		box-shadow: inset 0 0 0 100vmax var(--uclearn-background-tint), var(--uclearn-focus-shadow) !important;
+	}
+
+	.message-app :is(.view-overview-body, [data-region="view-contacts"]) :is(.list-group-item, .overview-section-toggle) {
+		--uclearn-pre-shadow: inset 0 0 transparent, inset 0 0 transparent, ;
+
+		&:focus-visible {
+			box-shadow: var(--uclearn-focus-shadow-inset), inset 0 0 0 100vmax var(--uclearn-background-tint) !important;
+		}
+	}
+
+	.navigation .nav-item:not(.dropdown),
+	.navbar .dropdown .dropdown-toggle,
+	.editmode-switch-form .input-group,
+	#usernavigation .nav-link {
+		--uclearn-pre-shadow: inset 0 0 transparent, ;
+
+		&:focus-visible, &:has(.nav-link:focus-visible), &.input-group:has(input:focus-visible) {
+			box-shadow:
+				inset 0 0 0 .2rem var(--uclearn-accent-color),
+				inset 0 0 0 100vmax var(--uclearn-background-tint) !important;
+		}
+	}
+
+	.drawer-toggler .btn:focus-visible,
+	.drawertoggle.btn:focus-visible {
+		box-shadow:
+			inset 0 0 0 100vmax var(--uclearn-background-tint),
+			0 0 0 .2rem var(--uclearn-accent-color) !important;
+	}
+
+	/* Tabstrip */
+
+	.multiblock-tabbed-list .nav-link {
+		--uclearn-bg-color: transparent;
+		position: relative;
+		border-radius: var(--uclearn-radius) var(--uclearn-radius) 0 0;
+		background-color: var(--uclearn-bg-color) !important;
+		outline: none;
+		color: var(--uclearn-foreground-muted);
+		transition: background-color var(--uclearn-transition-short),
+			box-shadow var(--uclearn-transition-short),
+			border-radius var(--uclearn-transition-short);
+
+		&:focus-visible {
+			box-shadow: var(--uclearn-focus-shadow) !important;
+		}
+
+		&::before {
+			right: calc(100% - 0.5px);
+			box-shadow: var(--uclearn-radius) 0 var(--uclearn-shadow-color);
+		}
+
+		&::after {
+			left: calc(100% - 0.5px);
+			box-shadow: calc(-1 * var(--uclearn-radius)) 0 var(--uclearn-shadow-color);
+		}
+
+		&::before, &::after {
+			content: "";
+			--uclearn-shadow-color: transparent;
+			position: absolute;
+			top: 0;
+			height: 100%;
+			width: calc(var(--uclearn-radius) * 2);
+			pointer-events: none;
+			clip-path: inset(0 0.5px);
+			transition: box-shadow var(--uclearn-transition-short),
+				border-radius var(--uclearn-transition-short);
+		}
+
+		&:is(:hover, :focus-visible, .focus):not(:active, .active) {
+			--uclearn-bg-color: var(--uclearn-hover-tint);
+			z-index: 1;
+
+			&::before {
+				border-bottom-right-radius: var(--uclearn-radius);
+				--uclearn-shadow-color: var(--uclearn-bg-color);
+			}
+
+			&+&, .nav-item:has(>&)+.nav-item>& {
+				border-top-left-radius: 0;
+
+				&::before {
+					border-radius: 0;
+					--uclearn-shadow-color: transparent;
+				}
+			}
+
+			&::after {
+				border-bottom-left-radius: var(--uclearn-radius);
+				--uclearn-shadow-color: var(--uclearn-bg-color);
+			}
+
+			&:has(+ &), .nav-item:has(+.nav-item>&)>& {
+				border-top-right-radius: 0;
+
+				&::after {
+					border-radius: 0;
+					--uclearn-shadow-color: transparent;
+				}
+			}
+		}
+
+		&:is(:active, .active)+&:is(:hover, :focus-visible, .focus),
+		.nav-item:has(> &:is(:active, .active))+.nav-item>&:is(:hover, :focus-visible, .focus) {
+			border-top-left-radius: 0;
+			border-bottom-left-radius: var(--uclearn-radius);
+
+			&::before {
+				border-top-right-radius: var(--uclearn-radius);
+				border-bottom-right-radius: 0;
+			}
+		}
+
+		&:is(:hover, :focus-visible, .focus):has(+ &:is(:active, .active)),
+		.nav-item:has(+ .nav-item>&:is(:active, .active))>&:is(:hover, :focus-visible, .focus) {
+			border-top-right-radius: 0;
+			border-bottom-right-radius: var(--uclearn-radius);
+
+			&::after {
+				border-top-left-radius: var(--uclearn-radius);
+				border-bottom-left-radius: 0;
+			}
+		}
+
+		&:is(:active, .active) {
+			--uclearn-bg-color: var(--uclearn-active-tint);
+			z-index: 2;
+			color: var(--uclearn-foreground);
+
+			&::before {
+				border-bottom-right-radius: var(--uclearn-radius);
+				--uclearn-shadow-color: var(--uclearn-bg-color);
+			}
+
+			&+&, .nav-item:has(>&)+.nav-item>& {
+				border-top-left-radius: 0;
+
+				&::before {
+					border-radius: 0;
+					--uclearn-shadow-color: transparent;
+				}
+			}
+
+			&::after {
+				border-bottom-left-radius: var(--uclearn-radius);
+				--uclearn-shadow-color: var(--uclearn-bg-color);
+			}
+
+			&:has(+ &), .nav-item:has(+.nav-item>&)>& {
+				border-top-right-radius: 0;
+
+				&::after {
+					border-radius: 0;
+					--uclearn-shadow-color: transparent;
+				}
+			}
+		}
+	}
+}

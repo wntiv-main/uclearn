@@ -1,14 +1,14 @@
 // stop();
 const parser = new DOMParser();
 (async () => {
-	// TODO: replace with document.contentType check?
-	if(/\.(?!html?|php)\w+$/.test(location.pathname)) return;
+	if(!document.contentType.includes("html")) return;
 	document.open();
 	document.writeln("<!doctype html>");
 	document.close();
 	const response = await fetch(location.href, {
 		method: 'GET',
 		priority: 'high',
+		cache: 'force-cache',
 	});
 	const content = await response.text();
 	const contentType = response.headers.get("Content-Type")?.split(";")[0] ?? 'text/html';

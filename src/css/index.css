@@ -1,0 +1,92 @@
+@import 'globals.css';
+@import 'reset.css';
+@import 'layout.css';
+@import 'ui.css';
+@import 'buttons.css';
+@import 'effects.css';
+@import 'nav.css';
+@import 'sections.css';
+@import 'drawers.css';
+@import 'notifications.css';
+@import 'message-app.css';
+@import 'code.css';
+@import 'quiz-nav.css';
+
+:root:root:root:root:root:root:root:root {
+
+	background-image: linear-gradient(0deg, var(--uclearn-translucent-bg), var(--uclearn-translucent-bg)), var(--uclearn-bg-url);
+	background-attachment: fixed;
+	background-size: cover;
+	background-position: center;
+
+	/* Theme */
+	&.uclearn-dark-mode {
+		color-scheme: dark;
+	}
+
+	img[src^="https://learn.canterbury.ac.nz/pix/"] {
+		filter: var(--uclearn-translucent-filter);
+	}
+
+	a:has(img[src^="https://learn.canterbury.ac.nz/pix/"]) {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.block_html div:not(:has(>:not(a))) {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		column-gap: 50px;
+
+		>a {
+			padding: 0 !important;
+		}
+	}
+
+	@media (prefers-color-scheme: dark) {
+		img[src^="https://learn.canterbury.ac.nz/pix/"] {
+			filter: var(--uclearn-translucent-filter) invert(1) hue-rotate(180deg);
+		}
+
+		.navbar .logo, img.icon, #logoimage {
+			filter: invert(1) hue-rotate(180deg);
+		}
+
+		img[src="https://learn.canterbury.ac.nz/theme/image.php/boost_union/core/1737599580/u/f1"] {
+			filter: brightness(0.5) contrast(3) brightness(0.6);
+		}
+
+		.block-timeline [data-region="no-events-empty-message"] img {
+			filter: brightness(0.3) contrast(1.5);
+			opacity: 0.5;
+		}
+	}
+
+	#page-wrapper .graphimage {
+		filter: var(--uclearn-translucent-filter);
+		margin: -30px;
+		width: calc(100% + 60px);
+		user-select: none;
+	}
+
+	.userinitials {
+		background-color: var(--uclearn-background);
+		color: var(--uclearn-foreground-muted);
+	}
+
+	/* Course Index */
+
+	.courseindex .completioninfo {
+		order: 1;
+	}
+
+	/* Course */
+
+	.formulation {
+		background-color: transparent !important;
+		border-color: currentColor !important;
+		color: inherit !important;
+	}
+}

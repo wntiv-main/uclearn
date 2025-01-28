@@ -1,0 +1,141 @@
+:root:root:root:root:root:root:root:root {
+	.navbar {
+		height: auto;
+		padding-right: 0;
+
+		&.fixed-top {
+			border-bottom: none;
+		}
+
+		.container-fluid {
+			align-items: stretch;
+		}
+
+		:is(.navbar-brand, .logo) {
+			width: auto !important;
+			height: 100% !important;
+			max-width: unset;
+		}
+
+		.nav-link {
+			padding-inline: 1em;
+			background-color: transparent;
+		}
+
+		.nav-link, .dropdown {
+			color: var(--uclearn-foreground);
+		}
+	}
+
+	#usernavigation {
+		#user-menu-toggle {
+			padding-inline: 0;
+
+			.userbutton {
+				scale: 0.8;
+				order: 1;
+			}
+		}
+
+		.editmode-switch-form, [id^="searchinput-navbar"] {
+			order: -1;
+		}
+
+		[id^="searchinput-navbar"] .btn {
+			border: none;
+		}
+
+		.divider:last-of-type {
+			display: none;
+		}
+
+		.editmode-switch-form .input-group {
+			height: 100%;
+			align-items: center;
+			justify-content: center;
+			padding-inline: 0.5rem;
+			position: relative;
+
+			label {
+				position: absolute;
+				inset: 0;
+				z-index: 2;
+				display: block;
+				font-size: 0;
+				color: transparent;
+				margin: 0 !important;
+			}
+
+			.custom-control-label {
+				display: none;
+			}
+
+			.custom-control {
+				width: 1.1em;
+				max-width: 24px;
+				min-height: 0;
+				aspect-ratio: 1;
+				padding: 0;
+				background-color: currentColor;
+				/* https://lucide.dev/icons/pencil */
+				mask-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXBlbmNpbCI+PHBhdGggZD0iTTIxLjE3NCA2LjgxMmExIDEgMCAwIDAtMy45ODYtMy45ODdMMy44NDIgMTYuMTc0YTIgMiAwIDAgMC0uNS44M2wtMS4zMjEgNC4zNTJhLjUuNSAwIDAgMCAuNjIzLjYyMmw0LjM1My0xLjMyYTIgMiAwIDAgMCAuODMtLjQ5N3oiLz48cGF0aCBkPSJtMTUgNSA0IDQiLz48L3N2Zz4=);
+				mask-size: cover;
+
+				&:has(.custom-control-input:checked) {
+					/* https://lucide.dev/icons/pencil-off */
+					mask-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXBlbmNpbC1vZmYiPjxwYXRoIGQ9Im0xMCAxMC02LjE1NyA2LjE2MmEyIDIgMCAwIDAtLjUuODMzbC0xLjMyMiA0LjM2YS41LjUgMCAwIDAgLjYyMi42MjRsNC4zNTgtMS4zMjNhMiAyIDAgMCAwIC44My0uNUwxNCAxMy45ODIiLz48cGF0aCBkPSJtMTIuODI5IDcuMTcyIDQuMzU5LTQuMzQ2YTEgMSAwIDEgMSAzLjk4NiAzLjk4NmwtNC4zNTMgNC4zNTMiLz48cGF0aCBkPSJtMTUgNSA0IDQiLz48cGF0aCBkPSJtMiAyIDIwIDIwIi8+PC9zdmc+);
+				}
+			}
+		}
+	}
+
+	.moremenu,
+	.navigation .nav-link {
+		height: 100%;
+	}
+
+	.navigation .nav-link:not(.dropdown):focus {
+		box-shadow: none !important;
+	}
+
+	.navigation .dropdown .dropdown-toggle.nav-link {
+		border: none;
+		align-self: stretch;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	#searchform-navbar {
+		position: relative;
+		left: 1px;
+		height: 100%;
+		background-color: transparent;
+	}
+
+	.navigation {
+		padding: 0;
+		margin: 0;
+		border-bottom: none;
+
+		.nav-tabs {
+			background-color: transparent;
+		}
+
+		.nav-link {
+			background-color: transparent;
+
+			&:not(.active) {
+				border-color: transparent;
+			}
+		}
+	}
+
+	#user-action-menu {
+		color: var(--uclearn-foreground);
+
+		.loggedinas {
+			margin-bottom: -0.5rem;
+		}
+	}
+}

@@ -1,0 +1,97 @@
+:root:root:root:root:root:root:root:root {
+	#page-footer, #footnote {
+		display: none;
+	}
+
+	#page-header {
+		margin-top: calc(15px + 1em - 1lh);
+
+		>.w-100 {
+			position: relative;
+
+			form:has(input[name="reset"][value="1"]) .btn {
+				position: absolute;
+				right: 0;
+				margin-top: calc(0.5lh - 0.5em);
+			}
+		}
+
+		&:has(+ .secondary-navigation) {
+			margin-bottom: 0;
+		}
+	}
+
+	body:not(#page-login-index) #page-wrapper {
+		display: grid;
+		grid: [navbar] max-content [navbar-end page] 1fr [page-end] / [far-left drawer-left] max-content [drawer-left-end left-gutter] minmax(5px, 1fr) [left-gutter-end page-left] minmax(0, 90vw) [page-right right-gutter] minmax(5px, 1fr) [right-gutter-end drawer-right] max-content [drawer-right-end scrollbar-gutter far-right] min-content [scrollbar-gutter-end];
+		overflow: clip;
+		width: 100%;
+
+		&::before {
+			content: "";
+			display: block;
+			backdrop-filter: var(--uclearn-bg-effect);
+			grid-area: navbar / scrollbar-gutter / page-end / scrollbar-gutter-end;
+			width: 100%;
+			height: 100%;
+		}
+
+		.navbar {
+			grid-area: navbar / far-left / navbar-end / far-right;
+		}
+
+		#page {
+			grid-area: navbar / far-left / page-end / scrollbar-gutter-end;
+			margin-inline: 0 !important;
+			overflow-y: auto !important;
+			margin-top: 0;
+			display: grid;
+			grid-template-rows: subgrid;
+			grid-template-columns: subgrid;
+
+			:has(:where(#page-content)) {
+				display: contents;
+			}
+
+			.main-inner {
+				grid-area: page / far-left / page-end / far-right;
+				display: grid;
+				grid-template-rows: repeat(99, max-content);
+				grid-template-columns: subgrid;
+				min-height: 0;
+				height: fit-content;
+
+				&::before {
+					grid-area: 1 / page-left / -1 / page-right;
+				}
+
+				.drawer-toggler {
+					grid-area: 1 / far-left / 1 / far-right;
+				}
+
+				>* {
+					grid-column: page-left / page-right;
+					width: 100%;
+					min-width: 0;
+				}
+
+				@media (max-width: 992px) {
+					&::before {
+						grid-column: far-left / far-right;
+					}
+
+					>* {
+						grid-column: far-left / far-right;
+					}
+				}
+			}
+
+			/* >* {
+				grid-area: page / page-left / page-end / page-right;
+				min-height: 0;
+				height: fit-content;
+				display: subgrid;
+			} */
+		}
+	}
+}

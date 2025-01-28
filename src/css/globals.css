@@ -1,0 +1,40 @@
+:root {
+	--uclearn-filters-src: "chrome-extension://__MSG_@@extension_id__/filters.svg";
+	/* chrome-extension://__MSG_@@extension_id__/filters.svg#graphTranslucent */
+	/* see: https://issues.chromium.org/issues/41001393 */
+	--uclearn-translucent-filter: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxmaWx0ZXIgaWQ9ImdyYXBoVHJhbnNsdWNlbnQiPjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VHcmFwaGljIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwCjAgMSAwIDAgMAowIDAgMSAwIDAKLTIgLTEgMCAyIDAiPjwvZmVDb2xvck1hdHJpeD48L2ZpbHRlcj48L3N2Zz4=#graphTranslucent);
+
+
+	--uclearn-small-screen-size: var(--breakpoint-lg, 992px);
+
+	--uclearn-foreground: light-dark(black, white);
+	--uclearn-background: light-dark(white, #1e1e1e);
+	--uclearn-foreground-muted: hsl(from var(--uclearn-foreground) h s calc(20 + 0.6 * l));
+
+	--uclearn-translucent-bg: hsla(from var(--uclearn-background) h s l / 0.6);
+	--uclearn-bg-effect: blur(10px);
+
+	--uclearn-hover-tint: #80808040;
+	--uclearn-active-tint: #80808080;
+
+	--uclearn-accent-color: #ce3e2e;
+	--uclearn-shadow-color: #00000080;
+	--uclearn-color-error: #ff0000;
+	--uclearn-color-warning: #ffff00;
+	--uclearn-color-success: #00ff00;
+	--uclearn-color-complete: #0060bf;
+
+	--uclearn-card-background: var(--uclearn-translucent-bg);
+	--uclearn-section-background: var(--uclearn-translucent-bg);
+
+	--uclearn-focus-shadow: 0 0 0 .15rem #0f6cbf, 0 0 0 .3rem #0f6cbfbf;
+	--uclearn-focus-shadow-inset: inset 0 0 0 .15rem #0f6cbf, inset 0 0 0 .3rem #0f6cbfbf;
+
+	--uclearn-transition-short-duration: 250ms;
+	--uclearn-transition-short-function: ease;
+	--uclearn-transition-short: var(--uclearn-transition-short-duration) var(--uclearn-transition-short-function);
+
+	--uclearn-radius: 10px;
+
+	--uclearn-font-stack: "Open Sans", sans-serif;
+}

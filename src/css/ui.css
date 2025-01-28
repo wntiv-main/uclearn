@@ -1,0 +1,184 @@
+:root:root:root:root:root:root:root:root {
+	/* Modals */
+
+	.moodle-dialogue-base {
+		border-radius: 1rem;
+
+		.moodle-dialogue-wrap {
+			border: none;
+		}
+	}
+
+	.modal-dialog {
+		.modal-content {
+			box-shadow: none;
+			transition: box-shadow var(--uclearn-transition-short);
+		}
+
+		&:focus-visible .modal-content {
+			box-shadow: var(--uclearn-focus-shadow);
+		}
+
+		.modal-body {
+			padding: 15px;
+		}
+	}
+
+	/* Popover */
+
+	.popover .arrow, .tooltip .arrow {
+		&::before, &::after {
+			content: unset;
+			display: none;
+		}
+	}
+
+	.tooltip.show {
+		opacity: 1;
+	}
+
+	.bs-tooltip-top>.arrow, .bs-tooltip-auto[x-placement^="top"]>.arrow,
+	.bs-popover-top>.arrow, .bs-popover-auto[x-placement^="top"]>.arrow {
+		clip-path: polygon(0 0, 100% 0, 50% 100%);
+	}
+
+	.bs-tooltip-right>.arrow, .bs-tooltip-auto[x-placement^="right"]>.arrow,
+	.bs-popover-right>.arrow, .bs-popover-auto[x-placement^="right"]>.arrow {
+		clip-path: polygon(0 50%, 100% 0, 100% 100%);
+	}
+
+	.bs-tooltip-bottom>.arrow, .bs-tooltip-auto[x-placement^="bottom"]>.arrow,
+	.bs-popover-bottom>.arrow, .bs-popover-auto[x-placement^="bottom"]>.arrow {
+		clip-path: polygon(50% 0, 0 100%, 100% 100%);
+	}
+
+	.bs-tooltip-left>.arrow, .bs-tooltip-auto[x-placement^="left"]>.arrow,
+	.bs-popover-left>.arrow, .bs-popover-auto[x-placement^="left"]>.arrow {
+		clip-path: polygon(0 0, 0 100%, 100% 50%);
+	}
+
+	/* Input Fields */
+	.input-group:has(input:not([type="checkbox"]).form-control) {
+		border: 1px solid #808080;
+		border-radius: var(--uclearn-radius);
+		background-color: var(--uclearn-translucent-bg);
+		transition: box-shadow var(--uclearn-transition-short);
+
+		&:has(> .form-control:focus-visible) {
+			box-shadow: var(--uclearn-focus-shadow);
+		}
+
+		.input-group-text {
+			border: none;
+		}
+
+		.form-control {
+			background-color: transparent;
+			border: none;
+			border-radius: 0;
+			box-shadow: none;
+		}
+
+		.btn-submit {
+			border: none;
+			border-radius: 0;
+			background-color: transparent;
+		}
+	}
+
+	/* Loading */
+	.bg-pulse-grey {
+		animation: none;
+		background-color: var(--uclearn-hover-tint);
+
+		&:not(.rounded-circle) {
+			border-radius: 0.2em;
+		}
+	}
+
+	/* Form */
+	.mform {
+		.col-form-label {
+			padding-block: 0;
+		}
+
+		.row:has(.col-form-label) {
+			align-items: baseline;
+		}
+	}
+
+	.custom-select {
+		background-color: var(--uclearn-background) !important;
+		background-clip: text;
+	}
+
+	.dropdown-menu {
+		overflow-y: auto;
+
+		.dropdown-item:first-child {
+			padding-top: 0.5rem;
+		}
+
+		.dropdown-item:last-child {
+			padding-bottom: 0.5rem;
+		}
+
+		.dropdown-divider {
+			margin-block: 0.5rem;
+		}
+
+		.dropdown-item {
+			align-items: center;
+
+			&:first-child {
+				border-top-left-radius: inherit;
+				border-top-right-radius: inherit;
+			}
+
+			&:last-child {
+				border-bottom-left-radius: inherit;
+				border-bottom-right-radius: inherit;
+			}
+		}
+
+		.dropdown-item:hover {
+			.dropdown-divider+& {
+				box-shadow: 0 0 0.5rem 0.25rem #0f6cbf;
+				clip-path: inset(-0.5rem 0 0 0);
+			}
+
+			&:has(+.dropdown-divider) {
+				box-shadow: 0 0 0.5rem 0.25rem #0f6cbf;
+				clip-path: inset(0 0 -0.5rem 0);
+			}
+		}
+	}
+
+	/* Cheverons */
+
+	.toggle-category, .icons-collapse-expand {
+		.collapsed, .expanded-icon {
+			display: inline-block;
+			rotate: 0deg;
+			transition: rotate var(--uclearn-transition-short);
+
+			[aria-expanded="false"]>& {
+				position: absolute;
+				visibility: hidden;
+				rotate: -90deg;
+			}
+		}
+
+		.expanded, .collapsed-icon {
+			display: inline-block;
+			rotate: 0deg;
+			transition: rotate var(--uclearn-transition-short);
+
+			[aria-expanded="true"]>& {
+				position: absolute;
+				visibility: hidden;
+				rotate: 90deg;
+			}
+		}
+	}
+}

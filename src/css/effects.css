@@ -1,0 +1,43 @@
+:root:root:root:root:root:root:root:root {
+
+	/* Frosted */
+	.popover-region-toggle::after,
+	.popover-region-container,
+	.drawer-toggler .btn,
+	.popover,
+	.popover .arrow,
+	.tooltip-inner,
+	.tooltip .arrow,
+	.moodle-dialogue-base .moodle-dialogue-wrap,
+	.card.emoji-picker {
+		background-color: var(--uclearn-translucent-bg);
+		backdrop-filter: var(--uclearn-bg-effect);
+	}
+
+	.navbar,
+	.dropdown-menu,
+	#page .main-inner,
+	.modal-content,
+	.login-container,
+	.drawer {
+		background-color: transparent;
+
+		&:not(.dropdown-menu) {
+			position: relative;
+		}
+
+		&.login-container {
+			contain: content;
+		}
+
+		&::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			z-index: -1;
+			background-color: var(--uclearn-translucent-bg);
+			backdrop-filter: var(--uclearn-bg-effect);
+			border-radius: inherit;
+		}
+	}
+}

@@ -15,15 +15,21 @@ async function loadScript(script: HTMLScriptElement) {
 	return script.text;
 }
 
-function execScript(script: HTMLScriptElement, content: string) {
-	if (!content) return;
+async function execScript(script: HTMLScriptElement, content: string) {
 	const newScript = document.createElement("script");
 	for (const attr of script.attributes) {
-		if (attr.name === 'src' || attr.name === 'async' || attr.name === 'defer') continue;
+		if ((attr.name === 'src' && content) || attr.name === 'async' || attr.name === 'defer') continue;
 		newScript.setAttribute(attr.name, attr.value);
 	}
-	newScript.text = content;
-	script.replaceWith(newScript);
+	if (content) {
+		newScript.text = content;
+		script.replaceWith(newScript);
+	} else {
+		return new Promise<void>(res => {
+			newScript.addEventListener('load', () => res());
+			script.replaceWith(newScript);
+		});
+	}
 }
 
 type ScriptAndContent = readonly [HTMLScriptElement, Promise<string>];
@@ -47,13 +53,13 @@ export async function loadPage() {
 	}
 
 	for (const [script, content] of scripts) {
-		execScript(script, await content);
+		await execScript(script, await content);
 	}
 	const runningAsyncScripts = Promise.all(asyncScripts.map(async ([script, content]) => {
 		return execScript(script, await content);
 	}));
 	for (const [script, content] of deferScripts) {
-		execScript(script, await content);
+		await execScript(script, await content);
 	}
 	await runningAsyncScripts;
 	return;

@@ -1,0 +1,101 @@
+:root:root:root:root:root:root:root:root {
+	.popover-region-toggle {
+		&::before {
+			display: none;
+		}
+
+		&::after {
+			clip-path: polygon(50% 0, 100% 100%, 0 100%);
+			border: none;
+			height: 10px;
+			aspect-ratio: 2;
+			bottom: -4px;
+			right: 50%;
+			transform: translateX(50%);
+		}
+	}
+
+	.popover-region-container {
+		border: none;
+		border-radius: var(--uclearn-radius);
+		width: max-content;
+		max-width: min(300px, 100vw);
+		height: auto;
+		/* biome-ignore lint/correctness/noUnknownProperty: <explanation> */
+		interpolate-size: allow-keywords;
+		transition: height var(--uclearn-transition-short);
+		overflow: hidden;
+
+		.popover-region.collapsed & {
+			height: 0;
+			transition: height var(--uclearn-transition-short),
+				opacity 101ms var(--uclearn-transition-short), visibility 101ms var(--uclearn-transition-short);
+		}
+
+		.popover-region-header-container {
+			padding: 5px 10px;
+			height: auto;
+			display: flow-root;
+		}
+
+		.popover-region-content-container {
+			height: auto;
+			max-height: 50vh;
+
+			.loading-icon, .empty-message {
+				padding: 20px;
+			}
+		}
+
+		.popover-region-footer-container {
+			background-color: transparent;
+		}
+
+		.content-item-container {
+			background-color: transparent;
+		}
+
+		.navbar & {
+			top: calc(100% + 3px);
+		}
+	}
+
+	.notification {
+		display: grid;
+		grid-template: "icon header header"max-content "icon time link"max-content / max-content 1fr max-content;
+
+		:has(.notification-image, .notification-message, .timestamp) {
+			display: contents;
+		}
+
+		.notification-image {
+			grid-area: icon;
+			display: flex;
+			place-self: center;
+			align-items: center;
+			justify-content: center;
+			margin-right: 5px;
+
+			.icon {
+				margin-right: 0;
+			}
+		}
+
+		.notification-message {
+			grid-area: header;
+		}
+
+		.timestamp {
+			margin-right: 2ch;
+			grid-area: time;
+			margin-left: 0;
+			align-self: end;
+		}
+
+		.view-more {
+			grid-area: link;
+			position: static;
+			place-self: end;
+		}
+	}
+}

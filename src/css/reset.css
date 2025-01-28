@@ -1,0 +1,618 @@
+:root:root:root:root:root:root:root:root {
+	* {
+		background-color: transparent;
+	}
+
+	/* * {
+		margin: 0 !important;
+		padding: 0 !important;
+		background-color: transparent !important;
+		color: inherit !important;
+	} */
+
+	/* Grid layouts */
+
+	/* .col {
+		flex-basis: 0%;
+		flex-grow: 1;
+		max-width: 100%;
+	} */
+
+	[class^="row-cols-"], [class*=" row-cols-"] {
+		display: grid;
+		grid-template-columns: repeat(var(--uclearn-column-count, 1), 1fr);
+
+		>* {
+			max-width: none;
+		}
+	}
+
+	.row-cols-1 {
+		--uclearn-column-count: 1;
+	}
+
+	.row-cols-2 {
+		--uclearn-column-count: 2;
+	}
+
+	.row-cols-3 {
+		--uclearn-column-count: 3;
+	}
+
+	.row-cols-4 {
+		--uclearn-column-count: 4;
+	}
+
+	.row-cols-5 {
+		--uclearn-column-count: 5;
+	}
+
+	.row-cols-6 {
+		--uclearn-column-count: 6;
+	}
+
+	/* .col-auto {
+		flex: 0 0 auto;
+		width: auto;
+		max-width: 100%
+	} */
+
+	[class^="col-"], [class*=" col-"] {
+		max-width: none;
+	}
+
+	.col-1 {
+		flex: 1 0 0;
+	}
+
+	.col-2 {
+		flex: 2 0 0;
+	}
+
+	.col-3 {
+		flex: 3 0 0;
+	}
+
+	.col-4 {
+		flex: 4 0 0;
+	}
+
+	.col-5 {
+		flex: 5 0 0;
+	}
+
+	.col-6 {
+		flex: 6 0 0;
+	}
+
+	.col-7 {
+		flex: 7 0 0;
+	}
+
+	.col-8 {
+		flex: 8 0 0;
+	}
+
+	.col-9 {
+		flex: 9 0 0;
+	}
+
+	.col-10 {
+		flex: 10 0 0;
+	}
+
+	.col-11 {
+		flex: 11 0 0;
+	}
+
+	.col-12 {
+		flex: 12 0 0;
+	}
+
+	@media (min-width: 576px) {
+		/* .col-sm {
+			flex-basis: 0%;
+			flex-grow: 1;
+			max-width: 100%
+		} */
+
+		.row-cols-sm-1 {
+			--uclearn-column-count: 1;
+		}
+
+		.row-cols-sm-2 {
+			--uclearn-column-count: 2;
+		}
+
+		.row-cols-sm-3 {
+			--uclearn-column-count: 3;
+		}
+
+		.row-cols-sm-4 {
+			--uclearn-column-count: 4;
+		}
+
+		.row-cols-sm-5 {
+			--uclearn-column-count: 5;
+		}
+
+		.row-cols-sm-6 {
+			--uclearn-column-count: 6;
+		}
+
+		/* .col-sm-auto {
+			flex: 0 0 auto;
+			width: auto;
+			max-width: 100%
+		} */
+
+		.col-sm-1 {
+			flex: 1 0 0;
+		}
+
+		.col-sm-2 {
+			flex: 2 0 0;
+		}
+
+		.col-sm-3 {
+			flex: 3 0 0;
+		}
+
+		.col-sm-4 {
+			flex: 4 0 0;
+		}
+
+		.col-sm-5 {
+			flex: 5 0 0;
+		}
+
+		.col-sm-6 {
+			flex: 6 0 0;
+		}
+
+		.col-sm-7 {
+			flex: 7 0 0;
+		}
+
+		.col-sm-8 {
+			flex: 8 0 0;
+		}
+
+		.col-sm-9 {
+			flex: 9 0 0;
+		}
+
+		.col-sm-10 {
+			flex: 10 0 0;
+		}
+
+		.col-sm-11 {
+			flex: 11 0 0;
+		}
+
+		.col-sm-12 {
+			flex: 12 0 0;
+		}
+	}
+
+	@media (min-width: 768px) {
+		/* .col-md {
+			flex-basis: 0%;
+			flex-grow: 1;
+			max-width: 100%
+		} */
+
+		.row-cols-md-1 {
+			--uclearn-column-count: 1;
+		}
+
+		.row-cols-md-2 {
+			--uclearn-column-count: 2;
+		}
+
+		.row-cols-md-3 {
+			--uclearn-column-count: 3;
+		}
+
+		.row-cols-md-4 {
+			--uclearn-column-count: 4;
+		}
+
+		.row-cols-md-5 {
+			--uclearn-column-count: 5;
+		}
+
+		.row-cols-md-6 {
+			--uclearn-column-count: 6;
+		}
+
+		/* .col-md-auto {
+			flex: 0 0 auto;
+			width: auto;
+			max-width: 100%
+		} */
+
+		.col-md-1 {
+			flex: 1 0 0;
+		}
+
+		.col-md-2 {
+			flex: 2 0 0;
+		}
+
+		.col-md-3 {
+			flex: 3 0 0;
+		}
+
+		.col-md-4 {
+			flex: 4 0 0;
+		}
+
+		.col-md-5 {
+			flex: 5 0 0;
+		}
+
+		.col-md-6 {
+			flex: 6 0 0;
+		}
+
+		.col-md-7 {
+			flex: 7 0 0;
+		}
+
+		.col-md-8 {
+			flex: 8 0 0;
+		}
+
+		.col-md-9 {
+			flex: 9 0 0;
+		}
+
+		.col-md-10 {
+			flex: 10 0 0;
+		}
+
+		.col-md-11 {
+			flex: 11 0 0;
+		}
+
+		.col-md-12 {
+			flex: 12 0 0;
+		}
+	}
+
+	@media (min-width: 992px) {
+		/* .col-lg {
+			flex-basis: 0%;
+			flex-grow: 1;
+			max-width: 100%
+		} */
+
+		.row-cols-lg-1 {
+			--uclearn-column-count: 1;
+		}
+
+		.row-cols-lg-2 {
+			--uclearn-column-count: 2;
+		}
+
+		.row-cols-lg-3 {
+			--uclearn-column-count: 3;
+		}
+
+		.row-cols-lg-4 {
+			--uclearn-column-count: 4;
+		}
+
+		.row-cols-lg-5 {
+			--uclearn-column-count: 5;
+		}
+
+		.row-cols-lg-6 {
+			--uclearn-column-count: 6;
+		}
+
+		/* .col-lg-auto {
+			flex: 0 0 auto;
+			width: auto;
+			max-width: 100%
+		} */
+
+		.col-lg-1 {
+			flex: 1 0 0;
+		}
+
+		.col-lg-2 {
+			flex: 2 0 0;
+		}
+
+		.col-lg-3 {
+			flex: 3 0 0;
+		}
+
+		.col-lg-4 {
+			flex: 4 0 0;
+		}
+
+		.col-lg-5 {
+			flex: 5 0 0;
+		}
+
+		.col-lg-6 {
+			flex: 6 0 0;
+		}
+
+		.col-lg-7 {
+			flex: 7 0 0;
+		}
+
+		.col-lg-8 {
+			flex: 8 0 0;
+		}
+
+		.col-lg-9 {
+			flex: 9 0 0;
+		}
+
+		.col-lg-10 {
+			flex: 10 0 0;
+		}
+
+		.col-lg-11 {
+			flex: 11 0 0;
+		}
+
+		.col-lg-12 {
+			flex: 12 0 0;
+		}
+	}
+
+	@media (min-width: 1200px) {
+		/* .col-xl {
+			flex-basis: 0%;
+			flex-grow: 1;
+			max-width: 100%
+		} */
+
+		.row-cols-xl-1 {
+			--uclearn-column-count: 1;
+		}
+
+		.row-cols-xl-2 {
+			--uclearn-column-count: 2;
+		}
+
+		.row-cols-xl-3 {
+			--uclearn-column-count: 3;
+		}
+
+		.row-cols-xl-4 {
+			--uclearn-column-count: 4;
+		}
+
+		.row-cols-xl-5 {
+			--uclearn-column-count: 5;
+		}
+
+		.row-cols-xl-6 {
+			--uclearn-column-count: 6;
+		}
+
+		/* .col-xl-auto {
+			flex: 0 0 auto;
+			width: auto;
+			max-width: 100%
+		} */
+
+		.col-xl-1 {
+			flex: 1 0 0;
+		}
+
+		.col-xl-2 {
+			flex: 2 0 0;
+		}
+
+		.col-xl-3 {
+			flex: 3 0 0;
+		}
+
+		.col-xl-4 {
+			flex: 4 0 0;
+		}
+
+		.col-xl-5 {
+			flex: 5 0 0;
+		}
+
+		.col-xl-6 {
+			flex: 6 0 0;
+		}
+
+		.col-xl-7 {
+			flex: 7 0 0;
+		}
+
+		.col-xl-8 {
+			flex: 8 0 0;
+		}
+
+		.col-xl-9 {
+			flex: 9 0 0;
+		}
+
+		.col-xl-10 {
+			flex: 10 0 0;
+		}
+
+		.col-xl-11 {
+			flex: 11 0 0;
+		}
+
+		.col-xl-12 {
+			flex: 12 0 0;
+		}
+	}
+
+	.nav-search {
+		max-width: 400px;
+		margin-left: 0.5rem;
+	}
+
+	.btn,
+	.aabtn,
+	.btn-link,
+	.nav-link,
+	.editor_atto_toolbar button,
+	.editor_atto_toolbar .atto_toolbar_row,
+	[role="button"],
+	.list-group-item-action,
+	input[type="checkbox"],
+	input[type="radio"],
+	input[type="file"],
+	input[type="image"],
+	.sr-only-focusable,
+	a.dropdown-toggle,
+	.moodle-dialogue-base .closebutton,
+	button.btn-close,
+	.form-autocomplete-selection,
+	[role="treeitem"]:not([aria-expanded="true"]) {
+		transition: box-shadow var(--uclearn-transition-short);
+		box-shadow: none;
+
+		&:is(:focus-visible, .focus) {
+			box-shadow: var(--uclearn-focus-shadow);
+		}
+	}
+
+	body {
+		color: var(--uclearn-foreground);
+		background-color: transparent;
+		height: 100%;
+	}
+
+	.bg-white, .bg-light {
+		background-color: transparent !important;
+	}
+
+	#page.drawers .drawer-right-toggle {
+		margin-right: 0;
+	}
+
+	.card,
+	.drawer-toggler .btn,
+	.section-item,
+	.card-dropdown .dropdown-menu,
+	.multiblock-tabbed-list .nav-link,
+	.dropdown .btn {
+		border: none;
+	}
+
+	.card-block-wrapper {
+		gap: 10px;
+
+		.card-block {
+			margin: 0;
+		}
+	}
+
+	.card-dropdown .dropdown-menu {
+		padding: 10px;
+	}
+
+	.btn,
+	.dropdown-menu,
+	.dropdown-item,
+	.form-control,
+	.popover-body,
+	.custom-select,
+	.course-section .sectionname>a,
+	.yui3-button,
+	.table,
+	.generaltable,
+	.generaltable tr,
+	.toggle-category i,
+	.courseindex-link,
+	.courseindex-chevron,
+	.coderunner-test-results,
+	.block-cards .categoryname {
+		color: inherit;
+	}
+
+	.carousel-item {
+		outline: none;
+	}
+
+	.dropdown-menu {
+		padding: 0;
+	}
+
+	.dropdown-menu:not(:has(.dropdown-item:is([aria-current="true"], [aria-selected="true"]))) .dropdown-item {
+		padding-inline: 0.75rem;
+	}
+
+	.dropdown-divider,
+	.course-section {
+		margin: 0;
+	}
+
+	section.block,
+	.multiblock {
+		margin: 0 !important;
+	}
+
+	.generaltable .sticky-column,
+	.generaltable tr,
+	.navigation,
+	#region-main,
+	.message-app,
+	.list-group-item,
+	.popover-header,
+	.overlay-icon-container,
+	.drawer {
+		background-color: transparent;
+	}
+
+	.popover-header {
+		border-color: currentColor;
+	}
+
+	#page .main-inner {
+		background-color: transparent;
+		padding: 15px 0;
+	}
+
+	.nav-tabs .nav-link.active,
+	.nav-tabs .nav-item.show .nav-link,
+	.list-group-item-action,
+	.text-dark,
+	.dimmed_text,
+	pre,
+	.text-muted {
+		color: var(--uclearn-foreground-muted) !important;
+	}
+
+	.secondary-navigation .moremenu .nav-link {
+		padding-bottom: calc(0.5rem - 3px);
+	}
+
+	.multiblock-tabbed-list .nav-tabs {
+		flex-wrap: nowrap;
+		overflow: auto hidden;
+		white-space: nowrap;
+		scrollbar-width: thin;
+		scrollbar-color: var(--uclearn-foreground-muted) transparent;
+		margin-top: -0.5rem;
+		padding-top: 0.5rem;
+		margin-inline: -10px;
+		padding-inline: 10px;
+		mask-image: linear-gradient(to right, transparent 0%, white 10px calc(100% - 10px), transparent 100%);
+	}
+
+	tr.spacer {
+		height: 0;
+	}
+
+	.block_multiblock:has(.multiblock):not(:has(.multiblock .row>*)) {
+		display: none;
+	}
+}

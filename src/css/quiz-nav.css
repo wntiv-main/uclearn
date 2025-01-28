@@ -1,0 +1,120 @@
+:root:root:root:root:root:root:root:root {
+	.path-mod-quiz #mod_quiz_navblock {
+		.mod_quiz-section-heading {
+			font-weight: normal;
+			font-size: 1.15rem;
+			letter-spacing: 0.5px;
+			margin-bottom: 0.2rem;
+			border-bottom: 1px solid currentColor;
+		}
+
+		.qnbutton {
+			margin-right: 0;
+			border-radius: var(--uclearn-radius);
+			background-color: transparent;
+			height: auto;
+			padding-block: calc(var(--uclearn-radius) / 2);
+			overflow: hidden;
+			color: inherit !important;
+			text-shadow: 1px 1px 6px var(--uclearn-shadow-color);
+
+			.thispageholder {
+				border: none;
+			}
+
+			&:is(:hover, :focus-visible) {
+				background-color: var(--uclearn-hover-tint);
+
+				& .trafficlight {
+					background-position: 50% 105%;
+				}
+			}
+
+			&:active {
+				background-color: var(--uclearn-active-tint);
+			}
+
+			&.thispage {
+				.thispageholder {
+					border: 2px solid var(--uclearn-color-complete);
+					border-radius: var(--uclearn-radius);
+					width: 100%;
+					height: 100%;
+				}
+
+				&+& .thispageholder {
+					border-left: none;
+				}
+
+				&:has(+ &) .thispageholder {
+					border-right: none;
+				}
+			}
+
+			&+& {
+				border-top-left-radius: 0;
+				border-bottom-left-radius: 0;
+
+				.thispageholder {
+					border-top-left-radius: 0;
+					border-bottom-left-radius: 0;
+				}
+			}
+
+			&:has(+ &) {
+				border-top-right-radius: 0;
+				border-bottom-right-radius: 0;
+
+				.thispageholder {
+					border-top-right-radius: 0;
+					border-bottom-right-radius: 0;
+				}
+			}
+
+			.trafficlight {
+				--uclearn-accent-bg: var(--uclearn-background);
+				margin-top: 0;
+				background-color: color-mix(in hsl,
+						color-mix(in hsl,
+							var(--uclearn-accent-bg) 60%,
+							var(--uclearn-background) 40%),
+						transparent 50%) !important;
+				background-position: 50% 75%;
+				width: 100%;
+				height: 100%;
+				border-radius: 0;
+				z-index: -1;
+				transition:
+					color 0.15s ease-in-out,
+					background-color 0.15s ease-in-out,
+					border-color 0.15s ease-in-out,
+					box-shadow 0.15s ease-in-out,
+					background-position 0.15s ease-in-out;
+			}
+
+			&.notyetanswered .trafficlight {
+				--uclearn-accent-bg: var(--uclearn-background);
+			}
+
+			&.complete .trafficlight,
+			&.answersaved .trafficlight,
+			&.requiresgrading .trafficlight {
+				--uclearn-accent-bg: var(--uclearn-color-complete);
+			}
+
+			&.correct .trafficlight {
+				--uclearn-accent-bg: var(--uclearn-color-success);
+			}
+
+			&.partiallycorrect .trafficlight,
+			&.invalidanswer .trafficlight {
+				--uclearn-accent-bg: var(--uclearn-color-warning);
+			}
+
+			&.notanswered .trafficlight,
+			&.incorrect .trafficlight {
+				--uclearn-accent-bg: var(--uclearn-color-error);
+			}
+		}
+	}
+}
