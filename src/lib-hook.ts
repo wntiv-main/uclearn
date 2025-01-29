@@ -54,7 +54,7 @@ declare global {
 	interface Window {
 		YUI?: YUI;
 		Y?: YUI;
-		M?: object & unknown;
+		M?: object & unknown & { cfg?: { courseId: number; }; };
 	}
 }
 

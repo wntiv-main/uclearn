@@ -6,6 +6,7 @@ import type MathJax from 'mathjax';
 // import { initField } from './mathquill-loader';
 import { assertNever, compareClasses, isElement, update } from './util';
 import { DOMInspector } from './dominspect';
+import type { YUI } from 'yui';
 
 let vjs: typeof VideoJS;
 
@@ -199,6 +200,7 @@ async function mathJaxReady() {
 const SAFE_ATTRS = /^id$|^class$|^data-uclearn/;
 
 type Hydration = {
+	config: { needsCourseIndexRefresh?: boolean; };
 	tasks: ({ debug?: boolean; } & ({
 		type: 'setAttr',
 		element: Element,
@@ -356,7 +358,7 @@ async function calculateChanges(state: Hydration, dom: Element, updated: Element
 			if (left.classes.contains('questionflag')) continue;
 			if (left.classes.contains('video-js')) continue;
 			if (left.id.startsWith('stack-iframe-holder-')) continue;
-			// if (left.id.includes('drawers-courseindex')) continue;
+			if (!state.config.needsCourseIndexRefresh && left.id.includes('drawers-courseindex')) continue;
 			await calculateChanges(state, left.node, right.node as Element);
 			if (left.classes.contains('filter_mathjaxloader_equation')) {
 				state.math.push(left.node);
@@ -367,9 +369,10 @@ async function calculateChanges(state: Hydration, dom: Element, updated: Element
 
 const inspectors: Map<Element, DOMInspector> = new Map();
 
-async function hydrate(dom: Element, updated: Element, nameHint: string) {
+async function hydrate(dom: Element, updated: Element, nameHint: string, config: Hydration['config']) {
 	console.log('hydrating', dom, updated);
 	const state: Hydration = {
+		config,
 		// inputs: [],
 		math: [],
 		matrixInputs: [],
@@ -616,15 +619,17 @@ async function hydrateFromResponse(resp: Response, hydrationHints: string[] = []
 	console.log(updated);
 	const startTime = performance.now();
 	console.time('hydration');
+	let needsCourseIndexRefresh = false;
 	for (const script of updated.body.querySelectorAll('script')) {
 		if (!/^\s*(\/\/.*)?\s*var\s*M/.test(script.text)) continue;
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		const oldConfig = (window as any).YUI_config;
 		// Eval script
-		const [M, YUI_config] = new Function(`${script.text};return [M, YUI_config];`)();
+		const [M, YUI_config]: [typeof window.M, Parameters<YUI['applyConfig']>[0]] = new Function(`${script.text};return [M, YUI_config];`)();
 		(await getYUIInstance()).applyConfig(YUI_config);
 		console.log('updated YUI config to', YUI_config, 'from', oldConfig);
-		console.log('updated Moodle state with', M, 'from', window.M);
+		console.log('updated Moodle state with', M, 'from', update({ cfg: {} }, window.M));
+		needsCourseIndexRefresh ||= window.M?.cfg?.courseId !== M?.cfg?.courseId;
 		window.M = update(window.M ?? {}, M);
 		break;
 	}
@@ -644,7 +649,7 @@ async function hydrateFromResponse(resp: Response, hydrationHints: string[] = []
 	}
 	// biome-ignore lint/style/noNonNullAssertion: <explanation>
 	if (!elPairs.length) elPairs.push([':root', document.getElementById("page-wrapper")!, updated.getElementById("page-wrapper")!]);
-	for (const [name, left, right] of elPairs) await hydrate(left, right, name);
+	for (const [name, left, right] of elPairs) await hydrate(left, right, name, { needsCourseIndexRefresh });
 	console.timeEnd('hydration');
 	(await Toast).add(`Hydration in ${((performance.now() - startTime) / 1000).toFixed(2)}s`, { type: 'success' });
 }

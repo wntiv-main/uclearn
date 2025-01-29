@@ -76,6 +76,11 @@
 			box-shadow: none;
 			padding-top: 10px;
 			overflow: visible;
+			pointer-events: none;
+
+			>* {
+				pointer-events: all;
+			}
 		}
 	}
 

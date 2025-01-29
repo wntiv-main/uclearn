@@ -611,6 +611,10 @@
 }
 
 :root:root:root:root:root:root:root:root {
+  & .toast-wrapper {
+    max-width: none;
+  }
+
   & .toast {
     --uclearn-accent-color: transparent;
     backdrop-filter: var(--uclearn-bg-effect);
@@ -618,6 +622,13 @@
     color: color-mix(in srgb, var(--uclearn-accent-color) 20%, currentColor);
     border: 1px solid color-mix(in srgb, var(--uclearn-accent-color) 50%, var(--uclearn-translucent-bg));
     border-radius: var(--uclearn-radius);
+    min-width: min-content;
+
+    & .toast-header {
+      color: inherit;
+      border-color: currentColor;
+      font-weight: bold;
+    }
 
     &.toast-success {
       --uclearn-accent-color: var(--uclearn-color-success);
@@ -1345,11 +1356,16 @@
     & .drawerheader {
       height: auto;
       box-shadow: none;
+      pointer-events: none;
       grid-row: a / b;
       padding-top: 10px;
       position: sticky;
       top: 0;
       overflow: visible;
+
+      & > * {
+        pointer-events: all;
+      }
     }
   }
 

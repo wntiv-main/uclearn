@@ -27,10 +27,12 @@ export function maybeUnwrap<T>(arg: T): MaybeUnwrap<T> {
 	return Array.isArray(arg) && arg.length === 1 ? arg[0] : arg as MaybeUnwrap<T>;
 }
 
-export function update<T extends Partial<U>, U extends Partial<T>>(obj: U, addons: T): U & T {
+export function update<T extends object, U>(obj: T, addons: U): T & U {
+	const _obj = obj as Partial<U>;
 	for (const k in addons) {
-		if (typeof obj[k] === 'object' && typeof addons[k] === 'object' && obj[k] !== null && addons[k] !== null) obj[k] = update(obj[k], addons[k]);
-		else obj[k] = (addons as U & T)[k];
+		if (typeof _obj[k] === 'object' && typeof addons[k] === 'object' && _obj[k] !== null && addons[k] !== null)
+			_obj[k] = update(_obj[k], addons[k]);
+		else _obj[k] = (addons as U & T)[k];
 	}
 	return obj as U & T;
 }
