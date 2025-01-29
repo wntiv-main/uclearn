@@ -209,7 +209,8 @@
 			rotate: 0deg;
 			transition: rotate var(--uclearn-transition-short);
 
-			:not([aria-expanded="true"])>& {
+			[aria-expanded="false"]>&.collapsed,
+			.collapsed>& {
 				position: absolute;
 				visibility: hidden;
 				rotate: -90deg;
@@ -221,7 +222,8 @@
 			rotate: 0deg;
 			transition: rotate var(--uclearn-transition-short);
 
-			[aria-expanded="true"]>& {
+			:not([aria-expanded="false"])>&.expanded,
+			:not(.collapsed)>&:not(.expanded) {
 				position: absolute;
 				visibility: hidden;
 				rotate: 90deg;

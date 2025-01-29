@@ -962,7 +962,7 @@
       display: inline-block;
       rotate: none;
 
-      :not([aria-expanded="true"]) > & {
+      [aria-expanded="false"] > &.collapsed, .collapsed > & {
         visibility: hidden;
         position: absolute;
         rotate: -90deg;
@@ -974,7 +974,7 @@
       display: inline-block;
       rotate: none;
 
-      [aria-expanded="true"] > & {
+      :not([aria-expanded="false"]) > &.expanded, :not(.collapsed) > &:not(.expanded) {
         visibility: hidden;
         position: absolute;
         rotate: 90deg;
