@@ -600,30 +600,25 @@ async function hydrate(dom: Element, updated: Element, nameHint: string, config:
 const parser = new DOMParser();
 let matrixInputCallback: (inputs: Element[]) => void;
 async function hydrateFromResponse(resp: Response, hydrationHints: string[] = []) {
-	if (!(resp instanceof Response)) return;
+	const startTime = performance.now();
+	console.time('hydration-parsing');
 	const contentType = resp.headers.get("Content-Type")?.split(";")[0] ?? 'text/html';
-	if (contentType !== "text/html"
-		&& contentType !== "text/xml"
-		&& contentType !== "application/xml"
-		&& contentType !== "application/xhtml+xml"
-		&& contentType !== "image/svg+xml") {
+	if (!contentType.includes("html")) {
+		// We shoudln't handle this, load page normally
 		location.replace(resp.url);
 		return; // needed for typescript
 	}
 	const updated = parser.parseFromString(
 		await resp.text(),
-		contentType,
+		contentType as DOMParserSupportedType,
 	);
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	if (new URL(resp.url).pathname !== location.pathname) (window as any).setupDone = false;
 	console.log(updated);
-	const startTime = performance.now();
-	console.time('hydration');
 	let needsCourseIndexRefresh = false;
-	for (const script of updated.body.querySelectorAll('script')) {
+	for (const script of updated.querySelectorAll('script')) {
 		if (!/^\s*(\/\/.*)?\s*var\s*M/.test(script.text)) continue;
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		const oldConfig = (window as any).YUI_config;
+		const oldConfig = window.YUI_config;
 		// Eval script
 		const [M, YUI_config]: [typeof window.M, Parameters<YUI['applyConfig']>[0]] = new Function(`${script.text};return [M, YUI_config];`)();
 		(await getYUIInstance()).applyConfig(YUI_config);
@@ -633,6 +628,8 @@ async function hydrateFromResponse(resp: Response, hydrationHints: string[] = []
 		window.M = update(window.M ?? {}, M);
 		break;
 	}
+	console.timeEnd('hydration-parsing');
+	console.time('hydration');
 	const elPairs: [string, HTMLElement, HTMLElement][] = [];
 	for (const selector of hydrationHints) {
 		const current = document.querySelectorAll(selector);

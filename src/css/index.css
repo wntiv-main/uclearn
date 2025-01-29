@@ -35,6 +35,10 @@
 		color-scheme: light;
 	}
 
+	&:has(>#page-login-index) {
+		display: grid;
+	}
+
 	img[src^="https://learn.canterbury.ac.nz/pix/"] {
 		filter: var(--uclearn-translucent-filter);
 	}

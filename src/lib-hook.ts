@@ -53,6 +53,7 @@ export function hookYUI(callback: (Y: YUI) => boolean | void) {
 declare global {
 	interface Window {
 		YUI?: YUI;
+		YUI_config?: Parameters<YUI['applyConfig']>[0];
 		Y?: YUI;
 		M?: object & unknown & { cfg?: { courseId: number; }; };
 	}
