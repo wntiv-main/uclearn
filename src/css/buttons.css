@@ -200,4 +200,32 @@
 			}
 		}
 	}
+
+	/* Cheverons */
+
+	.toggle-category, .icons-collapse-expand {
+		.collapsed, .expanded-icon {
+			display: inline-block;
+			rotate: 0deg;
+			transition: rotate var(--uclearn-transition-short);
+
+			:not([aria-expanded="true"])>& {
+				position: absolute;
+				visibility: hidden;
+				rotate: -90deg;
+			}
+		}
+
+		.expanded, .collapsed-icon {
+			display: inline-block;
+			rotate: 0deg;
+			transition: rotate var(--uclearn-transition-short);
+
+			[aria-expanded="true"]>& {
+				position: absolute;
+				visibility: hidden;
+				rotate: 90deg;
+			}
+		}
+	}
 }

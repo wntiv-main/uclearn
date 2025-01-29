@@ -12,6 +12,7 @@
 		padding-block: 0.5rem;
 		box-sizing: content-box;
 		width: auto !important;
+		overflow: clip;
 	}
 
 	.ace_indent-guide {
@@ -195,5 +196,9 @@
 	.sortable-code ul {
 		border-radius: var(--uclearn-radius);
 		padding: calc(var(--uclearn-radius) / 2);
+	}
+
+	[id*="_answer_run-output-text"] {
+		background-color: transparent;
 	}
 }

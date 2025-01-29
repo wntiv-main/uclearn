@@ -49,7 +49,6 @@ export class DOMInspector {
 
 	static #nodesEqual(left: Node, right: Node) {
 		if (DOMInspector.#isElement(left) && DOMInspector.#isElement(right)) {
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
 			const dist = (left as HTMLElement).innerText === (right as HTMLElement).innerText ? 0 : 1;//[...zip([...(left as HTMLElement).innerText], [...(right as HTMLElement).innerText])].reduce((a, b) => a + (b[0] === b[1] ? 0 : 1), 0);//LevenshteinDistance([...left.textContent!], [...right.textContent!], (a, b) => a === b);
 			return (left.tagName === right.tagName && compareClasses(left.classList, right.classList) ? 1 : 0)
 				- dist * 0.5 / Math.max((left as HTMLElement).innerText.length, (right as HTMLElement).innerText.length);
@@ -195,7 +194,7 @@ export class DOMInspector {
 			// biome-ignore lint/style/noNonNullAssertion: <explanation>
 			const hjsCss = win.document.createElement('link')!;
 			hjsCss.rel = 'stylesheet';
-			hjsCss.href = `${EXT_URL}/highlightjs/vs2015.css`;
+			hjsCss.href = `${EXT_URL}/highlight.	js/styles/vs2015.css`;
 			win.document.head.append(css, hjsCss);
 			win.addEventListener('beforeunload', () => {
 				this.#rootNode = document.adoptNode(this.#rootNode);
@@ -308,7 +307,11 @@ export class DOMInspector {
 			}
 		}
 		this.#tags.clear();
-		for (const added of this.#rootNode.querySelectorAll(":scope :is(.hydrate-inserted, .hydrate-unchanged)")) {
+		for (const added of [
+			...this.#rootNode.querySelectorAll(
+				":scope :is(.hydrate-inserted, .hydrate-unchanged)",
+			),
+		]) {
 			added.classList.remove('hydrate-inserted', 'hydrate-unchanged');
 			if (!added.classList.length && !added.id) added.replaceWith(...added.childNodes);
 		}

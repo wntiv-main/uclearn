@@ -1,4 +1,4 @@
-:root {
+:root:root:root:root:root:root:root:root {
   --uclearn-filters-src: "chrome-extension://__MSG_@@extension_id__/filters.svg";
   --uclearn-translucent-filter: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxmaWx0ZXIgaWQ9ImdyYXBoVHJhbnNsdWNlbnQiPjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VHcmFwaGljIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwCjAgMSAwIDAgMAowIDAgMSAwIDAKLTIgLTEgMCAyIDAiPjwvZmVDb2xvck1hdHJpeD48L2ZpbHRlcj48L3N2Zz4=#graphTranslucent");
   --uclearn-small-screen-size: var(--breakpoint-lg, 992px);
@@ -472,7 +472,7 @@
     padding-inline: .75rem;
   }
 
-  & .dropdown-divider, & .course-section {
+  & .dropdown-divider, & .dropdown-menu, & .course-section {
     margin: 0;
   }
 
@@ -611,6 +611,31 @@
 }
 
 :root:root:root:root:root:root:root:root {
+  & .toast {
+    --uclearn-accent-color: transparent;
+    backdrop-filter: var(--uclearn-bg-effect);
+    background-color: color-mix(in srgb, var(--uclearn-accent-color) 20%, var(--uclearn-translucent-bg));
+    color: color-mix(in srgb, var(--uclearn-accent-color) 20%, currentColor);
+    border: 1px solid color-mix(in srgb, var(--uclearn-accent-color) 50%, var(--uclearn-translucent-bg));
+    border-radius: var(--uclearn-radius);
+
+    &.toast-success {
+      --uclearn-accent-color: var(--uclearn-color-success);
+    }
+
+    &.toast-warning {
+      --uclearn-accent-color: var(--uclearn-color-warning);
+    }
+
+    &.toast-danger {
+      --uclearn-accent-color: var(--uclearn-color-error);
+    }
+
+    &.toast-info {
+      --uclearn-accent-color: var(--uclearn-color-complete);
+    }
+  }
+
   & .moodle-dialogue-base {
     border-radius: 1rem;
 
@@ -751,32 +776,6 @@
       &:has( + .dropdown-divider) {
         clip-path: inset(0 0 -.5rem);
         box-shadow: 0 0 .5rem .25rem #0f6cbf;
-      }
-    }
-  }
-
-  & .toggle-category, & .icons-collapse-expand {
-    & .collapsed, & .expanded-icon {
-      transition: rotate var(--uclearn-transition-short);
-      display: inline-block;
-      rotate: none;
-
-      [aria-expanded="false"] > & {
-        visibility: hidden;
-        position: absolute;
-        rotate: -90deg;
-      }
-    }
-
-    & .expanded, & .collapsed-icon {
-      transition: rotate var(--uclearn-transition-short);
-      display: inline-block;
-      rotate: none;
-
-      [aria-expanded="true"] > & {
-        visibility: hidden;
-        position: absolute;
-        rotate: 90deg;
       }
     }
   }
@@ -942,6 +941,32 @@
           --uclearn-shadow-color: transparent;
           border-radius: 0;
         }
+      }
+    }
+  }
+
+  & .toggle-category, & .icons-collapse-expand {
+    & .collapsed, & .expanded-icon {
+      transition: rotate var(--uclearn-transition-short);
+      display: inline-block;
+      rotate: none;
+
+      :not([aria-expanded="true"]) > & {
+        visibility: hidden;
+        position: absolute;
+        rotate: -90deg;
+      }
+    }
+
+    & .expanded, & .collapsed-icon {
+      transition: rotate var(--uclearn-transition-short);
+      display: inline-block;
+      rotate: none;
+
+      [aria-expanded="true"] > & {
+        visibility: hidden;
+        position: absolute;
+        rotate: 90deg;
       }
     }
   }
@@ -1873,6 +1898,7 @@
     border-radius: var(--uclearn-radius);
     box-sizing: content-box;
     padding-block: .5rem;
+    overflow: clip;
     width: auto !important;
   }
 
@@ -2001,6 +2027,10 @@
     border-radius: var(--uclearn-radius);
     padding: calc(var(--uclearn-radius) / 2);
   }
+
+  & [id*="_answer_run-output-text"] {
+    background-color: #0000;
+  }
 }
 
 :root:root:root:root:root:root:root:root {
@@ -2111,14 +2141,37 @@
   }
 }
 
+#uclearn-inspectors-list {
+  background-color: var(--uclearn-translucent-bg);
+  padding: var(--uclearn-radius);
+  border-top-left-radius: var(--uclearn-radius);
+  z-index: 9999;
+  border-top: 1px solid;
+  border-left: 1px solid;
+  width: fit-content;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+}
+
 :root:root:root:root:root:root:root:root {
   background-image: linear-gradient(0deg, var(--uclearn-translucent-bg), var(--uclearn-translucent-bg)), var(--uclearn-bg-url);
   background-position: center;
   background-size: cover;
   background-attachment: fixed;
 
+  @media (prefers-color-scheme: dark) {
+    & {
+      color-scheme: dark;
+    }
+  }
+
   &.uclearn-dark-mode {
     color-scheme: dark;
+  }
+
+  &.uclearn-light-mode {
+    color-scheme: light;
   }
 
   & img[src^="https://learn.canterbury.ac.nz/pix/"] {

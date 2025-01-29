@@ -31,7 +31,7 @@
 			]
 		},
 		{
-			"resources": ["inspector.css", "highlightjs/*.css"],
+			"resources": ["inspector.css", "highlight.js/styles/*.css"],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
 				"*://preuc.canterbury.ac.nz/*"

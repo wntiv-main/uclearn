@@ -11,6 +11,7 @@
 @import 'message-app.css';
 @import 'code.css';
 @import 'quiz-nav.css';
+@import 'injected.css';
 
 :root:root:root:root:root:root:root:root {
 
@@ -20,8 +21,18 @@
 	background-position: center;
 
 	/* Theme */
+	@media (prefers-color-scheme: dark) {
+		& {
+			color-scheme: dark;
+		}
+	}
+
 	&.uclearn-dark-mode {
 		color-scheme: dark;
+	}
+
+	&.uclearn-light-mode {
+		color-scheme: light;
 	}
 
 	img[src^="https://learn.canterbury.ac.nz/pix/"] {

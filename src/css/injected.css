@@ -1,0 +1,12 @@
+#uclearn-inspectors-list {
+	background-color: var(--uclearn-translucent-bg);
+	padding: var(--uclearn-radius);
+	border-top-left-radius: var(--uclearn-radius);
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	width: fit-content;
+	z-index: 9999;
+	border-top: 1px solid currentColor;
+	border-left: 1px solid currentColor;
+}
