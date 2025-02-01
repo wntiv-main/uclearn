@@ -1,4 +1,7 @@
 :root:root:root:root:root:root:root:root {
+	pre {
+		margin-block: 0.2rem;
+	}
 
 	.ace-tm {
 		background-color: transparent;
@@ -199,6 +202,14 @@
 	}
 
 	[id*="_answer_run-output-text"] {
-		background-color: transparent;
+		background-color: transparent !important;
+	}
+
+	.coderunner-test-results [style*="background"] {
+		background-color: transparent !important;
+	}
+
+	pre, code {
+		user-select: all;
 	}
 }

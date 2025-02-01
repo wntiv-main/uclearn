@@ -60,6 +60,28 @@
 		}
 	}
 
+	:is(.subcategories, #frontpage-category-names, #frontpage-category-combo) .coursebox>.info>.coursename a,
+	.course_category_tree .category.with_children>.info>.categoryname {
+		background-size: 0;
+		background-position: -100vmax -100vmax;
+		position: relative;
+
+		&::before {
+			content: "";
+			position: absolute;
+			display: block;
+			height: 1.2em;
+			aspect-ratio: 1;
+			background-image: inherit;
+			background-size: contain;
+			background-position: center;
+			background-repeat: no-repeat;
+			left: 0;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+	}
+
 	@media (prefers-color-scheme: dark) {
 		img[src^="https://learn.canterbury.ac.nz/pix/"] {
 			filter: var(--uclearn-translucent-filter) invert(1) hue-rotate(180deg);
@@ -76,6 +98,11 @@
 		.block-timeline [data-region="no-events-empty-message"] img {
 			filter: brightness(0.3) contrast(1.5);
 			opacity: 0.5;
+		}
+
+		:is(.subcategories, #frontpage-category-names, #frontpage-category-combo) .coursebox>.info>.coursename a::before,
+		.course_category_tree .category.with_children>.info>.categoryname::before {
+			filter: invert(1) hue-rotate(180deg);
 		}
 	}
 

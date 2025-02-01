@@ -117,4 +117,19 @@
 			}
 		}
 	}
+
+	#quiz-timer-wrapper {
+		pointer-events: none;
+
+		>* {
+			pointer-events: all;
+		}
+
+		#quiz-timer {
+			background-color: var(--uclearn-translucent-bg);
+			border-radius: var(--uclearn-radius);
+			border: none;
+			align-content: center;
+		}
+	}
 }

@@ -1,5 +1,8 @@
+import { DEBUG, DEBUG_SCRIPTING } from "./global/constants";
+import { asyncTimeout } from "./global/util";
+import { Toast } from "./lib-hook";
 
-async function loadScript(script: HTMLScriptElement) {
+export async function loadScript(script: HTMLScriptElement) {
 	if (script.src) {
 		try {
 			const content = await (await fetch(script.src, {
@@ -15,30 +18,50 @@ async function loadScript(script: HTMLScriptElement) {
 	return script.text;
 }
 
-async function execScript(script: HTMLScriptElement, content: string) {
+export async function execScript(script: HTMLScriptElement, content: string) {
 	const newScript = document.createElement("script");
 	for (const attr of script.attributes) {
 		if ((attr.name === 'src' && content) || attr.name === 'async' || attr.name === 'defer') continue;
 		newScript.setAttribute(attr.name, attr.value);
 	}
-	if (content) {
-		newScript.text = content;
-		script.replaceWith(newScript);
-	} else {
-		return new Promise<void>(res => {
-			newScript.addEventListener('load', () => res());
+	if (DEBUG) newScript.addEventListener("error", async (e) => {
+		console.warn("Script failed to run:", e, newScript);
+		(await Toast).add('Script failed to run during hydration!', { type: 'danger' });
+	});
+	if (DEBUG_SCRIPTING) {
+		const scriptStartTime = performance.now();
+		if (content) {
+			newScript.text = content;
 			script.replaceWith(newScript);
-		});
+			await asyncTimeout(0);
+			console.log('Executed script', newScript, 'in', performance.now() - scriptStartTime, 'ms');
+		} else {
+			return new Promise<void>(res => {
+				newScript.addEventListener('load', () => res());
+				script.replaceWith(newScript);
+			}).then(() =>
+				console.log('Executed script', newScript, 'in', performance.now() - scriptStartTime, 'ms'));
+		}
+	} else {
+		if (content) {
+			newScript.text = content;
+			script.replaceWith(newScript);
+		} else {
+			return new Promise<void>(res => {
+				newScript.addEventListener('load', () => res());
+				script.replaceWith(newScript);
+			});
+		}
 	}
 }
 
 type ScriptAndContent = readonly [HTMLScriptElement, Promise<string>];
-export async function loadPage() {
-	const scripts: ScriptAndContent[] = [];
+export async function loadScripts(scripts: Iterable<HTMLScriptElement>) {
+	const inlineScripts: ScriptAndContent[] = [];
 	const asyncScripts: ScriptAndContent[] = [];
 	const deferScripts: ScriptAndContent[] = [];
 
-	for (const script of document.scripts) {
+	for (const script of scripts) {
 		if (script.id === "__uclearn_bootload_script_el") continue;
 		if (
 			(script.type && !/j(ava)?s(cript)?/i.test(script.type)) ||
@@ -49,10 +72,10 @@ export async function loadPage() {
 		const loadingScript = [script, loadScript(script)] satisfies ScriptAndContent;
 		if (script.async) asyncScripts.push(loadingScript);
 		else if (script.defer) deferScripts.push(loadingScript);
-		else scripts.push(loadingScript);
+		else inlineScripts.push(loadingScript);
 	}
 
-	for (const [script, content] of scripts) {
+	for (const [script, content] of inlineScripts) {
 		await execScript(script, await content);
 	}
 	const runningAsyncScripts = Promise.all(asyncScripts.map(async ([script, content]) => {
@@ -62,5 +85,6 @@ export async function loadPage() {
 		await execScript(script, await content);
 	}
 	await runningAsyncScripts;
-	return;
 }
+
+export const loadPage = async () => await loadScripts(document.scripts);

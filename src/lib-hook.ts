@@ -1,9 +1,10 @@
 import type { YUI } from "yui";
+import type Ace from 'ace-code';
 import type VideoJS from 'video.js';
-import type UCModalFactory from './ucinterfaces/ModalFactory';
+import type UCModalRegistry from './ucinterfaces/ModalRegistry';
 import type UCModalEvents from './ucinterfaces/ModalEvents';
 import type UCToast from './ucinterfaces/Toast';
-import { maybeUnwrap, type MapType, type MaybeUnwrap } from "./util";
+import { maybeUnwrap, type MapType, type MaybeUnwrap } from "./global/util";
 
 let _require_promise: Promise<Require>;
 export async function getRequire() {
@@ -25,11 +26,19 @@ export async function getRequire() {
 	);
 }
 
+type AceConfig = {
+	dark_theme_mode?: unknown;
+};
+
 type ModuleTypesMap = {
 	"media_videojs/video-lazy": typeof VideoJS;
-	"core/modal_factory": UCModalFactory;
+	"core/modal_registry": UCModalRegistry;
 	"core/modal_events": UCModalEvents;
 	"core/toast": UCToast;
+	"filter_ace_inline/ace_inline_code": {
+		initAceHighlighting(config: unknown & object): PromiseLike<void>;
+		initAceInteractive(config: unknown & { button_label: string; }): PromiseLike<void>;
+	};
 };
 
 export async function requireModule<T extends (keyof ModuleTypesMap)[]>(...deps: T) {
@@ -38,9 +47,9 @@ export async function requireModule<T extends (keyof ModuleTypesMap)[]>(...deps:
 }
 
 export const videoJS = requireModule('media_videojs/video-lazy');
-export const ModalFactory = requireModule('core/modal_factory');
-export const ModalEvents = requireModule('core/modal_events');
+export const modals = requireModule('core/modal_registry', 'core/modal_events');
 export const Toast = requireModule('core/toast');
+export const initAce = requireModule('filter_ace_inline/ace_inline_code');
 
 // biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
 let YUICallbacks: ((Y: YUI) => boolean | void)[] = [];
@@ -55,7 +64,9 @@ declare global {
 		YUI?: YUI;
 		YUI_config?: Parameters<YUI['applyConfig']>[0];
 		Y?: YUI;
-		M?: object & unknown & { cfg?: { courseId: number; }; };
+		ace?: typeof Ace;
+		aceInlineCodeHighlightingDone?: boolean;
+		aceInlineCodeInteractiveDone?: boolean;
 	}
 }
 

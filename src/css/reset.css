@@ -3,6 +3,10 @@
 		background-color: transparent;
 	}
 
+	[style*="background"] {
+		background-color: transparent !important;
+	}
+
 	/* * {
 		margin: 0 !important;
 		padding: 0 !important;
@@ -536,6 +540,10 @@
 	.coderunner-test-results,
 	.block-cards .categoryname {
 		color: inherit;
+	}
+
+	.moremenu {
+		opacity: 1;
 	}
 
 	.carousel-item {

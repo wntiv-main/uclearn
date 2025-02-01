@@ -22,7 +22,7 @@
 				"mathlive/dist/sounds/*",
 				"fonts/**/*.woff",
 				"filters.svg",
-				// "mathquill/mathquill.min.js",
+				"hydration-worker.js",
 				"index.js"
 			],
 			"matches": [

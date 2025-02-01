@@ -144,7 +144,7 @@ details>.text:not(.scripted)::before, details>.text:not(.scripted)::after {
 	content: '"';
 }
 
-:is(.hydrate-inserted, .hydrate-removed) {
+:is(.hydrate-inserted, .hydrate-removed, .hydrate-updated) {
 	--expand: calc(var(--radius) / 4);
 	background-color: var(--current-background);
 	box-shadow: 0 0 1px calc(var(--radius) / 4) var(--current-background);
@@ -153,6 +153,10 @@ details>.text:not(.scripted)::before, details>.text:not(.scripted)::after {
 
 .hydrate-inserted {
 	--current-background: color-mix(in srgb, var(--inserted-color) 20%, transparent 80%);
+}
+
+.hydrate-updated {
+	--current-background: color-mix(in srgb, var(--mutated-color) 20%, transparent 80%);
 }
 
 .hydrate-removed {

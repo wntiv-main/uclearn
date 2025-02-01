@@ -1,8 +1,9 @@
-import { initHydration } from "./hydration";
+import { initNavigator } from "./navigation";
 import { Toast } from "./lib-hook";
 import { loadPage } from "./page-loader";
+import { DEBUG } from "./global/constants";
 
-window.addEventListener("error", async (e) => {
+if (DEBUG) window.addEventListener("error", async (e) => {
 	(await Toast).add(e.message, { title: `ERROR in '${e.filename}':`, type: 'danger' });
 });
 
@@ -12,6 +13,11 @@ Object.defineProperty(window, "jQuery", {
 	get: () => _jQuery,
 	set(v) { _jQuery = v ?? _jQuery; }
 });
+let _$: unknown = undefined;
+Object.defineProperty(window, "$", {
+	get: () => _$,
+	set(v) { _$ = v ?? _$; }
+});
 
 loadPage();
-initHydration();
+initNavigator();

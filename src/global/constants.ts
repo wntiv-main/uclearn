@@ -9,8 +9,11 @@ declare global {
 	interface Window {
 		process: typeof process;
 	}
+	interface WorkerGlobalScope {
+		process: typeof process;
+	}
 }
-window.process = { env: {} };
+(typeof window !== 'undefined' ? window : self).process = { env: {} };
 
 export const DEBUG = !!+(process.env.UCLEARN_DEBUG ?? 0);
 const DEBUG_FLAGS = DEBUG ? (process.env.UCLEARN_DEBUG_FLAGS ?? "").toLowerCase().split(/,\s*/g).filter(x => x) : [];

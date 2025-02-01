@@ -43,6 +43,7 @@
 
 		.moodle-dialogue-wrap {
 			border: none;
+			border-radius: var(--uclearn-radius);
 		}
 	}
 

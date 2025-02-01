@@ -1,25 +1,14 @@
 import hljs from 'highlight.js/lib/core';
 import hjxml from 'highlight.js/lib/languages/xml';
 import hjjs from 'highlight.js/lib/languages/javascript';
-import { Hirschberg } from './hirschberg';
-import { compareClasses } from './util';
+import { Hirschberg } from './global/hirschberg';
+import { compareClasses } from './domutil';
 import { js_beautify } from 'js-beautify';
+import { EXT_URL } from './constants';
+import { zip } from './global/util';
 
 hljs.registerLanguage('xml', hjxml);
 hljs.registerLanguage('javascript', hjjs);
-
-const EXT_URL = new URL((document.getElementById("__uclearn_bootload_script_el") as HTMLScriptElement).src).origin;
-
-type Flatten<T> = T extends (infer U)[] ? U : never;
-type FlattenItems<T> = { [key in keyof T]: Flatten<T[key]> };
-
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-function* zip<T extends any[][]>(...arrays: T) {
-	const maxLength = arrays.reduce((max, curIterable) => curIterable.length > max ? curIterable.length : max, 0);
-	for (let i = 0; i < maxLength; i++) {
-		yield arrays.map(array => array[i]) as FlattenItems<T>;
-	}
-}
 
 export class DOMInspector {
 	static #window: WindowProxy | null = null;
@@ -55,7 +44,7 @@ export class DOMInspector {
 		}
 		if (DOMInspector.#isText(left) && DOMInspector.#isText(right)) {
 			// return left.data === right.data;
-			return [...zip([...left.data], [...right.data])].reduce((a, b) => a + (b[0] === b[1] ? 1 : 0), 0) / Math.max(left.data.length, right.data.length);
+			return [...zip(left.data, right.data)].reduce((a, b) => a + (b[0] === b[1] ? 1 : 0), 0) / Math.max(left.data.length, right.data.length);
 		}
 		return false;
 	}
@@ -91,6 +80,7 @@ export class DOMInspector {
 			}
 			if (old && updated && old.nodeType === updated.nodeType) {
 				if (DOMInspector.#isElement(old) && DOMInspector.#isElement(updated)) {
+					if (old.innerHTML === updated.innerHTML) continue;
 					DOMInspector.#hydrate(old, updated);
 				} else if (DOMInspector.#isText(old) && DOMInspector.#isText(updated)) {
 					DOMInspector.#hydrateText(old, updated);
@@ -100,54 +90,64 @@ export class DOMInspector {
 	}
 
 	static #hydrateText(old: Text, updated: Text) {
+		if (old.data === updated.data) return;
+		if (old.data.length + updated.data.length > 100) {
+			const wrapper = old.ownerDocument.createElement('span');
+			wrapper.classList.add('hydrate-updated');
+			wrapper.textContent = updated.data;
+			old.replaceWith(wrapper);
+			return;
+		}
 		const els = [];
 		let added = '';
 		let removed = '';
-		let unchanged = false;
+		let unchanged = '';
 		for (const [left, right] of zip(...Hirschberg([...old.data], [...updated.data]))) {
+			if (unchanged && left !== right) {
+				const wrapper = old.ownerDocument.createElement('span');
+				wrapper.classList.add('hydrate-unchanged');
+				wrapper.textContent = unchanged;
+				els.push(wrapper);
+				unchanged = '';
+			}
+			if (added && (right == null || left === right)) {
+				const wrapper = old.ownerDocument.createElement('span');
+				wrapper.classList.add('hydrate-inserted');
+				wrapper.textContent = added;
+				els.push(wrapper);
+				added = '';
+			}
+			if (removed && (left == null || left === right)) {
+				const wrapper = old.ownerDocument.createElement('span');
+				wrapper.classList.add('hydrate-removed');
+				wrapper.textContent = removed;
+				els.push(wrapper);
+				removed = '';
+			}
 			if (left && left === right) {
-				if (removed) {
-					const wrapper = old.ownerDocument.createElement('span');
-					wrapper.classList.add('hydrate-removed');
-					wrapper.textContent = removed;
-					els.push(wrapper);
-					removed = '';
-				}
-				if (added) {
-					const wrapper = old.ownerDocument.createElement('span');
-					wrapper.classList.add('hydrate-inserted');
-					wrapper.textContent = added;
-					els.push(wrapper);
-					added = '';
-				}
-				if (unchanged) {
-					els[els.length - 1].textContent += left;
-				} else {
-					const wrapper = old.ownerDocument.createElement('span');
-					wrapper.classList.add('hydrate-unchanged');
-					wrapper.textContent = left;
-					els.push(wrapper);
-					unchanged = true;
-				}
+				unchanged += left;
 			} else {
-				unchanged = false;
 				if (left) removed += left;
 				if (right) added += right;
 			}
 		}
-		if (removed) {
+		if (unchanged) {
 			const wrapper = old.ownerDocument.createElement('span');
-			wrapper.classList.add('hydrate-removed');
-			wrapper.textContent = removed;
+			wrapper.classList.add('hydrate-unchanged');
+			wrapper.textContent = unchanged;
 			els.push(wrapper);
-			removed = '';
 		}
 		if (added) {
 			const wrapper = old.ownerDocument.createElement('span');
 			wrapper.classList.add('hydrate-inserted');
 			wrapper.textContent = added;
 			els.push(wrapper);
-			added = '';
+		}
+		if (removed) {
+			const wrapper = old.ownerDocument.createElement('span');
+			wrapper.classList.add('hydrate-removed');
+			wrapper.textContent = removed;
+			els.push(wrapper);
 		}
 		old.replaceWith(...els);
 	}
@@ -185,16 +185,14 @@ export class DOMInspector {
 
 	open() {
 		DOMInspector.#window ??= (() => {
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			const win = window.open('about:blank', 'domInspector', 'popup=1')!;
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			const css = win.document.createElement('link')!;
+			const win = window.open('about:blank', 'domInspector', 'popup=1');
+			if (!win) throw new Error("Could not open popup window");
+			const css = win.document.createElement('link');
 			css.rel = 'stylesheet';
 			css.href = `${EXT_URL}/inspector.css`;
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			const hjsCss = win.document.createElement('link')!;
+			const hjsCss = win.document.createElement('link');
 			hjsCss.rel = 'stylesheet';
-			hjsCss.href = `${EXT_URL}/highlight.	js/styles/vs2015.css`;
+			hjsCss.href = `${EXT_URL}/highlight.js/styles/vs2015.css`;
 			win.document.head.append(css, hjsCss);
 			win.addEventListener('beforeunload', () => {
 				this.#rootNode = document.adoptNode(this.#rootNode);
@@ -265,7 +263,7 @@ export class DOMInspector {
 		const filter = document.createElement('input');
 		filter.classList.add('filter-input');
 		filter.addEventListener('input', () => {
-			for (const el of this.#rootNode.querySelectorAll('filter-selected')) {
+			for (const el of this.#rootNode.getElementsByClassName('filter-selected')) {
 				el.classList.remove('filter-selected');
 			}
 			if (!filter.value) return;
@@ -309,10 +307,10 @@ export class DOMInspector {
 		this.#tags.clear();
 		for (const added of [
 			...this.#rootNode.querySelectorAll(
-				":scope :is(.hydrate-inserted, .hydrate-unchanged)",
+				":scope :is(.hydrate-inserted, .hydrate-unchanged, .hydrate-updated)",
 			),
 		]) {
-			added.classList.remove('hydrate-inserted', 'hydrate-unchanged');
+			added.classList.remove('hydrate-inserted', 'hydrate-unchanged', 'hydrate-updated');
 			if (!added.classList.length && !added.id) added.replaceWith(...added.childNodes);
 		}
 		const toRemove = this.#rootNode.getElementsByClassName('hydrate-removed');

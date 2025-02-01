@@ -4,6 +4,7 @@ node_modules/
 bun.lockb
 # dev script builds script in here
 src/static/index.js
+src/static/hydration-worker.js
 src/static/index.css
 src/static/mathlive/
 src/static/highlight.js/

@@ -10,3 +10,12 @@
 	border-top: 1px solid currentColor;
 	border-left: 1px solid currentColor;
 }
+
+#uclearn-loading-progress {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	height: 10px;
+	background-color: var(--uclearn-accent-color);
+	z-index: 9999;
+}
