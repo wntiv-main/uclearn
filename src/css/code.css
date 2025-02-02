@@ -194,6 +194,23 @@
 	#page-question-type-coderunner .ui_wrapper,
 	.que.coderunner .ui_wrapper {
 		border: none !important;
+		overflow: visible !important;
+	}
+
+	[id$="_answer-code_wrapper"] {
+		background-color: var(--uclearn-translucent-bg) !important;
+		border-radius: var(--uclearn-radius);
+		padding-block: calc(var(--uclearn-radius) / 2);
+
+		>[style*="vscode"] {
+			padding-inline: calc(var(--uclearn-radius) / 2);
+		}
+
+		.monaco-editor {
+			outline: none;
+			--vscode-editor-background: transparent;
+			--vscode-editorGutter-background: transparent;
+		}
 	}
 
 	.sortable-code ul {
@@ -211,5 +228,9 @@
 
 	pre, code {
 		user-select: all;
+	}
+
+	.coderunner-answer:has(+[id$="answer_wrapper"]:not([style*="display: none"])) {
+		display: none;
 	}
 }

@@ -18,12 +18,12 @@
 		{
 			"resources": [
 				"background.png",
-				"mathlive/dist/fonts/*",
-				"mathlive/dist/sounds/*",
 				"fonts/**/*.woff",
 				"filters.svg",
 				"hydration-worker.js",
-				"index.js"
+				"monaco/*",
+				"pyright/*.js",
+				"built/*"
 			],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
@@ -31,7 +31,7 @@
 			]
 		},
 		{
-			"resources": ["inspector.css", "highlight.js/styles/*.css"],
+			"resources": ["inspector.css", "highlight.js/*.css"],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
 				"*://preuc.canterbury.ac.nz/*"
@@ -51,11 +51,7 @@
 				"*://learn.canterbury.ac.nz/*",
 				"*://preuc.canterbury.ac.nz/*"
 			],
-			"css": [
-				"index.css",
-				"mathlive/dist/mathlive-static.css",
-				"mathlive/dist/mathlive-fonts.css"
-			],
+			"css": ["index.css"],
 			"js": ["bootload.js"],
 			"run_at": "document_start"
 		}

@@ -26,7 +26,9 @@ function compare(a: HydrationNode, b: HydrationNode) {
 			if (a.tag !== (b as typeof a).tag
 				|| a.id !== (b as typeof a).id) return false;
 			if (a.elementType === HydrationElementType.SCRIPT
-				&& a.content !== (b as typeof a).content) return false;
+				&& a.content !== (b as typeof a).content
+				&& (a.attributes.get('src') !== (b as typeof a).attributes.get('src')
+					|| !a.attributes.has('src') || !(b as typeof a).attributes.has('src'))) return false;
 			return similarClasses(a.classes, (b as typeof a).classes);
 		}
 		case HydrationNodeType.TEXT: return a.content === (b as typeof a).content;
@@ -54,12 +56,12 @@ function updateNode(tasks: HydrationTasks, dom: HydrationElement, updated: Hydra
 			value: newClasses.join(' '),
 		});
 	}
-	if (updated.id && dom.id !== updated.id)
+	if (updated.rawId && dom.rawId !== updated.rawId)
 		tasks.push({
 			type: 'setAttr',
 			element: dom.nodeId,
 			attr: 'id',
-			value: updated.id,
+			value: updated.rawId,
 		});
 	for (const [name,] of dom.attributes) {
 		if (SAFE_ATTRS.test(name)) continue;
@@ -139,6 +141,8 @@ async function calculateChanges(id: HydrationId, config: WHydrationConfig, tasks
 		if (left != null && right != null && !replaced) {
 			// Update
 			if (left.type !== HydrationNodeType.ELEMENT || right.type !== HydrationNodeType.ELEMENT) return;
+			if (left.rawId && right.rawId && left.rawId !== right.rawId)
+				self.postMessage({ type: 'alias', id: right.rawId, alias: left.rawId });
 			if (left.elementType !== HydrationElementType.NORMAL) return;
 			if (left.classes.includes('questionflag')) return;
 			if (left.id.startsWith('stack-iframe-holder-')) return;

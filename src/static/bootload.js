@@ -17,20 +17,21 @@ const parser = new DOMParser();
 
 	const root = document.documentElement;
 
-	root.style.setProperty("--uclearn-bg-url",
-		`url("${chrome.runtime.getURL("background.png")}")`);
+	// root.style.setProperty("--uclearn-bg-url",
+	// 	`url("${chrome.runtime.getURL("background.png")}")`);
 
 	// root.classList.add("uclearn-dark-mode");
 
-	window.addEventListener("load", () => {
-		for(const el of document.querySelectorAll(".navbar-light")) {
-			el.classList.remove("navbar-light");
-		}
-	});
+	// window.addEventListener("load", () => {
+	// 	for(const el of document.querySelectorAll(".navbar-light")) {
+	// 		el.classList.remove("navbar-light");
+	// 	}
+	// });
 
 	const script = document.createElement("script");
 	script.id = "__uclearn_bootload_script_el";
-	script.src = chrome.runtime.getURL("index.js");
+	script.classList.add('__uclearn-skip-reload');
+	script.src = chrome.runtime.getURL("built/index.js");
 	script.type = "module";
 	root.prepend(script);
 })();

@@ -102,8 +102,9 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 			}
 		}
 	}
-	// biome-ignore lint/style/noNonNullAssertion: <explanation>
-	if (!elPairs.length) elPairs.push([':root', document.getElementById("page-wrapper")!, updated.getElementById("page-wrapper")!, {}]);
+	if (!elPairs.length) elPairs.push([':root',
+		document.getElementById('page-wrapper') ?? document.body,
+		updated.getElementById('page-wrapper') ?? updated.body, {}]);
 	for (const [name, left, right, config] of elPairs)
 		await hydrate(left, right, { nameHint: name, needsCourseIndexRefresh, onProgress, ...config });
 	console.timeEnd('hydration');

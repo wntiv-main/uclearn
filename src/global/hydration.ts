@@ -21,6 +21,7 @@ export type HydrationNode = { nodeId: number; } & (({
 	type: HydrationNodeType.ELEMENT;
 	tag: string;
 	id: string;
+	rawId: string;
 	classes: string[];
 	attributes: Map<string, string>;
 	content: string;
@@ -119,4 +120,8 @@ export type W2DMessage = {
 	type: 'visitedAll';
 	hydrationId: HydrationId;
 	nodeId: HydrationNode['nodeId'];
+} | {
+	type: 'alias';
+	id: string;
+	alias: string;
 };

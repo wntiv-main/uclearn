@@ -4,7 +4,6 @@
 	/* see: https://issues.chromium.org/issues/41001393 */
 	--uclearn-translucent-filter: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxmaWx0ZXIgaWQ9ImdyYXBoVHJhbnNsdWNlbnQiPjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VHcmFwaGljIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwCjAgMSAwIDAgMAowIDAgMSAwIDAKLTIgLTEgMCAyIDAiPjwvZmVDb2xvck1hdHJpeD48L2ZpbHRlcj48L3N2Zz4=#graphTranslucent);
 
-
 	--uclearn-small-screen-size: var(--breakpoint-lg, 992px);
 
 	--uclearn-foreground: light-dark(black, white);

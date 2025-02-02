@@ -3,24 +3,24 @@
 	"type": "commonjs",
 	"scripts": {
 		"dev": "run-s clean:dev dev:static dev:watchers",
-		"dev:static": "cmd /C \"mklink /J build src\\static & mklink /J build\\highlight.js node_modules\\highlight.js & mklink /J build\\mathlive node_modules\\mathlive\"",
+		"dev:static": "cmd /C \"mklink /J build src\\static & mklink /J build\\highlight.js node_modules\\highlight.js\\styles & mklink /J build\\monaco node_modules\\monaco-editor\\min\\vs & mklink /J build\\pyright node_modules\\@typefox\\pyright-browser\\dist\"",
 		"dev:watchers": "run-p -r -l dev:scripts dev:hydration-worker dev:css",
-		"dev:scripts": "export UCLEARN_DEBUG=1 && bun build --outfile=build/index.js src/index.ts --env \"UCLEARN_*\" --watch",
+		"dev:scripts": "export UCLEARN_DEBUG=1 && mkdir build/built && bun build --outdir=build/built src/index.ts --env \"UCLEARN_*\" --watch",
 		"dev:hydration-worker": "export UCLEARN_DEBUG=1 && bun build --outfile=build/hydration-worker.js src/hydration-worker/index.ts --env \"UCLEARN_*\" --watch",
 		"dev:css": "bun lightningcss --bundle src/css/index.css -o build/index.css && bun onchange src/css/*.css -- lightningcss --bundle src/css/index.css -o build/index.css",
-		"build": "run-s clean:build bundle build:scripts build:hydration-worker build:css",
-		"build:scripts": "export UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && bun build --outfile=dist/index.js src/index.ts --drop=DOMInspector --drop=console --env \"UCLEARN_*\" --minify",
+		"build": "run-s clean:dev clean:build bundle build:scripts build:hydration-worker build:css",
+		"build:scripts": "export UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && mkdir dist/built && bun build --outdir=dist/built src/index.ts --drop=DOMInspector --drop=console --env \"UCLEARN_*\" --minify",
 		"build:hydration-worker": "export UCLEARN_DEBUG=1 && bun build --outfile=dist/hydration-worker.js src/hydration-worker/index.ts --drop=console --env \"UCLEARN_*\" --minify",
 		"build:css": "bun lightningcss --minify --bundle src/css/index.css -o dist/index.css",
-		"bundle": "mkdir dist && cp -R src/static/* dist && cp -R node_modules/mathlive/ dist && cp -R node_modules/highlight.js/ dist",
+		"bundle": "mkdir dist && cp -R src/static/* dist && mkdir dist/highlight.js && mkdir dist/monaco && mkdir dist/pyright && cmd /C \"copy node_modules\\highlight.js\\styles dist\\highlight.js & copy node_modules\\monaco-editor\\min\\vs dist\\monaco & copy node_modules\\@typefox\\pyright-browser\\dist dist\\pyright\"",
 		"clean:build": "rm -r -f dist",
-		"clean:dev": "(rm -f src/static/index.js src/static/hydration-worker.js src/static/index.css || true) && cmd /C \"rd src\\static\\mathlive & rd src\\static\\highlight.js & rd build\" || true"
+		"clean:dev": "(rm -r -f src/static/built src/static/hydration-worker.js src/static/index.css || true) && cmd /C \"rd src\\static\\highlight.js & rd src\\static\\monaco & rd src\\static\\pyright & rd build\" || true"
 	},
 	"devDependencies": {
 		"@trevorhanus/mathquill-types": "https://github.com/trevorhanus/mathquill-types",
 		"@types/bun": "latest",
 		"@types/requirejs": "^2.1.37",
-		"ace-code": "https://github.com/ajaxorg/ace",
+		"ace": "git://github.com/ajaxorg/ace.git#v1.4.13",
 		"lightningcss-cli": "^1.29.1",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0"
@@ -29,15 +29,18 @@
 		"typescript": "^5.0.0"
 	},
 	"dependencies": {
+		"@typefox/pyright-browser": "^1.1.299",
 		"@types/jquery": "^3.5.31",
 		"@types/js-beautify": "^1.14.3",
 		"@types/mathjax": "^0.0.40",
 		"@types/video.js": "^7.3.58",
 		"@types/yui": "^3.14.31",
 		"asciimath": "^0.0.0",
+		"constrained-editor-plugin": "^1.3.0",
 		"highlight.js": "^11.10.0",
 		"js-beautify": "^1.15.1",
-		"mathlive": "^0.103.0"
+		"mathlive": "^0.103.0",
+		"monaco-editor": "^0.52.2"
 	},
 	"patchedDependencies": {
 		"asciimath@0.0.0": "patches/asciimath@0.0.0.patch",

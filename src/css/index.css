@@ -15,7 +15,8 @@
 
 :root:root:root:root:root:root:root:root {
 
-	background-image: linear-gradient(0deg, var(--uclearn-translucent-bg), var(--uclearn-translucent-bg)), var(--uclearn-bg-url);
+	background-image: linear-gradient(0deg, var(--uclearn-translucent-bg), var(--uclearn-translucent-bg)),
+		url("chrome-extension://__MSG_@@extension_id__/background.png");
 	background-attachment: fixed;
 	background-size: cover;
 	background-position: center;
@@ -91,7 +92,7 @@
 			filter: invert(1) hue-rotate(180deg);
 		}
 
-		img[src="https://learn.canterbury.ac.nz/theme/image.php/boost_union/core/1737599580/u/f1"] {
+		img[src$="/u/f1"] {
 			filter: brightness(0.5) contrast(3) brightness(0.6);
 		}
 

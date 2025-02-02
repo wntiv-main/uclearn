@@ -91,7 +91,7 @@ export class DOMInspector {
 
 	static #hydrateText(old: Text, updated: Text) {
 		if (old.data === updated.data) return;
-		if (old.data.length + updated.data.length > 100) {
+		if (old.data.length + updated.data.length > 500) {
 			const wrapper = old.ownerDocument.createElement('span');
 			wrapper.classList.add('hydrate-updated');
 			wrapper.textContent = updated.data;
@@ -192,7 +192,7 @@ export class DOMInspector {
 			css.href = `${EXT_URL}/inspector.css`;
 			const hjsCss = win.document.createElement('link');
 			hjsCss.rel = 'stylesheet';
-			hjsCss.href = `${EXT_URL}/highlight.js/styles/vs2015.css`;
+			hjsCss.href = `${EXT_URL}/highlight.js/vs2015.css`;
 			win.document.head.append(css, hjsCss);
 			win.addEventListener('beforeunload', () => {
 				this.#rootNode = document.adoptNode(this.#rootNode);
@@ -263,11 +263,18 @@ export class DOMInspector {
 		const filter = document.createElement('input');
 		filter.classList.add('filter-input');
 		filter.addEventListener('input', () => {
-			for (const el of this.#rootNode.getElementsByClassName('filter-selected')) {
-				el.classList.remove('filter-selected');
+			const oldEls = this.#rootNode.getElementsByClassName('filter-selected');
+			while (oldEls.length) {
+				oldEls[0].classList.remove('filter-selected');
 			}
 			if (!filter.value) return;
-			for (const el of this.#rootSourceNode.querySelectorAll(filter.value)) {
+			let matching: Iterable<Element>;
+			try {
+				matching = this.#rootSourceNode.querySelectorAll(filter.value);
+			} catch (e) {
+				matching = [];
+			}
+			for (const el of matching) {
 				this.#renderDirectRouteTo(el);
 				const item = this.#nodeMap.get(el);
 				if (!item) {

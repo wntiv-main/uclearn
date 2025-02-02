@@ -110,11 +110,15 @@ function* precomputeCompare(
 
 			if (el.classList.contains("coderunner-answer")) {
 				const next = nodes[i + 1];
-				if (isElement(next) && next.classList.contains("ui_wrapper")) {
+				if (isElement(next) && next.getAttribute('id')?.includes("answer_wrapper")) {
 					tiedNodes.push(next);
 					i++;
 				}
 			}
+
+			const id = (typeof el.id === "string"
+				? el.id
+				: el.getAttribute("id") ?? "");
 
 			yield {
 				nodeId: allocateEl(
@@ -126,10 +130,8 @@ function* precomputeCompare(
 				),
 				type: HydrationNodeType.ELEMENT,
 				tag: el.tagName,
-				id: (typeof el.id === "string"
-					? el.id
-					: (el.getAttribute("id") ?? "")
-				).replace(ID_RGX, "$1$2"),
+				id: id.replace(ID_RGX, "$1$2"),
+				rawId: id,
 				classes: [...el.classList],
 				attributes: new Map(
 					[...el.attributes].map(({ name, value }) => [name, value]),
@@ -296,6 +298,37 @@ function debugTask(
 	}
 }
 
+const idAliases: Record<string, string[]> = {};
+const aliasId: Record<string, string> = {};
+
+function destroyId(id: string) {
+	if (!(id in idAliases)) return;
+	for (const alias of idAliases[id]) {
+		delete aliasId[alias];
+	}
+	delete idAliases[id];
+}
+
+function assignAlias(id: string, alias: string) {
+	aliasId[alias] = id;
+	// biome-ignore lint/suspicious/noAssignInExpressions: why not
+	(idAliases[id] ??= []).push(alias);
+}
+
+// TODO: put alias data to use
+
+// Document.prototype._querySelector = Element.prototype._querySelector = function (selector: string) {
+// 	return this.querySelector(selector
+// 		.replaceAll(/(?<=#)(?<id>[-\w]*)/g, (_, id) => aliasId[id] ?? id));
+// };
+// Document.prototype._querySelectorAll = Element.prototype._querySelectorAll = function (selector: string) {
+// 	return this.querySelectorAll(selector
+// 		.replaceAll(/(?<=#)(?<id>[-\w]*)/g, (_, id) => aliasId[id] ?? id));
+// };
+// Document.prototype._getElementById = function (selector: string) {
+// 	return this.getElementById(aliasId[selector] ?? selector);
+// };
+
 const inspectors: Map<Element, DOMInspector> = new Map();
 async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 	const { config, elMap: map, root: dom } = hydrationStates[id];
@@ -365,6 +398,14 @@ async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 				case "remove": {
 					const ref = map[task.element];
 					for (const el of [ref.node, ...(ref.tiedNodes ?? [])]) {
+						if (isElement(el)) {
+							const id = el.getAttribute('id');
+							if (id) destroyId(id);
+							for (const idEl of el.querySelectorAll('[id]')) {
+								const id = idEl.getAttribute('id');
+								if (id) destroyId(id);
+							}
+						}
 						(el as ChildNode).remove();
 					}
 					break;
@@ -490,6 +531,10 @@ async function handleWorkerMessage(
 			state.config.onProgress?.(HydrationStage.HYDRATING, state.nodesVisited * state.progressPerNode);
 			break;
 		}
+		case "alias":
+			assignAlias(msg.id, msg.alias);
+			console.log('aliased', msg.alias, 'to', msg.id);
+			break;
 		default:
 			assertNever(msg);
 	}
