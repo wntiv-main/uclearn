@@ -21,8 +21,9 @@
 				"fonts/**/*.woff",
 				"filters.svg",
 				"hydration-worker.js",
-				"monaco/*",
+				"lsp-worker.js",
 				"pyright/*.js",
+				"python-stdlib.zip",
 				"built/*"
 			],
 			"matches": [

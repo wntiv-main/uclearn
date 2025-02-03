@@ -8,7 +8,7 @@
 		color: inherit;
 	}
 
-	.ace_editor {
+	.ace_editor:not(.ace_autocomplete) {
 		background-color: var(--uclearn-translucent-bg);
 		color: inherit;
 		border-radius: var(--uclearn-radius);
@@ -28,7 +28,7 @@
 		padding-block: 0.5rem;
 	}
 
-	.ace_scroller {
+	.ace_editor:not(.ace_autocomplete) .ace_scroller {
 		margin-block: 0.5rem;
 		overflow: visible;
 	}
@@ -37,8 +37,8 @@
 		outline-color: hsla(from currentColor h s l / 0.5);
 	}
 
-	.ace_editor:not(:has(.ace_gutter))>.ace_scroller,
-	.ace_gutter[style*="display"][style*="none"]+.ace_scroller {
+	.ace_editor:not(.ace_autocomplete, :has(.ace_gutter))>.ace_scroller,
+	.ace_editor:not(.ace_autocomplete)>.ace_gutter[style*="display"][style*="none"]+.ace_scroller {
 		margin-inline: 0.5rem;
 
 		.ace_editor:has(>&) {
@@ -194,10 +194,10 @@
 	#page-question-type-coderunner .ui_wrapper,
 	.que.coderunner .ui_wrapper {
 		border: none !important;
-		overflow: visible !important;
+		/* overflow: visible !important; */
 	}
 
-	[id$="_answer-code_wrapper"] {
+	/* [id$="_answer-code_wrapper"] {
 		background-color: var(--uclearn-translucent-bg) !important;
 		border-radius: var(--uclearn-radius);
 		padding-block: calc(var(--uclearn-radius) / 2);
@@ -211,7 +211,7 @@
 			--vscode-editor-background: transparent;
 			--vscode-editorGutter-background: transparent;
 		}
-	}
+	} */
 
 	.sortable-code ul {
 		border-radius: var(--uclearn-radius);
