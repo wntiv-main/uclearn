@@ -1,6 +1,6 @@
 import type Ace from "ace";
 
-import type { LanguageProvider, MessageController } from "ace-linters";
+import type { LanguageProvider } from "ace-linters";
 import { AceLanguageClient } from "ace-linters/build/ace-language-client";
 import { EXT_URL } from "./constants";
 import JSZip from "jszip";
@@ -41,39 +41,25 @@ async function workerLanguageServer(url: string, name: string) {
 		worker: worker,
 		initializationOptions: {
 			files: await readZipFile(`${EXT_URL}/python-stdlib.zip`),
-		}
+		},
+		features: {
+			completion: true,
+			completionResolve: true,
+			diagnostics: true,
+			documentHighlight: true,
+			hover: true,
+			semanticTokens: true,
+			signatureHelp: true,
+		},
 	});
-	// (async () => {
-	// 	const messageController: MessageController = Reflect.get(languageProvider, '$messageController');
-	// 	for await (const [name, content] of readZipFile(`${EXT_URL}/python-stdlib.zip`)) {
-	// 		messageController.init({
-	// 			documentUri: `/typings/${name}`,
-	// 			sessionId: '',
-	// 		}, {
-	// 			getValue() {
-	// 				return content;
-	// 			},
-	// 		} satisfies Partial<Ace.Ace.Document>, 'ace/mode/python', {}, () => { });
-	// 	}
-	// })();
-	// languageProvider.setGlobalOptions("python", );
 	return languageProvider;
 }
-
-// async function workerLanguageServer(url: string, name: string) {
-// 	const data = await (await fetch(url)).blob();
-// 	const blobUrl = URL.createObjectURL(data);
-// 	const worker = new Worker(blobUrl, {
-// 		type: 'module',
-// 		name,
-// 	});
-// 	return LanguageProvider.create(worker);
-// }
 
 const languageServers: Partial<Record<'py', Promise<LanguageProvider>>> = {};
 
 function onSetLanguage(mode: string | Ace.Ace.SyntaxMode, editor: Ace.Ace.Editor) {
 	if (typeof mode !== 'string') return;
+	if (editor.getReadOnly()) return;
 	if (mode.includes('py')) {
 		languageServers.py ??= workerLanguageServer(`${EXT_URL}/pyright/pyright.worker.js`, "Pyright Language Server");
 		languageServers.py.then(ls => ls.registerEditor(editor));
@@ -88,6 +74,7 @@ export function patchAceEditor() {
 			try {
 				const editor = _internalEdit?.(el, {
 					copyWithEmptySelection: true,
+					scrollPastEnd: 0.5 as unknown as boolean,
 					...options,
 				});
 				if (!editor) throw new Error("Could not make ACE editor");
@@ -96,6 +83,11 @@ export function patchAceEditor() {
 				editor.session.setMode = function (mode, cb) {
 					onSetLanguage(mode, editor);
 					_setMode.call(this, mode, cb);
+				};
+				const _setReadOnly = editor.setReadOnly;
+				editor.setReadOnly = function (readOnly) {
+					onSetLanguage(editor.session.getMode(), editor);
+					_setReadOnly.call(this, readOnly);
 				};
 				return editor;
 			} catch (e) {

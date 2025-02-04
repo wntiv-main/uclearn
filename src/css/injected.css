@@ -11,6 +11,13 @@
 	border-left: 1px solid currentColor;
 }
 
+#uclearn-inspector-highlight {
+	position: fixed;
+	background-color: #36b0ff3d;
+	z-index: 9999;
+	pointer-events: none;
+}
+
 #uclearn-loading-progress {
 	position: fixed;
 	top: 0px;

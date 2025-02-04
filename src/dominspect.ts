@@ -172,10 +172,7 @@ export class DOMInspector {
 	#showDocumentHighlight(rect: DOMRect) {
 		DOMInspector.#domSelector ??= (() => {
 			const highlight = document.createElement('div');
-			highlight.style.position = 'fixed';
-			highlight.style.backgroundColor = '#36b0ff3d';
-			highlight.style.zIndex = '9999';
-			highlight.style.pointerEvents = 'none';
+			highlight.id = "uclearn-inspector-highlight";
 			document.body.append(highlight);
 			return highlight;
 		})();
@@ -284,7 +281,8 @@ export class DOMInspector {
 				item.classList.add('filter-selected');
 			}
 		});
-		DOMInspector.#window?.document.body.replaceChildren(this.#rootNode, filter);
+		DOMInspector.#window.document.body.replaceChildren(this.#rootNode, filter);
+		DOMInspector.#window.focus();
 	}
 
 	commit() {
