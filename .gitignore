@@ -2,13 +2,13 @@ dist/
 build/
 node_modules/
 bun.lockb
+
+src/static/python-typeshed.zip
 # dev script builds script in here
-src/static/built
+src/static/index.js
 src/static/hydration-worker.js
-src/static/lsp-worker.js
 src/static/index.css
 src/static/highlight.js/
-src/static/pyright/
 src/static/python-stdlib.zip
 src/static/_metadata/
 

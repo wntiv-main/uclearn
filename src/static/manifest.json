@@ -21,10 +21,9 @@
 				"fonts/**/*.woff",
 				"filters.svg",
 				"hydration-worker.js",
-				"lsp-worker.js",
 				"pyright/*.js",
-				"python-stdlib.zip",
-				"built/*"
+				"python-typeshed.zip",
+				"index.js"
 			],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",

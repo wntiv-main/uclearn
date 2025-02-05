@@ -1,0 +1,13 @@
+diff --git a/build/ace-language-client.js b/build/ace-language-client.js
+index 79a2daa9236f8f0398e27d2cccd662b3274106e1..a3d03c6eb5c18c10316cc9b9aa7afd2c363dd5b9 100644
+--- a/build/ace-language-client.js
++++ b/build/ace-language-client.js
+@@ -20081,6 +20081,8 @@ function toCompletions(completions) {
+                 return item;
+             });
+         }).flat();
++        if(combinedCompletions[0]?.sortText)
++            return combinedCompletions.sort((a,b)=>(a.sortText??a.label)>(b.sortText??b.label)?1:-1).map((item,i)=>({...toCompletion(item),score:-i*100}));
+         return combinedCompletions.map((item)=>toCompletion(item));
+     }
+     return [];

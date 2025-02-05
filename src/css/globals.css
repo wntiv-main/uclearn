@@ -23,6 +23,8 @@
 	--uclearn-color-success: #00ff00;
 	--uclearn-color-complete: #0060bf;
 
+	--uclearn-color-link: color-mix(in srgb, var(--uclearn-foreground) 50%, #0060bf 50%);
+
 	--uclearn-card-background: var(--uclearn-translucent-bg);
 	--uclearn-section-background: var(--uclearn-translucent-bg);
 
@@ -36,4 +38,5 @@
 	--uclearn-radius: 10px;
 
 	--uclearn-font-stack: "Open Sans", sans-serif;
+	--uclearn-code-stack: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }

@@ -3,20 +3,18 @@
 	"type": "commonjs",
 	"scripts": {
 		"dev": "export UCLEARN_DEBUG=1 && run-s clean:dev dev:static dev:watchers",
-		"dev:static": "cmd /C \"mklink /J build src\\static & mklink /J build\\highlight.js node_modules\\highlight.js\\styles & mklink /J build\\pyright node_modules\\@typefox\\pyright-browser\\dist\" && cd node_modules/typeshed/stdlib && bestzip ../../../build/python-stdlib.zip ./* --level 0 && cd ../../..",
-		"dev:watchers": "run-p -r -l dev:scripts dev:hydration-worker dev:lsp-worker dev:css",
-		"dev:scripts": "mkdir build/built && bun build --outdir=build/built src/index.ts --env \"UCLEARN_*\" --watch",
+		"dev:static": "cmd /C \"mklink /J build src\\static & mklink /J build\\highlight.js node_modules\\highlight.js\\styles\" && cd node_modules/typeshed && bestzip ../../build/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 0 && cd ../..",
+		"dev:watchers": "run-p -r -l dev:scripts dev:hydration-worker dev:css",
+		"dev:scripts": " bun build --outfile=build/index.js src/index.ts --env \"UCLEARN_*\" --watch",
 		"dev:hydration-worker": "bun build --outfile=build/hydration-worker.js src/hydration-worker/index.ts --env \"UCLEARN_*\" --watch",
-		"dev:lsp-worker": "bun build --outfile=build/lsp-worker.js src/lsp-worker/index.ts --env \"UCLEARN_*\" --watch",
 		"dev:css": "bun lightningcss --bundle src/css/index.css -o build/index.css && bun onchange src/css/*.css -- lightningcss --bundle src/css/index.css -o build/index.css",
-		"build": "export UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && run-s clean:dev clean:build bundle build:scripts build:hydration-worker build:lsp-worker build:css",
-		"build:scripts": "mkdir dist/built && bun build --outdir=dist/built src/index.ts --drop=DOMInspector --drop=console --env \"UCLEARN_*\" --minify",
+		"build": "export UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && run-s clean:dev clean:build bundle build:scripts build:hydration-worker build:css",
+		"build:scripts": "bun build --outfile=dist/index.js src/index.ts --drop=DOMInspector --drop=console --env \"UCLEARN_*\" --minify",
 		"build:hydration-worker": "bun build --outfile=dist/hydration-worker.js src/hydration-worker/index.ts --drop=console --env \"UCLEARN_*\" --minify",
-		"build:lsp-worker": "bun build --outfile=dist/lsp-worker.js src/lsp-worker/index.ts --drop=console --env \"UCLEARN_*\" --minify",
 		"build:css": "bun lightningcss --minify --bundle src/css/index.css -o dist/index.css",
-		"bundle": "mkdir dist && cp -R src/static/* dist && mkdir dist/highlight.js && mkdir dist/pyright && cmd /C \"xcopy /s node_modules\\highlight.js\\styles dist\\highlight.js & xcopy /s node_modules\\@typefox\\pyright-browser\\dist dist\\pyright\" && cd node_modules/typeshed/stdlib && bestzip ../../../dist/python-stdlib.zip ./* --level 9 && cd ../../..",
+		"bundle": "mkdir dist && cp -R src/static/* dist && mkdir dist/highlight.js && cmd /C \"xcopy /s node_modules\\highlight.js\\styles dist\\highlight.js\" && cd node_modules/typeshed && bestzip ../../dist/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 9 && cd ../..",
 		"clean:build": "rm -r -f dist",
-		"clean:dev": "(rm -r -f src/static/built src/static/python-stdlib.zip src/static/hydration-worker.js src/static/lsp-worker.js src/static/index.css || true) && cmd /C \"rd src\\static\\highlight.js & rd src\\static\\pyright & rd build\" || true"
+		"clean:dev": "(rm -r -f src/static/index.js src/static/python-stdlib.zip src/static/hydration-worker.js src/static/index.css || true) && cmd /C \"rd src\\static\\highlight.js & rd build\" || true"
 	},
 	"devDependencies": {
 		"@trevorhanus/mathquill-types": "https://github.com/trevorhanus/mathquill-types",
@@ -52,6 +50,7 @@
 	"patchedDependencies": {
 		"asciimath@0.0.0": "patches/asciimath@0.0.0.patch",
 		"@types/mathjax@0.0.40": "patches/@types%2Fmathjax@0.0.40.patch",
-		"@types/yui@3.14.31": "patches/@types%2Fyui@3.14.31.patch"
+		"@types/yui@3.14.31": "patches/@types%2Fyui@3.14.31.patch",
+		"ace-linters@1.4.1": "patches/ace-linters@1.4.1.patch"
 	}
 }

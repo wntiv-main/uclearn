@@ -31,7 +31,7 @@ const parser = new DOMParser();
 	const script = document.createElement("script");
 	script.id = "__uclearn_bootload_script_el";
 	script.classList.add('__uclearn-skip-reload');
-	script.src = chrome.runtime.getURL("built/index.js");
+	script.src = chrome.runtime.getURL("index.js");
 	script.type = "module";
 	root.prepend(script);
 })();

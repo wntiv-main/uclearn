@@ -30,10 +30,5 @@
 		"noPropertyAccessFromIndexSignature": false
 	},
 	"include": ["src/**/*"],
-	"exclude": [
-		"node_modules",
-		"src/static",
-		"src/hydration-worker",
-		"src/lsp-worker"
-	]
+	"exclude": ["node_modules", "src/static", "src/hydration-worker"]
 }

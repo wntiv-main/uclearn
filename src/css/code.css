@@ -33,6 +33,10 @@
 		overflow: visible;
 	}
 
+	.ace_autocomplete, .ace_tooltip, .ace_lineWidgetContainer {
+		margin-top: 0.5rem !important;
+	}
+
 	.ace-gap-outline {
 		outline-color: hsla(from currentColor h s l / 0.5);
 	}
@@ -232,5 +236,89 @@
 
 	.coderunner-answer:has(+[id$="answer_wrapper"]:not([style*="display: none"])) {
 		display: none;
+	}
+
+	.ace_tooltip {
+		background-color: var(--uclearn-translucent-bg);
+		backdrop-filter: var(--uclearn-bg-effect);
+		border: none;
+		border-radius: var(--uclearn-radius);
+		padding: calc(var(--uclearn-radius) / 2);
+		color: inherit;
+
+		p {
+			white-space: pre-wrap;
+			font-family: var(--uclearn-code-stack);
+		}
+
+		pre {
+			margin: 0;
+		}
+	}
+
+	.ace_autocomplete {
+		background-color: var(--uclearn-translucent-bg);
+		backdrop-filter: var(--uclearn-bg-effect);
+		border: none;
+		border-radius: 0.2em;
+
+		.ace_text-layer {
+			right: 0px;
+			width: auto;
+		}
+
+		.ace_active-line, .ace_line-hover {
+			border: none;
+			background-color: var(--uclearn-hover-tint);
+		}
+
+		.ace_line {
+			display: flex;
+
+			.ace_completion-highlight, .ace_completion-message {
+				color: var(--uclearn-color-link);
+			}
+
+			.ace_completion-message {
+				margin-left: 2ch;
+			}
+
+			.ace_completion-meta {
+				flex-grow: 1;
+				text-align: right;
+				margin-block: 0;
+				margin-right: 0;
+				color: var(--uclearn-foreground-muted);
+				font-size: 0.7em;
+				text-transform: lowercase;
+
+				.ace_selected & {
+					opacity: 1;
+				}
+			}
+		}
+	}
+
+	#ace_settingsmenu, #kbshortcutmenu {
+		background-color: var(--uclearn-translucent-bg);
+		backdrop-filter: var(--uclearn-bg-effect);
+		color: var(--uclearn-foreground);
+		box-shadow: -5px 4px 5px var(--uclearn-shadow-color);
+	}
+
+	.ace_prompt_container {
+		box-shadow: none;
+		padding: 0;
+
+		>.ace_editor:not(.ace_autocomplete) {
+			backdrop-filter: var(--uclearn-bg-effect);
+			margin-inline: calc(-1 * var(--uclearn-radius));
+		}
+
+		>.ace_autocomplete {
+			margin-top: 0 !important;
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+		}
 	}
 }

@@ -5,7 +5,20 @@ import { AceLanguageClient } from "ace-linters/build/ace-language-client";
 import { EXT_URL } from "./constants";
 import JSZip from "jszip";
 
-async function readZipFile(url: string) {
+declare module 'ace' {
+	namespace Ace {
+		interface EditorOptions {
+			enableBasicAutocompletion?: boolean | Ace.Completer[];
+			/**
+			 * Enable live autocomplete. If the value is an array, it is assumed to be an array of completers
+			 * and will use them instead of the default completers.
+			 */
+			enableLiveAutocompletion?: boolean | Ace.Completer[];
+		}
+	}
+}
+
+async function readZipFile(base: string, url: string) {
 	try {
 		const response = await fetch(url);
 		const data = await response.arrayBuffer();
@@ -13,7 +26,7 @@ async function readZipFile(url: string) {
 		const zip = await JSZip.loadAsync(data);
 		for (const [filename, file] of Object.entries(zip.files)) {
 			if (file.dir) continue;
-			results[`/typings/${filename}`] = await file.async("text");
+			results[`${base}/${filename}`] = await file.async("text");
 		}
 		return results;
 	} catch (error) {
@@ -40,13 +53,26 @@ async function workerLanguageServer(url: string, name: string) {
 		type: "webworker",
 		worker: worker,
 		initializationOptions: {
-			files: await readZipFile(`${EXT_URL}/python-stdlib.zip`),
+			rootPath: '/',
+			files: await readZipFile('/__typeshed__', `${EXT_URL}/python-typeshed.zip`),
+		},
+		options: {
+			python: {
+				analysis: {
+					typeshedPaths: ['/__typeshed__'],
+					include: ['/**/*'],
+					exclude: ['/**/__pycache__', '/**/.*', '/__typeshed__', '/tmp'],
+				},
+			},
 		},
 		features: {
+			codeAction: true,
 			completion: true,
 			completionResolve: true,
 			diagnostics: true,
 			documentHighlight: true,
+			executeCommand: true,
+			format: true,
 			hover: true,
 			semanticTokens: true,
 			signatureHelp: true,
@@ -62,7 +88,10 @@ function onSetLanguage(mode: string | Ace.Ace.SyntaxMode, editor: Ace.Ace.Editor
 	if (editor.getReadOnly()) return;
 	if (mode.includes('py')) {
 		languageServers.py ??= workerLanguageServer(`${EXT_URL}/pyright/pyright.worker.js`, "Pyright Language Server");
-		languageServers.py.then(ls => ls.registerEditor(editor));
+		languageServers.py.then(ls => {
+			ls.registerEditor(editor);
+			editor.setOption('enableLiveAutocompletion', true);
+		});
 	}
 }
 
