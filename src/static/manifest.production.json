@@ -5,16 +5,10 @@
 	"version": "0.1",
 	"description": "University of Canterbury AKO|Learn feature upgrades",
 	"permissions": [
-		"management",
-		"tabs",
 		"storage",
 		"scripting",
-		"declarativeNetRequestWithHostAccess",
-		"background"
+		"declarativeNetRequestWithHostAccess"
 	],
-	"background": {
-		"service_worker": "./dev-watcher-client.js"
-	},
 	"host_permissions": [
 		"*://learn.canterbury.ac.nz/*",
 		"*://preuc.canterbury.ac.nz/*",
@@ -28,8 +22,7 @@
 				"hydration-worker.js",
 				"pyright/*.js",
 				"python-typeshed.zip",
-				"index.js",
-				"index.css"
+				"index.js"
 			],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
@@ -57,7 +50,8 @@
 				"*://learn.canterbury.ac.nz/*",
 				"*://preuc.canterbury.ac.nz/*"
 			],
-			"js": ["bootload.js", "dev-watcher-content-script.js"],
+			"css": ["index.css"],
+			"js": ["bootload.js"],
 			"run_at": "document_start"
 		}
 	],

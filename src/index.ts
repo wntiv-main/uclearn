@@ -2,7 +2,7 @@ import { initNavigator } from "./navigation";
 import { Toast } from "./lib-hook";
 import { loadPage } from "./page-loader";
 import { DEBUG } from "./global/constants";
-import { patchAceEditor } from "./ace-lsp";
+import { patchAceEditor } from "./ace-patches";
 
 if (DEBUG) window.addEventListener("error", async (e) => {
 	(await Toast).add(e.message, { title: `ERROR in '${e.filename}':`, type: 'danger' });

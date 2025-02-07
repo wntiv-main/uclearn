@@ -1,20 +1,39 @@
-import type Ace from "ace";
+import type Ace from "ace-code";
+import type { FontMetrics as FontMetricsType } from "ace-code/src/layer/font_metrics";
 
 import type { LanguageProvider } from "ace-linters";
 import { AceLanguageClient } from "ace-linters/build/ace-language-client";
 import { EXT_URL } from "./constants";
 import JSZip from "jszip";
+import { getAce } from "./lib-hook";
 
-declare module 'ace' {
-	namespace Ace {
-		interface EditorOptions {
-			enableBasicAutocompletion?: boolean | Ace.Completer[];
-			/**
-			 * Enable live autocomplete. If the value is an array, it is assumed to be an array of completers
-			 * and will use them instead of the default completers.
-			 */
-			enableLiveAutocompletion?: boolean | Ace.Completer[];
-		}
+declare module 'ace-code' {
+	const require: Require;
+	const define: RequireDefine;
+}
+
+type BoxSize = { width: number, height: number; };
+
+type AddListenerToEmit<T> = T extends (event: infer K extends string, callback: (...args: infer R extends unknown[]) => unknown) => unknown
+	? (event: K, ...data: R) => void : never;
+
+declare module "ace-code/src/layer/font_metrics" {// Expose required internals
+	interface FontMetrics {
+		$characterSize: {
+			width: number;
+			height: number;
+		};
+		$observer?: ResizeObserver;
+		$measureNode?: Element;
+		$setMeasureNodeStyles(style: CSSStyleDeclaration, isRoot?: boolean): void;
+		$addObserver(): void;
+		$pollSizeChanges(): ReturnType<typeof setTimeout>;
+		$measureSizes(node: Element): BoxSize | null;
+		$measureCharWidth(ch: string & { length: 1; }): number;
+		$getZoom(element: Element): number;
+		$initTransformMeasureNodes(): void;
+		checkForSizeChanges(size?: BoxSize): void;
+		_emit: AddListenerToEmit<FontMetricsType['on']>;
 	}
 }
 
@@ -95,17 +114,19 @@ function onSetLanguage(mode: string | Ace.Ace.SyntaxMode, editor: Ace.Ace.Editor
 	}
 }
 
-export function patchAceEditor() {
-	window.ace = {};
-	let _internalEdit: typeof Ace.edit | null = null;
-	Object.defineProperty(window.ace, 'edit', {
+export async function patchAceEditor() {
+	const ace = await getAce();
+	let _internalEdit = ace.edit;
+	Object.defineProperty(ace, 'edit', {
 		get: (): typeof Ace.edit => (el, options) => {
 			try {
 				const editor = _internalEdit?.(el, {
 					copyWithEmptySelection: true,
-					scrollPastEnd: 0.5 as unknown as boolean,
+					scrollPastEnd: 0.5,
+					enableBasicAutocompletion: false,
 					...options,
-				});
+				} satisfies Ace.Ace.EditorOptions);
+				editor.renderer.attachToShadowRoot();
 				if (!editor) throw new Error("Could not make ACE editor");
 				if (options?.mode) onSetLanguage(options.mode, editor);
 				const _setMode = editor.session.setMode;
@@ -127,5 +148,43 @@ export function patchAceEditor() {
 		set(v) {
 			_internalEdit = v;
 		}
+	});
+	ace.require(['ace/layer/font_metrics'], ({ FontMetrics }: { FontMetrics: typeof FontMetricsType; }) => {
+		const metricHandlers = new WeakMap<Element, FontMetricsType>();
+		const observer = new window.ResizeObserver(events => {
+			for (const evt of events) {
+				metricHandlers.get(evt.target)?.checkForSizeChanges();
+			}
+		});
+		FontMetrics.prototype.$addObserver = function () {
+			const node = this.$measureNode;
+			if (!node) return;
+			metricHandlers.set(node, this);
+			observer.observe(node);
+			this.$observer = {
+				disconnect() {
+					observer.unobserve(node);
+				},
+				observe() { },
+				unobserve() { },
+			};
+		};
+		const cache: Partial<Record<string, [BoxSize, boolean, Record<string, BoxSize>]>> = {};
+		const _checkForSizeChanges = FontMetrics.prototype.checkForSizeChanges;
+		FontMetrics.prototype.checkForSizeChanges = function (size) {
+			if (!this.$measureNode) return;
+			const fontStyle = window.getComputedStyle(this.$measureNode).font;
+			const cached = cache[fontStyle];
+			if (cached) {
+				[this.$characterSize, this.allowBoldFonts, this.charSizes] = cached;
+				this._emit("changeCharacterSize", {
+					data: cached[0] satisfies BoxSize,
+				});
+				return;
+			}
+			this.$characterSize = { width: 0, height: 0 };
+			_checkForSizeChanges.call(this, size);
+			cache[fontStyle] = [this.$characterSize, this.allowBoldFonts, this.charSizes];
+		};
 	});
 }

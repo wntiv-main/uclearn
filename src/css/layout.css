@@ -23,7 +23,7 @@
 
 	body:not(#page-login-index) #page-wrapper {
 		display: grid;
-		grid: [navbar] max-content [navbar-end page] 1fr [page-end] / [far-left drawer-left] max-content [drawer-left-end left-gutter] minmax(5px, 1fr) [left-gutter-end page-left] minmax(0, 90vw) [page-right right-gutter] minmax(5px, 1fr) [right-gutter-end drawer-right] max-content [drawer-right-end scrollbar-gutter far-right] min-content [scrollbar-gutter-end];
+		grid: [navbar] max-content [navbar-end page] 1fr [page-end] / [far-left drawer-left] max-content [drawer-left-end left-gutter] minmax(5px, 1fr) [left-gutter-end page-left] minmax(0, 80vw) [page-right right-gutter] minmax(5px, 1fr) [right-gutter-end drawer-right] max-content [drawer-right-end scrollbar-gutter far-right] min-content [scrollbar-gutter-end];
 		overflow: clip;
 		width: 100%;
 
@@ -60,6 +60,7 @@
 				grid-template-columns: subgrid;
 				min-height: 0;
 				height: fit-content;
+				margin: 0;
 
 				&::before {
 					grid-area: 1 / page-left / -1 / page-right;

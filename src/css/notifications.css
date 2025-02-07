@@ -15,6 +15,11 @@
 		}
 	}
 
+	.count-container {
+		background-color: #ca3120;
+		color: #ffffff;
+	}
+
 	.popover-region-container {
 		border: none;
 		border-radius: var(--uclearn-radius);

@@ -10,13 +10,13 @@
 @import 'notifications.css';
 @import 'message-app.css';
 @import 'code.css';
+@import 'quiz.css';
 @import 'quiz-nav.css';
 @import 'injected.css';
 
 :root:root:root:root:root:root:root:root {
 
-	background-image: linear-gradient(0deg, var(--uclearn-translucent-bg), var(--uclearn-translucent-bg)),
-		url("chrome-extension://__MSG_@@extension_id__/background.png");
+	background-image: url("chrome-extension://__MSG_@@extension_id__/background.png");
 	background-attachment: fixed;
 	background-size: cover;
 	background-position: center;
@@ -41,6 +41,10 @@
 	}
 
 	img[src^="https://learn.canterbury.ac.nz/pix/"] {
+		filter: var(--uclearn-graph-translucent-filter);
+	}
+
+	.que img {
 		filter: var(--uclearn-translucent-filter);
 	}
 
@@ -84,11 +88,20 @@
 	}
 
 	@media (prefers-color-scheme: dark) {
+		& {
+			background-image: linear-gradient(0deg, var(--uclearn-translucent-bg), var(--uclearn-translucent-bg)),
+				url("chrome-extension://__MSG_@@extension_id__/background.png");
+		}
+
 		img[src^="https://learn.canterbury.ac.nz/pix/"] {
+			filter: var(--uclearn-graph-translucent-filter) invert(1) hue-rotate(180deg);
+		}
+
+		.que img {
 			filter: var(--uclearn-translucent-filter) invert(1) hue-rotate(180deg);
 		}
 
-		.navbar .logo, img.icon, #logoimage {
+		.navbar .logo, img.icon, #logoimage, .questionflagimage {
 			filter: invert(1) hue-rotate(180deg);
 		}
 

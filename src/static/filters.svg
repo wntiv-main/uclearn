@@ -2,3 +2,7 @@
 0 1 0 0 0
 0 0 1 0 0
 -2 -1 0 2 0"></feColorMatrix></filter></svg>
+<svg xmlns="http://www.w3.org/2000/svg"><filter id="translucentBg"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0
+0 1 0 0 0
+0 0 1 0 0
+-0.8504 -2.8608 -0.2888 4 0"></feColorMatrix></filter></svg>

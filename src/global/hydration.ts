@@ -49,15 +49,22 @@ export type WHydrationConfig = {
 	needsCourseIndexRefresh?: boolean;
 };
 
-export enum HydrationStage {
-	FETCHING = 0,
-	PARSING = 1,
-	HYDRATING = 2,
-	APPLYING = 3,
-	CLOSE = 4
+export enum PartialHydrationStage {
+	HYDRATING = 0,
+	APPLYING = 1,
 }
 
-export type HydrationProgressCallback = (stage: HydrationStage, percentage: number) => void;
+export type HydrationStages = number[];
+export function precomputeStages(stages: HydrationStages): _HydrationStages {
+	const total = stages.reduce((a, b) => a + b);
+	return stages.reduce(([running, arr], b) => {
+		return [running + b / total, [...arr, [running, b / total]]] as [number, [number, number][]];
+	}, [0, []] as [number, [number, number][]])[1];
+}
+export type _HydrationStages = [pre: number, current: number][];
+export type HydrationStage = 'fetching' | 'parsing' | { stage: number & keyof HydrationStages, partial: PartialHydrationStage; } | 'closed';
+
+export type HydrationProgressCallback = (stage: PartialHydrationStage, percentage: number) => void;
 
 export type HydrationConfig = WHydrationConfig & {
 	updateUpTree?: boolean;

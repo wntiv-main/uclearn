@@ -17,8 +17,13 @@
 		display: grid;
 		grid-template-rows: [a] max-content [b] minmax(max-content, 1fr) [c];
 
-		&.scrolled {
-			box-shadow: inset 0 8px 11px -7px rgb(0 0 0 / .25);
+		.block-region>.block:only-of-type {
+			background-color: transparent;
+			border-radius: 0;
+
+			>.card-body {
+				padding: 0.5rem !important;
+			}
 		}
 
 		&:is(.drawer-left, .drawer-right):not(.show), &[data-region].hidden {
@@ -62,6 +67,11 @@
 			height: auto;
 			overflow-y: hidden;
 			grid-row: b / c;
+			grid-column: 1;
+		}
+
+		&:has(.drawercontent .block:first-of-type .card-title)>*:not(.drawerheader) {
+			grid-row: a / c;
 		}
 
 		.drawercontent {

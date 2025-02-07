@@ -2,7 +2,8 @@
 	--uclearn-filters-src: "chrome-extension://__MSG_@@extension_id__/filters.svg";
 	/* chrome-extension://__MSG_@@extension_id__/filters.svg#graphTranslucent */
 	/* see: https://issues.chromium.org/issues/41001393 */
-	--uclearn-translucent-filter: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxmaWx0ZXIgaWQ9ImdyYXBoVHJhbnNsdWNlbnQiPjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VHcmFwaGljIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwCjAgMSAwIDAgMAowIDAgMSAwIDAKLTIgLTEgMCAyIDAiPjwvZmVDb2xvck1hdHJpeD48L2ZpbHRlcj48L3N2Zz4=#graphTranslucent);
+	--uclearn-graph-translucent-filter: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxmaWx0ZXIgaWQ9ImdyYXBoVHJhbnNsdWNlbnQiPjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VHcmFwaGljIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwCjAgMSAwIDAgMAowIDAgMSAwIDAKLTIgLTEgMCAyIDAiPjwvZmVDb2xvck1hdHJpeD48L2ZpbHRlcj48L3N2Zz4=#graphTranslucent);
+	--uclearn-translucent-filter: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxmaWx0ZXIgaWQ9InRyYW5zbHVjZW50QmciPjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VHcmFwaGljIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwCjAgMSAwIDAgMAowIDAgMSAwIDAKLTAuODUwNCAtMi44NjA4IC0wLjI4ODggNCAwIj48L2ZlQ29sb3JNYXRyaXg+PC9maWx0ZXI+PC9zdmc+#translucentBg);
 
 	--uclearn-small-screen-size: var(--breakpoint-lg, 992px);
 
@@ -10,7 +11,7 @@
 	--uclearn-background: light-dark(white, #1e1e1e);
 	--uclearn-foreground-muted: hsl(from var(--uclearn-foreground) h s calc(20 + 0.6 * l));
 
-	--uclearn-translucent-bg: hsla(from var(--uclearn-background) h s l / 0.6);
+	--uclearn-translucent-bg: rgb(from var(--uclearn-background) r g b / 0.5);
 	--uclearn-bg-effect: blur(10px);
 
 	--uclearn-hover-tint: #80808040;
@@ -22,6 +23,7 @@
 	--uclearn-color-warning: #ffff00;
 	--uclearn-color-success: #00ff00;
 	--uclearn-color-complete: #0060bf;
+	--uclearn-color-code: #ff008c;
 
 	--uclearn-color-link: color-mix(in srgb, var(--uclearn-foreground) 50%, #0060bf 50%);
 

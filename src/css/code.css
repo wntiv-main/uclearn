@@ -16,6 +16,7 @@
 		box-sizing: content-box;
 		width: auto !important;
 		overflow: clip;
+		contain: strict;
 	}
 
 	.ace_indent-guide {
@@ -320,5 +321,13 @@
 			border-top-left-radius: 0;
 			border-top-right-radius: 0;
 		}
+	}
+
+	code:not(:empty, pre>code), pre:has(>code) {
+		background-color: var(--uclearn-hover-tint) !important;
+		box-shadow: 0 0 0 0.4ch var(--uclearn-hover-tint);
+		margin-inline: 0.4ch;
+		border-radius: 0.4ch;
+		color: color-mix(in srgb, currentColor 50%, var(--uclearn-color-code) 50%) !important;
 	}
 }

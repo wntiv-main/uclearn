@@ -1,0 +1,118 @@
+:root:root:root:root:root:root:root:root {
+	#quiz-timer-wrapper {
+		pointer-events: none;
+
+		>* {
+			pointer-events: all;
+		}
+
+		#quiz-timer {
+			background-color: var(--uclearn-translucent-bg);
+			border-radius: var(--uclearn-radius);
+			border: none;
+			align-content: center;
+		}
+	}
+
+	.que, .que .correctness.badge {
+		--uclearn-accent-color: #808080;
+
+		&.correct {
+			--uclearn-accent-color: var(--uclearn-color-success);
+		}
+
+		&.partiallycorrect {
+			--uclearn-accent-color: var(--uclearn-color-warning);
+		}
+
+		&.incorrect, &.notanswered {
+			--uclearn-accent-color: var(--uclearn-color-error);
+		}
+	}
+
+	.que {
+		padding: 0;
+		margin: 0;
+
+		.formulation,
+		.outcome,
+		.comment,
+		.specificfeedback,
+		.generalfeedback,
+		.numpartscorrect,
+		.rightanswer,
+		.im-feedback,
+		.feedback,
+		.coderunnerexamples,
+		p {
+			margin: 0;
+		}
+
+		.coderunner-examples {
+			margin-block: 0.5rem 0;
+		}
+
+		.prompt {
+			margin-block: 0.5rem;
+		}
+
+		.table-responsive, .coderunner-examples {
+			width: auto;
+			max-width: 100%;
+		}
+
+		.coderunner-test-results {
+			padding: 0;
+		}
+
+		.cr-test-table-div td:has(>textarea:only-child) {
+			padding: 0;
+
+			>textarea {
+				display: block;
+				border: none;
+				padding: 0.3rem;
+				min-height: fit-content;
+			}
+		}
+
+		.outcome, .comment {
+			margin: 0;
+			padding: calc(var(--uclearn-radius) - 0.2em) var(--uclearn-radius);
+			border-radius: var(--uclearn-radius);
+			color: inherit;
+			background-color: color-mix(in srgb, var(--uclearn-accent-color) 10%, var(--uclearn-translucent-bg) 90%);
+			width: fit-content;
+			margin-inline: auto;
+
+			.correctness.badge {
+				padding: 0;
+				color: color-mix(in srgb, var(--uclearn-accent-color) 50%, var(--uclearn-foreground) 50%);
+			}
+		}
+
+		.content {
+			border-radius: var(--uclearn-radius);
+			padding: calc(0.5 * var(--uclearn-radius));
+			background-color: var(--uclearn-translucent-bg);
+			margin-bottom: 1rem;
+		}
+	}
+
+	.que .content {
+		margin-left: 0;
+	}
+
+	.que .info {
+		background-color: transparent;
+		border: solid currentColor;
+		border-width: 0 0 1px 1px;
+		border-radius: 0 0 0 var(--uclearn-radius);
+		margin: 0 0 1ch 1ch;
+		padding: var(--uclearn-radius);
+		float: inline-end;
+		text-align: end;
+		position: relative;
+		z-index: 1;
+	}
+}

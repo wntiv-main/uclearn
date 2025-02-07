@@ -26,10 +26,6 @@ export async function getRequire() {
 	);
 }
 
-type AceConfig = {
-	dark_theme_mode?: unknown;
-};
-
 type ModuleTypesMap = {
 	"media_videojs/video-lazy": typeof VideoJS;
 	"core/modal_registry": UCModalRegistry;
@@ -120,4 +116,19 @@ export async function getYUIInstance() {
 			});
 		})))
 	);
+}
+
+let _acePromise: Promise<typeof Ace> | null = null;
+export async function getAce() {
+	_acePromise ??= new Promise(res => {
+		let _ace: typeof Ace | null = null;
+		Object.defineProperty(window, 'ace', {
+			get: () => _ace,
+			set(v) {
+				_ace = v;
+				res(v);
+			}
+		});
+	});
+	return _acePromise;
 }

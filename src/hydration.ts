@@ -17,12 +17,12 @@ import {
 	type HydrationId,
 	type HydrationNode,
 	HydrationNodeType,
-	HydrationStage,
 	type HydrationTasks,
 	HydrationTextType,
+	PartialHydrationStage,
 	type W2DMessage,
 } from "./global/hydration";
-import { assertNever, asyncTimeout, type ItemOf, type Shifted } from "./global/util";
+import { assertNever, type ItemOf, type Shifted } from "./global/util";
 import { Toast } from "./lib-hook";
 import { loadScripts } from "./page-loader";
 
@@ -347,6 +347,7 @@ async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 					(() => {
 						const list = document.createElement("div");
 						list.id = "uclearn-inspectors-list";
+						list.classList.add(SKIP_HYDRATION_CLASS);
 						document.body.append(list);
 						return list;
 					})();
@@ -362,7 +363,7 @@ async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 		for (let i = 0; i < tasks.length; i++) {
 			const task = tasks[i];
 			if (i % 10 === 0)
-				config.onProgress?.(HydrationStage.APPLYING, i * fract);
+				config.onProgress?.(PartialHydrationStage.APPLYING, i * fract);
 			if (i % 50 === 0)
 				await yieldToMain();
 			debugTask(task, map, inspector, toUpdate, collectors);
@@ -376,7 +377,7 @@ async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 		for (let i = 0; i < tasks.length; i++) {
 			const task = tasks[i];
 			if (i % 10 === 0)
-				config.onProgress?.(HydrationStage.APPLYING, i * fract);
+				config.onProgress?.(PartialHydrationStage.APPLYING, i * fract);
 			if (i % 50 === 0)
 				await yieldToMain();
 			switch (task.type) {
@@ -438,7 +439,7 @@ async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 			}
 		}
 	}
-	config.onProgress?.(HydrationStage.APPLYING, 1);
+	config.onProgress?.(PartialHydrationStage.APPLYING, 1);
 
 	await loadScripts(
 		collectors.scripts.filter(
@@ -520,7 +521,7 @@ async function handleWorkerMessage(
 		case "visited": {
 			const state = hydrationStates[msg.hydrationId];
 			state.nodesVisited++;
-			state.config.onProgress?.(HydrationStage.HYDRATING, state.nodesVisited * state.progressPerNode);
+			state.config.onProgress?.(PartialHydrationStage.HYDRATING, state.nodesVisited * state.progressPerNode);
 			break;
 		}
 		case "visitedAll": {
@@ -528,7 +529,7 @@ async function handleWorkerMessage(
 			const ref = state.elMap[msg.nodeId];
 			for (const node of [ref.node, ...ref.tiedNodes ?? []]) if (isElement(node))
 				state.nodesVisited += node.querySelectorAll('*').length + 1;
-			state.config.onProgress?.(HydrationStage.HYDRATING, state.nodesVisited * state.progressPerNode);
+			state.config.onProgress?.(PartialHydrationStage.HYDRATING, state.nodesVisited * state.progressPerNode);
 			break;
 		}
 		case "alias":

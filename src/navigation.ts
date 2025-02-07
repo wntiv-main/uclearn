@@ -2,7 +2,7 @@ import type VideoJS from 'video.js';
 import type { YUI } from 'yui';
 
 import { DEBUG } from './global/constants';
-import { type HydrationConfig, type HydrationProgressCallback, HydrationStage } from "./global/hydration";
+import { type _HydrationStages, type HydrationConfig, type HydrationStage, precomputeStages } from "./global/hydration";
 import { update } from './global/util';
 import { hydrate, SKIP_HYDRATION_CLASS } from './hydration';
 import { getYUIInstance, initAce, modals, Toast, videoJS } from './lib-hook';
@@ -18,11 +18,11 @@ type HydrationHint = [
 			updatedDom: Document,
 		) => HTMLElement | null | undefined,
 	],
-	...[Partial<HydrationConfig>] | []
+	...[Partial<HydrationConfig & { weight: number; }>] | []
 ];
 
 const parser = new DOMParser();
-async function hydrateFromResponse(resp: Response, content: string, hydrationHints: HydrationHint[] = [], onProgress?: HydrationProgressCallback) {
+async function hydrateFromResponse(resp: Response, content: string, hydrationHints: HydrationHint[] = []) {
 	const startTime = performance.now();
 	console.time('hydration-parsing');
 	const contentType = resp.headers.get("Content-Type")?.split(";")[0] ?? 'text/html';
@@ -31,12 +31,12 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 		location.replace(resp.url);
 		return; // needed for typescript
 	}
-	onProgress?.(HydrationStage.PARSING, 0);
+	updateProgress([], 'parsing', 0);
 	const updated = parser.parseFromString(
 		content,
 		contentType as DOMParserSupportedType,
 	);
-	onProgress?.(HydrationStage.PARSING, 1);
+	updateProgress([], 'parsing', 1);
 	if (new URL(resp.url).pathname !== location.pathname) (window as { setupDone?: boolean; }).setupDone = false;
 	console.log(updated);
 	let needsCourseIndexRefresh = false;
@@ -54,7 +54,7 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 	}
 	console.timeEnd('hydration-parsing');
 	console.time('hydration');
-	const elPairs: [string, HTMLElement, HTMLElement, Partial<HydrationConfig>][] = [];
+	const elPairs: [string, HTMLElement, HTMLElement, Partial<HydrationConfig & { weight: number; }>][] = [];
 	for (const [selector, config = {}] of hydrationHints) {
 		if (typeof selector === 'string') {
 			const current = document.querySelectorAll(selector);
@@ -105,8 +105,18 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 	if (!elPairs.length) elPairs.push([':root',
 		document.getElementById('page-wrapper') ?? document.body,
 		updated.getElementById('page-wrapper') ?? updated.body, {}]);
-	for (const [name, left, right, config] of elPairs)
-		await hydrate(left, right, { nameHint: name, needsCourseIndexRefresh, onProgress, ...config });
+	const stages = precomputeStages(elPairs.map(pair => pair[3].weight ?? 1));
+	for (let i = 0; i < elPairs.length; i++) {
+		const [name, left, right, config] = elPairs[i];
+		await hydrate(left, right, {
+			nameHint: name,
+			needsCourseIndexRefresh,
+			onProgress: (stage, percentage) => {
+				updateProgress(stages, { stage: i, partial: stage }, percentage);
+			},
+			...config,
+		});
+	}
 	console.timeEnd('hydration');
 	// Quiz timer needs restart
 	try { window.M?.mod_quiz?.timer?.update(); } catch (e) { console.warn(e); }
@@ -118,7 +128,7 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 		behavior: 'smooth',
 		block: 'center',
 	});
-	onProgress?.(HydrationStage.CLOSE, 0);
+	updateProgress([], 'closed', 0);
 	if (DEBUG) (await Toast).add(`Hydration in ${((performance.now() - startTime) / 1000).toFixed(2)}s`, { type: 'success' });
 }
 
@@ -215,14 +225,14 @@ async function safeFetch(input: RequestInfo | URL, { onProgress, onError, ...ini
 // }
 
 let loadingEl: HTMLElement | null = null;
-const stageWidths: Record<HydrationStage, number> = {
-	[HydrationStage.FETCHING]: 0.1,
-	[HydrationStage.PARSING]: 0.1,
-	[HydrationStage.HYDRATING]: 0.4,
-	[HydrationStage.APPLYING]: 0.4,
-	[HydrationStage.CLOSE]: 0,
-};
-function updateProgress(stage: HydrationStage, percentage: number) {
+// const stageWidths: Record<HydrationStage, number> = {
+// 	[HydrationStage.FETCHING]: 0.1,
+// 	[HydrationStage.PARSING]: 0.1,
+// 	[HydrationStage.HYDRATING]: 0.4,
+// 	[HydrationStage.APPLYING]: 0.4,
+// 	[HydrationStage.CLOSE]: 0,
+// };
+function updateProgress(stages: _HydrationStages, stage: HydrationStage, percentage: number) {
 	loadingEl ??= (() => {
 		const el = document.createElement('div');
 		el.id = "uclearn-loading-progress";
@@ -232,23 +242,23 @@ function updateProgress(stage: HydrationStage, percentage: number) {
 		document.body.append(el);
 		return el;
 	})();
-	let totalProgress = 0;
-	if (stage > HydrationStage.FETCHING)
-		totalProgress += stageWidths[HydrationStage.FETCHING];
-	if (stage > HydrationStage.PARSING)
-		totalProgress += stageWidths[HydrationStage.PARSING];
-	if (stage > HydrationStage.HYDRATING)
-		totalProgress += stageWidths[HydrationStage.HYDRATING];
-	if (stage > HydrationStage.APPLYING)
-		totalProgress += stageWidths[HydrationStage.APPLYING];
-	if (stage >= HydrationStage.CLOSE) {
+	if (stage === 'closed') {
 		setTimeout(() => {
 			if (loadingEl) loadingEl.style.width = '0';
 		}, 300);
 		return;
 	}
-	loadingEl.ariaValueNow = `${100 * (totalProgress + percentage * stageWidths[stage])}`;
-	loadingEl.style.width = `${100 * (totalProgress + percentage * stageWidths[stage])}%`;
+	let totalProgress = 0;
+	if (stage === 'fetching')
+		totalProgress += percentage * 0.1;
+	else if (stage === 'parsing')
+		totalProgress += 0.1 + totalProgress * 0.1;
+	else {
+		const [pre, current] = stages[stage.stage];
+		totalProgress += pre + current * (stage.partial + percentage) / 2;
+	}
+	loadingEl.ariaValueNow = `${100 * totalProgress}`;
+	loadingEl.style.width = `${100 * totalProgress}%`;
 }
 
 export async function initNavigator() {
@@ -265,9 +275,9 @@ export async function initNavigator() {
 				method: "POST",
 				body: new FormData(form, e.submitter),
 				onProgress: (loaded, total) =>
-					total && updateProgress(HydrationStage.FETCHING, loaded / total),
+					total && updateProgress([], 'fetching', loaded / total),
 				onError: () =>
-					updateProgress(HydrationStage.CLOSE, 0),
+					updateProgress([], 'fetching', 0),
 			});
 			const scrollPos = document.getElementById("page")?.scrollTop;
 			if (!e.submitter?.classList.contains('submit'))
@@ -276,8 +286,8 @@ export async function initNavigator() {
 			if (e.submitter?.classList.contains('submit')) {
 				const question = e.submitter.closest('.que');
 				if (question?.id) {
-					toHydrate.push(["#mod_quiz_navblock", { updateUpTree: true }]);
-					toHydrate.push([`#${question.id}`, { updateUpTree: true }]);
+					toHydrate.push(["#mod_quiz_navblock", { updateUpTree: true, weight: 2 }]);
+					toHydrate.push([`#${question.id}`, { updateUpTree: true, weight: 4 }]);
 					toHydrate.push(["#responseform .submitbtns"]);
 					toHydrate.push([[
 						'#responseform>*>input[type="hidden"], #responseform input[name*="sequencecheck"]',
@@ -287,11 +297,11 @@ export async function initNavigator() {
 				}
 			}
 			if (e.submitter?.classList.contains('mod_quiz-next-nav') || e.submitter?.classList.contains('mod_quiz-prev-nav')) {
-				toHydrate.push(['#mod_quiz_navblock', { updateUpTree: true }]);
-				toHydrate.push(['#region-main', { updateUpTree: true }]);
+				toHydrate.push(['#mod_quiz_navblock', { updateUpTree: true, weight: 2 }]);
+				toHydrate.push(['#region-main', { updateUpTree: true, weight: 5 }]);
 				toHydrate.push(['#page-footer']);
 			}
-			await hydrateFromResponse(resp, content, toHydrate, updateProgress);
+			await hydrateFromResponse(resp, content, toHydrate);
 			const newLocation = new URL(resp.url);
 			const oldSearch = new URLSearchParams(location.search);
 			let searchesMatch = true;
@@ -322,9 +332,9 @@ export async function initNavigator() {
 		const [resp, content] = await safeFetch(link.href, {
 			method: "GET",
 			onProgress: (loaded, total) =>
-				total && updateProgress(HydrationStage.FETCHING, loaded / total),
+				total && updateProgress([], 'fetching', loaded / total),
 			onError: () =>
-				updateProgress(HydrationStage.CLOSE, 0),
+				updateProgress([], 'closed', 0),
 		});
 		const scrollPos = document.getElementById("page")?.scrollTop;
 		document.getElementById("page")?.scrollTo(0, 0);
@@ -332,11 +342,11 @@ export async function initNavigator() {
 		if (link.id.startsWith('quiznavbutton')
 			|| link.classList.contains('mod_quiz-next-nav')
 			|| link.classList.contains('mod_quiz-prev-nav')) {
-			toHydrate.push(['#mod_quiz_navblock', { updateUpTree: true }]);
-			toHydrate.push(['#region-main', { updateUpTree: true }]);
+			toHydrate.push(['#mod_quiz_navblock', { updateUpTree: true, weight: 2 }]);
+			toHydrate.push(['#region-main', { updateUpTree: true, weight: 5 }]);
 			toHydrate.push(['#page-footer']);
 		}
-		await hydrateFromResponse(resp, content, toHydrate, updateProgress);
+		await hydrateFromResponse(resp, content, toHydrate);
 		const newLocation = new URL(resp.url);
 		const oldSearch = new URLSearchParams(location.search);
 		let searchesMatch = true;
@@ -359,11 +369,11 @@ export async function initNavigator() {
 		const [resp, content] = await safeFetch(location.href, {
 			method: "GET",
 			onProgress: (loaded, total) =>
-				total && updateProgress(HydrationStage.FETCHING, loaded / total),
+				total && updateProgress([], 'fetching', loaded / total),
 			onError: () =>
-				updateProgress(HydrationStage.CLOSE, 0),
+				updateProgress([], 'closed', 0),
 		});
-		await hydrateFromResponse(resp, content, [], updateProgress);
+		await hydrateFromResponse(resp, content, []);
 		if (e.state?.scrollPos) {
 			document.getElementById("page")?.scrollTo(0, e.state.scrollPos);
 		}
