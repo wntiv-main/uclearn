@@ -57,7 +57,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 	for(const tab of await chrome.tabs.query({ url: INJECT_URLS })) {
 		chrome.scripting.executeScript({
-			files: ['dev-watcher-content-script.js'],
+			files: [`${tab.url.includes("timetable.canterbury.ac.nz") ? 'timetable' : 'learn'}/dev-watcher-content-script.js`],
 			injectImmediately: true,
 			target: { tabId: tab.id },
 		});

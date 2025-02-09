@@ -1,0 +1,193 @@
+:root {
+	--foreground-color: white;
+	--background: #101010;
+	--radius: 10px;
+	--border-style: 1px solid;
+	--inserted-color: #00ff00;
+	--mutated-color: #ff8000;
+	--removed-color: #ff0000;
+	--debug-color: #0080ff;
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	color: var(--foreground-color);
+	background-color: var(--background);
+	display: flex;
+	flex-flow: column;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+}
+
+.filter-input {
+	flex: 0 0;
+}
+
+.uclearn-dom-inspector {
+	padding: var(--radius);
+	padding-left: calc(var(--radius) + 2ch);
+	background-color: var(--background);
+	border: none;
+	border-radius: var(--radius);
+	font-family: 'Courier New', Courier, monospace;
+	line-height: 1.5em;
+	color: inherit;
+	white-space: pre-wrap;
+	text-wrap: pretty;
+	tab-size: 4;
+	flex-grow: 1;
+	overflow: auto;
+}
+
+details.item {
+	padding-left: 3ch;
+
+	&[open] {
+		border-left: 1px solid #80808080;
+	}
+}
+
+details.item>summary {
+	margin-left: -3ch;
+	list-style-position: outside;
+	cursor: pointer;
+}
+
+.item>summary {
+	position: relative;
+}
+
+.item {
+	--current-background: transparent;
+	border-radius: calc(var(--radius) / 2);
+	background-color: var(--final-bg);
+	box-shadow: 0 0 1px calc(var(--radius) / 2) var(--final-bg);
+
+	& {
+		--final-bg: var(--current-background);
+	}
+
+	&:hover:not(:has(.item:hover)) {
+		--final-bg: color-mix(in srgb, #80808080 20%, var(--current-background) 80%);
+	}
+
+	&:active:not(:has(.item:active)) {
+		--final-bg: color-mix(in srgb, #80808080 40%, var(--current-background) 60%);
+	}
+}
+
+.item.item-inserted {
+	--current-background: color-mix(in srgb, var(--inserted-color) 10%, transparent 90%);
+}
+
+.item.item-removed {
+	--current-background: color-mix(in srgb, var(--removed-color) 10%, transparent 90%);
+	margin-block: calc(var(--radius) / 2);
+}
+
+.item.item-mutated>summary {
+	border-radius: calc(var(--radius) / 4);
+	background-color: var(--current-background);
+	box-shadow: 0 0 1px calc(var(--radius) / 4) var(--current-background);
+	--current-background: color-mix(in srgb, var(--mutated-color) 10%, transparent 90%);
+}
+
+.item:where(.debugging,
+	:has(.item.item-inserted, .item.item-removed, .item.item-mutated):not([open]))>summary::after {
+	--shift-0: -1;
+	--shift-1: var(--shift-0);
+	--shift-2: var(--shift-1);
+	--shift-3: var(--shift-2);
+	content: '';
+	width: var(--radius);
+	height: var(--radius);
+	border-radius: var(--radius);
+	position: absolute;
+	right: 0;
+	top: calc(50% - var(--radius) / 2);
+	box-shadow: var(--shadow-inserted, 0 0), var(--shadow-mutated, 0 0), var(--shadow-removed, 0 0), var(--shadow-debug, 0 0);
+}
+
+.item:has(.item.item-inserted):not([open])>summary::after {
+	--shadow-inserted: calc(var(--radius) * var(--shift-0)) 0 0 0 var(--inserted-color);
+	--shift-1: calc(var(--shift-0) - 1.5);
+}
+
+.item:has(.item.item-mutated):not([open])>summary::after {
+	--shadow-mutated: calc(var(--radius) * var(--shift-1)) 0 0 0 var(--mutated-color);
+	--shift-2: calc(var(--shift-1) - 1.5);
+}
+
+.item:has(.item.item-removed):not([open])>summary::after {
+	--shadow-removed: calc(var(--radius) * var(--shift-2)) 0 0 0 var(--removed-color);
+	--shift-3: calc(var(--shift-2) - 1.5);
+}
+
+.item.debugging>summary::after {
+	--shadow-debug: calc(var(--radius) * var(--shift-3)) 0 0 0 var(--debug-color);
+}
+
+.collapsed>summary {
+	list-style: none;
+}
+
+.collapsed>* {
+	display: inline;
+}
+
+details>.text:not(.scripted)::before, details>.text:not(.scripted)::after {
+	content: '"';
+}
+
+:is(.hydrate-inserted, .hydrate-removed, .hydrate-updated) {
+	--expand: calc(var(--radius) / 4);
+	background-color: var(--current-background);
+	box-shadow: 0 0 1px calc(var(--radius) / 4) var(--current-background);
+	border-radius: var(--expand);
+}
+
+.hydrate-inserted {
+	--current-background: color-mix(in srgb, var(--inserted-color) 20%, transparent 80%);
+}
+
+.hydrate-updated {
+	--current-background: color-mix(in srgb, var(--mutated-color) 20%, transparent 80%);
+}
+
+.hydrate-removed {
+	--current-background: color-mix(in srgb, var(--removed-color) 20%, transparent 80%);
+	text-decoration: var(--removed-color) line-through;
+}
+
+:is(.hydrate-inserted, .hydrate-removed)+ :is(.hydrate-inserted, .hydrate-removed) {
+	clip-path: inset(calc(-1 * var(--expand)) calc(-1 * var(--expand)) calc(-1 * var(--expand)) 0);
+}
+
+:is(.hydrate-inserted, .hydrate-removed):has(+ :is(.hydrate-inserted, .hydrate-removed)) {
+	clip-path: inset(calc(-1 * var(--expand)) 0 calc(-1 * var(--expand)) calc(-1 * var(--expand)));
+}
+
+:is(.hydrate-inserted, .hydrate-removed)+ :is(.hydrate-inserted, .hydrate-removed):has(+ :is(.hydrate-inserted, .hydrate-removed)) {
+	clip-path: inset(calc(-1 * var(--expand)) 0 calc(-1 * var(--expand)) 0);
+}
+
+.uclearn-dom-inspector:has(.filter-selected) .item:not(.filter-selected, :has(.filter-selected)) {
+	display: none;
+}
+
+.item:not(.filter-selected):has(.filter-selected)>summary {
+	font-size: 0.5em;
+}
+
+.uclearn-dom-inspector .item.filter-selected .item {
+	display: revert;
+}
+
+.uclearn-dom-inspector .item.text.empty {
+	display: none;
+}

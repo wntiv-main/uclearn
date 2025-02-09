@@ -1,0 +1,11 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		// Enable latest features
+		"lib": ["es2023", "dom", "dom.Iterable"],
+
+		"types": ["requirejs"]
+	},
+	"include": ["./**/*", "../global/**/*"],
+	"exclude": ["hydration-worker"]
+}

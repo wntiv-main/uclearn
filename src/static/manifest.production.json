@@ -20,11 +20,11 @@
 			"resources": [
 				"background.png",
 				"fonts/**/*.woff",
-				"hydration-worker.js",
-				"pyright/*.js",
-				"python-typeshed.zip",
-				"ace-code-shadow.css",
-				"index.js"
+				"learn/hydration-worker.js",
+				"learn/pyright/*.js",
+				"learn/python-typeshed.zip",
+				"learn/ace-code-shadow.css",
+				"learn/index.js"
 			],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
@@ -32,7 +32,7 @@
 			]
 		},
 		{
-			"resources": ["inspector.css", "highlight.js/*.css"],
+			"resources": ["learn/inspector.css", "learn/highlight.js/*.css"],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
 				"*://preuc.canterbury.ac.nz/*"
@@ -52,8 +52,8 @@
 				"*://learn.canterbury.ac.nz/*",
 				"*://preuc.canterbury.ac.nz/*"
 			],
-			"css": ["index.css"],
-			"js": ["bootload.js"],
+			"css": ["learn/index.css"],
+			"js": ["learn/bootload.js"],
 			"run_at": "document_start"
 		},
 		{

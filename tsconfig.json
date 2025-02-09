@@ -1,16 +1,15 @@
 {
 	"compilerOptions": {
 		// Enable latest features
-		"lib": ["es2023", "dom", "dom.Iterable"],
+		"lib": ["es2023"],
 		"target": "esnext",
 		"module": "CommonJS",
 		"moduleDetection": "force",
 		"jsx": "preserve",
 		"allowJs": true,
 
-		"types": ["requirejs"],
 		"typeRoots": ["node_modules/@types"],
-		"baseUrl": "./node_modules",
+		"baseUrl": "node_modules",
 		"esModuleInterop": true,
 
 		// Bundler mode
@@ -29,6 +28,5 @@
 		"noUnusedParameters": false,
 		"noPropertyAccessFromIndexSignature": false
 	},
-	"include": ["src/**/*"],
-	"exclude": ["node_modules", "src/static", "src/hydration-worker"]
+	"include": ["src/global/**/*"]
 }
