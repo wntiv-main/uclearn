@@ -1,7 +1,7 @@
 :root:root:root:root:root:root:root:root {
 	.navbar {
 		height: auto;
-		padding-right: 0;
+		padding-inline: 0;
 
 		&.fixed-top {
 			border-bottom: none;
@@ -15,6 +15,11 @@
 			width: auto !important;
 			height: 100% !important;
 			max-width: unset;
+		}
+
+		.navbar-brand {
+			padding-inline: 10px !important;
+			margin: 0 !important;
 		}
 
 		.nav-link {
@@ -106,11 +111,35 @@
 		align-items: center;
 	}
 
+	.simplesearchform:has(#searchform-navbar) {
+		display: flex;
+		justify-content: end;
+	}
+
 	#searchform-navbar {
 		position: relative;
 		left: 1px;
 		height: 100%;
 		background-color: transparent;
+		transition: width var(--uclearn-transition-short);
+		/* biome-ignore lint/correctness/noUnknownProperty: <explanation> */
+		interpolate-size: allow-keywords;
+		width: 0;
+		overflow: visible;
+
+		&.show {
+			width: fit-content;
+		}
+
+		.mform {
+			max-width: 100%;
+		}
+
+		.input-group {
+			overflow: hidden;
+			flex-wrap: nowrap;
+			max-width: 100%;
+		}
 	}
 
 	.navigation {

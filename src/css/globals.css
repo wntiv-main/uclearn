@@ -1,4 +1,4 @@
-:root:root:root:root:root:root:root:root {
+:root:root:root:root:root:root:root:root, :host {
 	--uclearn-filters-src: "chrome-extension://__MSG_@@extension_id__/filters.svg";
 	/* chrome-extension://__MSG_@@extension_id__/filters.svg#graphTranslucent */
 	/* see: https://issues.chromium.org/issues/41001393 */
@@ -41,4 +41,18 @@
 
 	--uclearn-font-stack: "Open Sans", sans-serif;
 	--uclearn-code-stack: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+	@media (prefers-color-scheme: dark) {
+		& {
+			color-scheme: dark;
+		}
+	}
+
+	&.uclearn-dark-mode {
+		color-scheme: dark;
+	}
+
+	&.uclearn-light-mode {
+		color-scheme: light;
+	}
 }

@@ -18,6 +18,7 @@
 	"host_permissions": [
 		"*://learn.canterbury.ac.nz/*",
 		"*://preuc.canterbury.ac.nz/*",
+		"*://timetable.canterbury.ac.nz/*",
 		"*://login.microsoftonline.com/*"
 	],
 	"web_accessible_resources": [
@@ -28,6 +29,7 @@
 				"hydration-worker.js",
 				"pyright/*.js",
 				"python-typeshed.zip",
+				"ace-code-shadow.css",
 				"index.js",
 				"index.css"
 			],
@@ -43,6 +45,10 @@
 				"*://preuc.canterbury.ac.nz/*"
 			],
 			"match_about_blank": true
+		},
+		{
+			"resources": ["timetable/index.css"],
+			"matches": ["*://timetable.canterbury.ac.nz/*"]
 		}
 	],
 	"icons": {
@@ -59,6 +65,10 @@
 			],
 			"js": ["bootload.js", "dev-watcher-content-script.js"],
 			"run_at": "document_start"
+		},
+		{
+			"matches": ["*://timetable.canterbury.ac.nz/*"],
+			"js": ["timetable/dev-watcher-content-script.js"]
 		}
 	],
 	"declarative_net_request": {

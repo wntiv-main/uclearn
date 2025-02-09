@@ -1,0 +1,139 @@
+<style>
+	#timetable {
+		display: grid;
+		grid-template-rows: max-content 1fr;
+		grid-template-columns: max-content 5px repeat(7, auto);
+		overflow-x: auto;
+		resize: both;
+
+		.header {
+			display: contents;
+			min-height: 0;
+
+			.day-header {
+				padding: 5px;
+				text-align: center;
+				border-left: 1px solid rgb(from currentColor r g b / 0.2);
+			}
+		}
+
+		.contents {
+			display: grid;
+			grid-template-rows: repeat(calc(24 * 2 + 1), minmax(20px, 1fr));
+			grid-template-columns: subgrid;
+			row-gap: 1px;
+			grid-column: 1 / -1;
+			overflow-y: auto;
+			padding-block: 0.5em;
+
+			.time-headers,
+			.timetable-day {
+				display: grid;
+				grid-template-rows: subgrid;
+				margin-block: -0.5rem;
+				padding-block: 0.5em;
+			}
+
+			.timetable-row-border {
+				grid-column: 2 / -1;
+				border-top: 1px solid rgb(from currentColor r g b / 0.2);
+				position: relative;
+				top: -1px;
+			}
+
+			.time-headers {
+				grid-column: 1;
+				position: relative;
+				grid-row: 1 / -1;
+				color: rgb(from currentColor r g b / 0.5);
+				margin-right: 2px;
+
+				.time {
+					height: 0;
+					display: flex;
+					align-items: center;
+					justify-content: end;
+				}
+			}
+
+			.timetable-day {
+				grid-row: 1 / -2;
+				border-left: 1px solid rgb(from currentColor r g b / 0.2);
+			}
+
+			.timetable-item {
+				background-color: #0066ff40;
+				border-radius: 5px;
+				padding: 3px;
+				margin-inline: 2px;
+			}
+		}
+	}
+</style>
+<div id="timetable">
+	<div class="header">
+		<div class="header-title"></div>
+		<div></div>
+		<div class="day-header">Mon</div>
+		<div class="day-header">Tue</div>
+		<div class="day-header">Wed</div>
+		<div class="day-header">Thu</div>
+		<div class="day-header">Fri</div>
+		<div class="day-header">Sat</div>
+		<div class="day-header">Sun</div>
+	</div>
+	<div class="contents">
+		<script>
+			document.currentScript.replaceWith(...new Array(24 * 2 + 1).fill().map((_, i) => {
+				const el = document.createElement("div");
+				el.classList.add("timetable-row-border");
+				el.style.gridRow = `${i + 1}`;
+				return el;
+			}));
+		</script>
+		<div class="time-headers">
+			<script>
+				document.currentScript.replaceWith(...new Array(24 + 1).fill().map((_, i) => {
+					const el = document.createElement("span");
+					el.classList.add("time");
+					el.textContent = `${i}:00`;
+					el.style.gridRow = `${i * 2 + 1}`;
+					return el;
+				}));
+			</script>
+		</div>
+		<script>
+			document.currentScript.replaceWith(...new Array(7).fill().map((_, i) => {
+				const el = document.createElement("div");
+				el.classList.add("timetable-day");
+				el.style.gridColumn = `${i + 3}`;
+				return el;
+			}));
+		</script>
+	</div>
+</div>
+<script>
+	const timetable = document.getElementById("timetable");
+	const days = timetable.getElementsByClassName("timetable-day");
+	function addItem(day, start, end, title) {
+		const el = document.createElement("div");
+		el.classList.add("timetable-item");
+		el.textContent = title;
+		el.style.gridRow = `${start + 1} / ${end + 1}`;
+		days[day].append(el);
+	}
+	addItem(1, 9 * 2, 11 * 2, "a");
+	addItem(2, 9 * 2, 11 * 2 + 1, "w");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 11 * 2, 13 * 2, "g");
+	addItem(2, 8 * 2, 15 * 2, "c");
+</script>

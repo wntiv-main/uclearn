@@ -1,6 +1,6 @@
 import { courseIcons, initCms } from './ucpatches/course-sidebar';
 import { DatabaseHandler, type DBStore, uclearnDB } from './db';
-import { DEBUG } from "./debug-options"
+import { DEBUG } from "./debug-options";
 import { getRemappedName } from './util';
 import { getRequire, hookYUI } from './lib-hook';
 import type { YUI } from 'yui';
@@ -13,15 +13,16 @@ declare global {
 			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 			_debug_values: any[],
 			templateCacheGet(courseId: string): Promise<Partial<DBStore<typeof uclearnDB, 'courseIndex'>>>,
-			templateCacheSet(courseId: string, value: { html: string, js: string }): Promise<void>,
+			templateCacheSet(courseId: string, value: { html: string, js: string; }): Promise<void>,
 			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 			optimizedRender<T extends any[]>(
 				_templates: {
 					default: {
-						renderForPromise(...args: T): PromiseLike<{ html: string, js: string }>
-					}},
-				...args: T): PromiseLike<{ html: string, js: string }>
-		}
+						renderForPromise(...args: T): PromiseLike<{ html: string, js: string; }>;
+					};
+				},
+				...args: T): PromiseLike<{ html: string, js: string; }>;
+		};
 	}
 }
 
@@ -30,37 +31,37 @@ type Callable = (...args: any[]) => any;
 
 const remapped_DEBUG_name = getRemappedName(() => DEBUG);
 const patch = <T extends Callable>(
-		method: T,
-		transformer: (code: string) => string,
-		skipLog?: boolean,
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		locals: { [key: string]: any } = {},
-		name?: string) => {
+	method: T,
+	transformer: (code: string) => string,
+	skipLog?: boolean,
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	locals: { [key: string]: any; } = {},
+	name?: string) => {
 	const oldContent = method.toString();
 	let newContent = transformer(oldContent);
-	if(DEBUG && newContent === oldContent) {
+	if (DEBUG && newContent === oldContent) {
 		console.warn('Patch for', name ?? method.name, 'had no change, transform may have failed', transformer, '(', method, ')');
 		return method;
 	}
 	locals[remapped_DEBUG_name] ??= DEBUG;
-	if(DEBUG && !skipLog) {
+	if (DEBUG && !skipLog) {
 		const index = window.__uclearn_hooks._debug_values.push(locals) - 1;
 		newContent = newContent.replace('{', `{console.log("Called", ${JSON.stringify(name ?? method.name)}, window.__uclearn_hooks._debug_values[${index}]);`);
 	}
-	if(!/^[^{]*=>/.test(newContent)) newContent = newContent.replace(/^(\s*(?:async\s+)?)(?=\w+)(?!function)/, "$1function ");
+	if (!/^[^{]*=>/.test(newContent)) newContent = newContent.replace(/^(\s*(?:async\s+)?)(?=\w+)(?!function)/, "$1function ");
 	const localNames = Object.keys(locals);
 	// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: needed to match nothing
 	const localRx = localNames.length ? new RegExp(String.raw`(?<![(=!]\s*/.*?/)\b(${localNames.join('|')})\b(?=(?:['"]|[^'"][^'"]*['"])*)`, 'g') : /[]/g;
 	return new Function(...localNames.map(local => `__uclrn_${local}`), `return ${newContent.replaceAll(localRx, '__uclrn_$1')};`)(...Object.values(locals));
 };
 const patchObj = <T extends { [key in S]: M }, S extends keyof T, M extends Callable>(
-		obj: T,
-		method: S,
-		transformer: (code: string) => string,
-		skipLog?: boolean,
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		locals: { [key: string]: any } = {},
-		name?: string) => {
+	obj: T,
+	method: S,
+	transformer: (code: string) => string,
+	skipLog?: boolean,
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	locals: { [key: string]: any; } = {},
+	name?: string) => {
 	// biome-ignore lint/suspicious/noAssignInExpressions: no u
 	return obj[method] = patch(obj[method], transformer, skipLog, locals, name ?? method.toString());
 };
@@ -70,7 +71,7 @@ const patchRegexG = new RegExp(patchObjRegex, 'g');
 const patchObjRegexG = new RegExp(patchObjRegex, 'g');
 const ARGS_RX = /^\s*\w+(?:\s\w*)?\((?<args>.*?)\)|^\s*\((?<args>.*?)\)\s*=>|^\s*(?<args>\w+)\s*=>/;
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-const postModuleHook = <T, A extends any[]>(name: string, module: (...deps: A) => T, hook: (mod: T, ...args: A) => any, locals: { [key: string]: any } = {}) => {
+const postModuleHook = <T, A extends any[]>(name: string, module: (...deps: A) => T, hook: (mod: T, ...args: A) => any, locals: { [key: string]: any; } = {}) => {
 	const args = module.toString().match(ARGS_RX)?.groups?.args ?? '';
 	const hookContents = `((module, ...args) => (${hook.toString()
 		.replace(patchObjRegex, `(__uclrn_${patchObj.name} = ${patchObj.toString()})`)
@@ -105,7 +106,7 @@ const courseIconsCode = courseIcons.toString();
 const initCmsCode = initCms.toString();
 
 function optimiseJs(js: string) {
-	if(DEBUG) {
+	if (DEBUG) {
 		console.time("optimiseJs");
 		const unknownJs = js
 			.replaceAll(
@@ -118,7 +119,7 @@ function optimiseJs(js: string) {
 			)
 			.replaceAll(/\/\/.*?$/gm, "")
 			.replaceAll(/^[\s\n;]+(?:^|\Z)/gm, "");
-		if(unknownJs) {
+		if (unknownJs) {
 			console.warn("Excess code in courseIndex!!", unknownJs);
 		}
 		console.timeEnd("optimiseJs");
@@ -176,7 +177,7 @@ function optimiseJs(js: string) {
 window.__uclearn_hooks = {
 	_debug_values: [],
 	async templateCacheGet(courseId) {
-		if(DEBUG) return {};
+		if (DEBUG) return {};
 		const cacheStore = await uclearnDB.openStore('courseIndex');
 		return await DatabaseHandler.prepare(cacheStore.get(courseId)) ?? {};
 	},
@@ -194,15 +195,15 @@ window.__uclearn_hooks = {
 	}
 };
 
-type DefineArgs = 
+type DefineArgs =
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	| [config: { [key: string]: any }]
+	| [config: { [key: string]: any; }]
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	| [func: () => any]
 	// biome-ignore lint/complexity/noBannedTypes: <explanation>
 	| [deps: string[], ready: Function]
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	| [ready: (require: Require, exports: { [key: string]: any }, module: RequireModule) => any]
+	| [ready: (require: Require, exports: { [key: string]: any; }, module: RequireModule) => any]
 	// biome-ignore lint/complexity/noBannedTypes: <explanation>
 	| [name: string, deps: string[], ready: Function]
 	// biome-ignore lint/complexity/noBannedTypes: <explanation>
@@ -335,30 +336,30 @@ const patchYUIModule: (...args: Parameters<typeof YUI.add>) => Parameters<typeof
 							/(if\s*\(\s*i\s*\(\s*t\s*\)\s*\)(?:\s*\{)?)\s*while\s*\((\w+)\)\s*{(.*?)}/,
 							(match, prefix: string, node: string, body: string) => {
 								let list: string | undefined = undefined;
-								for(const match of body.matchAll(/(\w+)\s*\.\s*push\s*\(\s*(\w+)\s*,?\s*\)/g)) {
-									if(match[2] !== node) continue;
+								for (const match of body.matchAll(/(\w+)\s*\.\s*push\s*\(\s*(\w+)\s*,?\s*\)/g)) {
+									if (match[2] !== node) continue;
 									list = match[1];
 									break;
 								}
-								if(!list) {
-									if(DEBUG) console.error('Could not find location of list variable in', fn);
+								if (!list) {
+									if (DEBUG) console.error('Could not find location of list variable in', fn);
 									return match; // Fail gracefully, no optimisation
 								}
-								
+
 								let root: string | undefined = undefined;
-								for(const match of body.matchAll(/(\w+)\s*===?\s*(\w+)/g)) {
-									if(match[1] !== node && match[2] !== node) continue;
+								for (const match of body.matchAll(/(\w+)\s*===?\s*(\w+)/g)) {
+									if (match[1] !== node && match[2] !== node) continue;
 									root = match[match[1] !== node ? 1 : 2];
 									break;
 								}
-								if(!root) {
-									if(DEBUG) console.error('Could not find location of root variable in', fn);
+								if (!root) {
+									if (DEBUG) console.error('Could not find location of root variable in', fn);
 									return match; // Fail gracefully, no optimisation
 								}
 
 								const selector = src.match(/^\s*(?:function\s+)?\w+\s*\((?<args>.*?)\)\s*{|^\s*(?<args>\w+)\s*=>|^\s*\((?<args>.*?)\)\s*=>/)?.groups?.args;
-								if(!selector) {
-									if(DEBUG) console.error('Could not find location of selector parameter in', fn);
+								if (!selector) {
+									if (DEBUG) console.error('Could not find location of selector parameter in', fn);
 									return match; // Fail gracefully, no optimisation
 								}
 
@@ -371,7 +372,7 @@ const patchYUIModule: (...args: Parameters<typeof YUI.add>) => Parameters<typeof
 											${node} = ${node}.parentNode));`
 									.replaceAll(/[\n\s]+/g, '');
 							}),
-						);
+					);
 				}, { [getRemappedName(() => fn)]: fn });
 			break;
 		case 'selector':

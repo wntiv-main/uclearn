@@ -7,6 +7,19 @@
 		background-color: transparent !important;
 	}
 
+	a {
+		color: var(--uclearn-color-link);
+	}
+
+	.activity-navigation .float-end {
+		float: none !important;
+		display: contents;
+	}
+
+	.activity-navigation .row>:has(.urlselect) {
+		align-self: center;
+	}
+
 	/* * {
 		margin: 0 !important;
 		padding: 0 !important;

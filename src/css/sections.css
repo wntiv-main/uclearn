@@ -24,7 +24,7 @@
 	/* Cards */
 
 	.card {
-		background-color: red;
+		background-color: var(--uclearn-card-background);
 		margin: 0;
 	}
 

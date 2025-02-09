@@ -8,6 +8,7 @@ src/static/python-typeshed.zip
 src/static/index.js
 src/static/hydration-worker.js
 src/static/index.css
+src/static/ace-code-shadow.css
 src/static/highlight.js/
 src/static/python-stdlib.zip
 src/static/_metadata/

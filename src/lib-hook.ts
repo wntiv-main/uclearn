@@ -5,6 +5,8 @@ import type UCModalRegistry from './ucinterfaces/ModalRegistry';
 import type UCModalEvents from './ucinterfaces/ModalEvents';
 import type UCToast from './ucinterfaces/Toast';
 import { maybeUnwrap, type MapType, type MaybeUnwrap } from "./global/util";
+import { getRemappedName, patch, tailHook } from "./patch";
+import { onPreHydrate } from "./navigation";
 
 let _require_promise: Promise<Require>;
 export async function getRequire() {
@@ -35,6 +37,9 @@ type ModuleTypesMap = {
 		initAceHighlighting(config: unknown & object): PromiseLike<void>;
 		initAceInteractive(config: unknown & { button_label: string; }): PromiseLike<void>;
 	};
+	"block_recentlyaccessedcourses/main": {
+		init(userid: number, root: Element): void;
+	};
 };
 
 export async function requireModule<T extends (keyof ModuleTypesMap)[]>(...deps: T) {
@@ -46,6 +51,56 @@ export const videoJS = requireModule('media_videojs/video-lazy');
 export const modals = requireModule('core/modal_registry', 'core/modal_events');
 export const Toast = requireModule('core/toast');
 export const initAce = requireModule('filter_ace_inline/ace_inline_code');
+
+type RequireFunctionDeps<T extends (keyof ModuleTypesMap)[]> = { [K in keyof T]: ModuleTypesMap[T[K]] };
+
+type DefineArgs<K extends keyof ModuleTypesMap = keyof ModuleTypesMap, D extends (keyof ModuleTypesMap)[] = (keyof ModuleTypesMap)[]> =
+	| [config: { [key: string]: unknown; }]
+	| [func: () => unknown]
+	| [ready: (...deps: RequireFunctionDeps<D>) => unknown]
+	| [ready: (require: Require, exports: { [key: string]: unknown; }, module: RequireModule) => unknown]
+	| [name: K, deps: D, (...deps: RequireFunctionDeps<D>) => ModuleTypesMap[K]]
+	| [name: K, () => ModuleTypesMap[K]];
+
+function patchDefine(define: RequireDefine) {
+	return new Proxy(define, {
+		apply(target, thisArg, argArray) {
+			const args = argArray as DefineArgs;
+			if (!(typeof args[0] === 'string')) return Reflect.apply(target, thisArg, argArray);
+			let name: keyof ModuleTypesMap = argArray[0];
+			let deps: (keyof ModuleTypesMap)[];
+			let ready: (..._deps: RequireFunctionDeps<typeof deps>) => ModuleTypesMap[typeof name];
+			if (argArray.length === 2) {
+				[name, ready] = argArray;
+				deps = [];
+			} else[name, deps, ready] = argArray;
+			switch (name) {
+				case "block_recentlyaccessedcourses/main": {
+					ready = tailHook(
+						ready,
+						() => { onPreHydrate(() => { visibleCoursesId = null; }); },
+						{ [getRemappedName(() => onPreHydrate)]: onPreHydrate },
+						`<module init: ${name}>`,
+					);
+					break;
+				}
+			}
+			return Reflect.apply(target, thisArg, [name, deps, ready]);
+		}
+	});
+}
+
+declare let visibleCoursesId: string | null;
+getRequire().then(() => {
+	window.define = patchDefine(window.define);
+	// let _internalDefine: RequireDefine = patchDefine(window.define);
+	// Object.defineProperty(window, 'define', {
+	// 	get: () => _internalDefine,
+	// 	set(v) {
+	// 		_internalDefine = patchDefine(v);
+	// 	},
+	// });
+});
 
 // biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
 let YUICallbacks: ((Y: YUI) => boolean | void)[] = [];

@@ -9,9 +9,9 @@ export function assertNever(value: never): asserts value is never {
 }
 
 export function compareClasses(classListA: DOMTokenList, classListB: DOMTokenList) {
-	if(classListA.length !== classListB.length) return false;
-	for(const item of classListA) {
-		if(!classListB.contains(item)) return false;
+	if (classListA.length !== classListB.length) return false;
+	for (const item of classListA) {
+		if (!classListB.contains(item)) return false;
 	}
 	return true;
 }

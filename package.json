@@ -7,18 +7,19 @@
 		"dev:hydration:scripting": "export UCLEARN_DEBUG_FLAGS=HYDRATION,SCRIPTING && bun run dev",
 		"dev": "export UCLEARN_DEBUG=1 && run-s clean:dev dev:static dev:watchers",
 		"dev:static": "cmd /C \"mklink /J build src\\static & mklink /J build\\highlight.js node_modules\\highlight.js\\styles\" && ls src/static/python-typeshed.zip || (cd node_modules/typeshed && bestzip ../../build/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 0 && cd ../..)",
-		"dev:watchers": "run-p -r -l dev:scripts dev:hydration-worker dev:css dev:reload-watcher-server",
+		"dev:watchers": "run-p -r -l dev:scripts dev:hydration-worker dev:css-watcher dev:reload-watcher-server",
 		"dev:scripts": "bun build --outfile=build/index.js src/index.ts --env \"UCLEARN_*\" --watch",
 		"dev:hydration-worker": "bun build --outfile=build/hydration-worker.js src/hydration-worker/index.ts --env \"UCLEARN_*\" --watch",
-		"dev:css": "bun onchange -i src/css/*.css -- lightningcss --bundle src/css/index.css -o build/index.css",
+		"dev:css-watcher": "bun onchange -i src/css/*.css -- bun run dev:css",
+		"dev:css": "lightningcss --bundle src/css/index.css -o build/index.css && lightningcss --bundle src/css/ace-code-shadow.css -o build/ace-code-shadow.css",
 		"dev:reload-watcher-server": "bun run ./devserver.ts",
 		"build": "export UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && run-s clean:dev clean:build bundle build:scripts build:hydration-worker build:css",
 		"build:scripts": "bun build --outfile=dist/index.js src/index.ts --drop=DOMInspector --drop=console --env \"UCLEARN_*\" --minify",
 		"build:hydration-worker": "bun build --outfile=dist/hydration-worker.js src/hydration-worker/index.ts --drop=console --env \"UCLEARN_*\" --minify",
-		"build:css": "bun lightningcss --minify --bundle src/css/index.css -o dist/index.css",
-		"bundle": "mkdir dist && cp -R src/static/* dist && rm dist/manifest.json dist/dev-* && mv dist/manifest.production.json dist/manifest.json && mkdir dist/highlight.js && cmd /C \"xcopy /s node_modules\\highlight.js\\styles dist\\highlight.js\" && cd node_modules/typeshed && bestzip ../../dist/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 9 && cd ../..",
+		"build:css": "lightningcss --minify --bundle src/css/index.css -o dist/index.css && lightningcss --minify --bundle src/css/ace-code-shadow.css -o dist/ace-code-shadow.css",
+		"bundle": "mkdir dist && cp -R src/static/* dist && rm dist/manifest.json dist/**/dev-* && mv dist/manifest.production.json dist/manifest.json && mkdir dist/highlight.js && cmd /C \"xcopy /s node_modules\\highlight.js\\styles dist\\highlight.js\" && cd node_modules/typeshed && bestzip ../../dist/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 9 && cd ../..",
 		"clean:build": "rm -r -f dist",
-		"clean:dev": "(rm -r -f src/static/index.js src/static/python-stdlib.zip src/static/hydration-worker.js src/static/index.css || true) && cmd /C \"rd src\\static\\highlight.js & rd build\" || true"
+		"clean:dev": "(rm -r -f src/static/index.js src/static/python-stdlib.zip src/static/hydration-worker.js src/static/index.css src/static/ace-code-shadow.css || true) && cmd /C \"rd src\\static\\highlight.js & rd build\" || true"
 	},
 	"devDependencies": {
 		"@trevorhanus/mathquill-types": "https://github.com/trevorhanus/mathquill-types",
@@ -33,7 +34,7 @@
 		"watcher": "^2.3.1"
 	},
 	"peerDependencies": {
-		"typescript": "^5.0.0"
+		"typescript": "^5.7.3"
 	},
 	"dependencies": {
 		"@typefox/pyright-browser": "^1.1.299",

@@ -1,4 +1,4 @@
-const INJECT_URLS = ["*://learn.canterbury.ac.nz/*", "*://preuc.canterbury.ac.nz/*"];
+const INJECT_URLS = ["*://learn.canterbury.ac.nz/*", "*://preuc.canterbury.ac.nz/*", "*://timetable.canterbury.ac.nz/*"];
 
 function startSocket() {
 	/** @type WebSocket */
@@ -22,7 +22,7 @@ function startSocket() {
 					: ["Change detected in js - reload to update!", { type: 'warning' }];
 		for(const tab of await chrome.tabs.query({ url: INJECT_URLS }))
 			chrome.scripting.executeScript({
-				func: (args) => window.require?.(['core/toast'], toast => toast.add(...args)),
+				func: (args) => window.require ? window.require(['core/toast'], toast => toast.add(...args)) : console.log(...args),
 				args: [toastMessage],
 				injectImmediately: true,
 				world: "MAIN",
@@ -56,7 +56,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 	startSocket();
 
 	for(const tab of await chrome.tabs.query({ url: INJECT_URLS })) {
-		await chrome.scripting.executeScript({
+		chrome.scripting.executeScript({
 			files: ['dev-watcher-content-script.js'],
 			injectImmediately: true,
 			target: { tabId: tab.id },

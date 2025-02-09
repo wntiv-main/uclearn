@@ -18,6 +18,10 @@
 	.count-container {
 		background-color: #ca3120;
 		color: #ffffff;
+		font-size: 0.7em;
+		line-height: 1em;
+		right: 3px;
+		top: 50%;
 	}
 
 	.popover-region-container {
@@ -54,6 +58,8 @@
 
 		.popover-region-footer-container {
 			background-color: transparent;
+			height: auto;
+			padding-block: 3px;
 		}
 
 		.content-item-container {
@@ -63,11 +69,33 @@
 		.navbar & {
 			top: calc(100% + 3px);
 		}
+
+		.see-all-link {
+			border-bottom-left-radius: inherit;
+			border-bottom-right-radius: inherit;
+
+			color: inherit;
+			text-decoration: none;
+			display: block;
+			transition: background-color var(--uclearn-transition-short);
+
+			&:is(:hover, :focus-visible) {
+				background-color: var(--uclearn-hover-tint);
+			}
+
+			&:active {
+				background-color: var(--uclearn-active-tint);
+			}
+		}
 	}
 
 	.notification {
 		display: grid;
 		grid-template: "icon header header"max-content "icon time link"max-content / max-content 1fr max-content;
+
+		a:not(.view-more) {
+			color: inherit;
+		}
 
 		:has(.notification-image, .notification-message, .timestamp) {
 			display: contents;

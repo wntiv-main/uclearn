@@ -22,26 +22,13 @@
 	background-position: center;
 
 	/* Theme */
-	@media (prefers-color-scheme: dark) {
-		& {
-			color-scheme: dark;
-		}
-	}
-
-	&.uclearn-dark-mode {
-		color-scheme: dark;
-	}
-
-	&.uclearn-light-mode {
-		color-scheme: light;
-	}
 
 	&:has(>#page-login-index) {
 		display: grid;
 	}
 
 	img[src^="https://learn.canterbury.ac.nz/pix/"] {
-		filter: var(--uclearn-graph-translucent-filter);
+		filter: var(--uclearn-translucent-filter);
 	}
 
 	.que img {
@@ -94,7 +81,7 @@
 		}
 
 		img[src^="https://learn.canterbury.ac.nz/pix/"] {
-			filter: var(--uclearn-graph-translucent-filter) invert(1) hue-rotate(180deg);
+			filter: var(--uclearn-translucent-filter) invert(1) hue-rotate(180deg);
 		}
 
 		.que img {
@@ -121,7 +108,7 @@
 	}
 
 	#page-wrapper .graphimage {
-		filter: var(--uclearn-translucent-filter);
+		filter: var(--uclearn-graph-translucent-filter);
 		margin: -30px;
 		width: calc(100% + 60px);
 		user-select: none;

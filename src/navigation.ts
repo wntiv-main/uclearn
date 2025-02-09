@@ -5,9 +5,18 @@ import { DEBUG } from './global/constants';
 import { type _HydrationStages, type HydrationConfig, type HydrationStage, precomputeStages } from "./global/hydration";
 import { update } from './global/util';
 import { hydrate, SKIP_HYDRATION_CLASS } from './hydration';
-import { getYUIInstance, initAce, modals, Toast, videoJS } from './lib-hook';
+import { getYUIInstance, modals, Toast, videoJS } from './lib-hook';
 
 let vjs: typeof VideoJS;
+
+const preHydrateHooks: (() => void)[] = [];
+const postHydrateHooks: (() => void)[] = [
+	// Quiz timer needs restart
+	() => window.M?.mod_quiz?.timer?.update(),
+];
+
+export const onPreHydrate = Array.prototype.push.bind(preHydrateHooks);
+export const onPostHydrate = Array.prototype.push.bind(postHydrateHooks);
 
 type HydrationHint = [
 	| string
@@ -38,6 +47,7 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 	);
 	updateProgress([], 'parsing', 1);
 	if (new URL(resp.url).pathname !== location.pathname) (window as { setupDone?: boolean; }).setupDone = false;
+	for (const hook of preHydrateHooks) try { hook(); } catch (e) { console.error('Error in pre-hydrate hook', e); }
 	console.log(updated);
 	let needsCourseIndexRefresh = false;
 	for (const script of updated.querySelectorAll('script')) {
@@ -104,7 +114,7 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 	}
 	if (!elPairs.length) elPairs.push([':root',
 		document.getElementById('page-wrapper') ?? document.body,
-		updated.getElementById('page-wrapper') ?? updated.body, {}]);
+		updated.getElementById('page-wrapper') ?? updated.body, { updateUpTree: true, weight: 10 }]);
 	const stages = precomputeStages(elPairs.map(pair => pair[3].weight ?? 1));
 	for (let i = 0; i < elPairs.length; i++) {
 		const [name, left, right, config] = elPairs[i];
@@ -118,16 +128,12 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 		});
 	}
 	console.timeEnd('hydration');
-	// Quiz timer needs restart
-	try { window.M?.mod_quiz?.timer?.update(); } catch (e) { console.warn(e); }
-	window.aceInlineCodeHighlightingDone &&= false;
-	window.aceInlineCodeInteractiveDone &&= false;
-	(await initAce).initAceHighlighting({});
-	(await initAce).initAceInteractive({ button_label: "Try it!" });
+	for (const hook of postHydrateHooks) try { hook(); } catch (e) { console.error('Error in post-hydrate hook', e); }
 	document.querySelector("#mod_quiz_navblock .thispage")?.scrollIntoView({
 		behavior: 'smooth',
 		block: 'center',
 	});
+	document.title = updated.title;
 	updateProgress([], 'closed', 0);
 	if (DEBUG) (await Toast).add(`Hydration in ${((performance.now() - startTime) / 1000).toFixed(2)}s`, { type: 'success' });
 }
@@ -243,9 +249,10 @@ function updateProgress(stages: _HydrationStages, stage: HydrationStage, percent
 		return el;
 	})();
 	if (stage === 'closed') {
-		setTimeout(() => {
-			if (loadingEl) loadingEl.style.width = '0';
-		}, 300);
+		// setTimeout(() => {
+		// 	if (loadingEl) 
+		// }, 300);
+		loadingEl.style.width = '0';
 		return;
 	}
 	let totalProgress = 0;
@@ -255,7 +262,7 @@ function updateProgress(stages: _HydrationStages, stage: HydrationStage, percent
 		totalProgress += 0.1 + totalProgress * 0.1;
 	else {
 		const [pre, current] = stages[stage.stage];
-		totalProgress += pre + current * (stage.partial + percentage) / 2;
+		totalProgress += 0.2 + 0.8 * (pre + current * (stage.partial + percentage) / 2);
 	}
 	loadingEl.ariaValueNow = `${100 * totalProgress}`;
 	loadingEl.style.width = `${100 * totalProgress}%`;
@@ -329,6 +336,19 @@ export async function initNavigator() {
 		if (target.origin !== location.origin) return; // Cross-origin
 		if (/\.(?!x?html?|php)\w+$/i.test(target.pathname)) return; // not html
 		e.preventDefault();
+		const scrollPos = document.getElementById("page")?.scrollTop;
+		// TODO: is this good
+		if (link.href.startsWith('#')) {
+			// hash change only
+			const el = link.href && document.getElementById(link.href.substring(1));
+			if (el) el.scrollIntoView({
+				block: 'center',
+				inline: 'center',
+				behavior: 'smooth',
+			});
+			history.pushState({ scrollPos }, "", new URL(link.href));
+			return;
+		}
 		const [resp, content] = await safeFetch(link.href, {
 			method: "GET",
 			onProgress: (loaded, total) =>
@@ -336,8 +356,11 @@ export async function initNavigator() {
 			onError: () =>
 				updateProgress([], 'closed', 0),
 		});
-		const scrollPos = document.getElementById("page")?.scrollTop;
-		document.getElementById("page")?.scrollTo(0, 0);
+		document.getElementById("page")?.scrollTo({
+			behavior: 'instant',
+			left: 0,
+			top: 0,
+		});
 		const toHydrate: HydrationHint[] = [];
 		if (link.id.startsWith('quiznavbutton')
 			|| link.classList.contains('mod_quiz-next-nav')
@@ -366,6 +389,7 @@ export async function initNavigator() {
 	});
 
 	window.addEventListener("popstate", async (e) => {
+		if (!e.state) return;
 		const [resp, content] = await safeFetch(location.href, {
 			method: "GET",
 			onProgress: (loaded, total) =>

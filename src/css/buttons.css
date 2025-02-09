@@ -9,13 +9,14 @@
 	.message-app :is(.view-overview-body, [data-region="view-contacts"]) :is(.list-group-item, .overview-section-toggle),
 	.block-add.btn,
 	.custom-select,
-	.activity,
+	/* .activity, */
 	.closewidget .btn-link,
 	.message-app [data-route="view-contacts"],
 	.moodle-dialogue-base .closebutton,
 	.generaltable tr,
 	.notification,
 	.courseindex-item,
+	.navbar-brand,
 	.drawertoggle.btn {
 		--uclearn-background-tint: transparent;
 		background-color: transparent;
@@ -199,6 +200,46 @@
 				}
 			}
 		}
+	}
+
+	/* Link buttons */
+
+	.aabtn:not(.navbar-brand),
+	a.btn.btn-link,
+	.breadcrumb-item a {
+		--uclearn-background-tint: transparent;
+		display: inline-block;
+		border-radius: calc(var(--uclearn-radius) / 2);
+		background-color: var(--uclearn-background-tint);
+		color: var(--uclearn-color-link);
+		text-decoration: none;
+		text-wrap-style: balance;
+		place-content: center;
+		padding: 3px;
+
+		&:is(:hover, :focus-visible) {
+			--uclearn-background-tint: var(--uclearn-hover-tint);
+		}
+
+		&:active {
+			--uclearn-background-tint: var(--uclearn-active-tint);
+		}
+	}
+
+	.breadcrumb-item a {
+		padding-block: 0;
+		box-shadow: 0 0 0 3px var(--uclearn-background-tint);
+		transition: box-shadow var(--uclearn-transition-short),
+			background-color var(--uclearn-transition-short);
+	}
+
+	.activity-navigation .row {
+		align-items: stretch;
+	}
+
+	.activity-navigation .btn-link {
+		width: 100%;
+		height: 100%;
 	}
 
 	/* Cheverons */

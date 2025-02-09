@@ -5,19 +5,12 @@
 	if(!linkEl) {
 		const css = document.createElement("link");
 		css.id = CSS_ID;
-		css.classList.add('__uclearn-skip-reload', '__uclearn-hydrate-remove');
 		css.rel = "stylesheet";
-		css.href = chrome.runtime.getURL('index.css');
+		css.href = chrome.runtime.getURL('timetable/index.css');
 		document.documentElement.prepend(css);
 	} else if(linkEl.classList.contains(CSS_RELOAD_CLASS)) {
 		linkEl.classList.remove(CSS_RELOAD_CLASS);
 		// biome-ignore lint/correctness/noSelfAssign: forces reload
 		linkEl.href = linkEl.href;
-		for(const el of document.getElementsByClassName('__uclearn-code-editor-container')) {
-			const shadowLink = el.shadowRoot.getElementById('__uclearn-ace-code-shadow');
-			if(!shadowLink) continue;
-			// biome-ignore lint/correctness/noSelfAssign: forces reload
-			shadowLink.href = shadowLink.href;
-		}
 	}
 })();
