@@ -1,6 +1,12 @@
 @import "globals.css";
 
 :root:root:root:root:root:root:root:root {
+	background-image: var(--uclearn-background-image);
+	background-attachment: fixed;
+	background-size: cover;
+	background-position: center;
+	color: var(--uclearn-foreground);
+
 	#uc {
 		display: none;
 	}
@@ -11,14 +17,34 @@
 
 	.aplus-container {
 		max-width: none;
-		background-color: var(--uclearn-background);
-		color: var(--uclearn-foreground);
+		background-color: transparent;
+		color: inherit;
 	}
 
 	.aplus-container #dialog {
 		background-color: var(--uclearn-translucent-bg);
 		backdrop-filter: var(--uclearn-bg-effect);
 		box-shadow: 0 0 20px 0 var(--uclearn-shadow-color);
+	}
+
+	.module {
+		background-color: transparent;
+		border: none;
+		border-radius: var(--uclearn-radius);
+
+		&::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background-color: var(--uclearn-translucent-bg);
+			backdrop-filter: var(--uclearn-bg-effect);
+			z-index: -1;
+		}
+	}
+
+	.aplus-container .profile .module .profile-info {
+		border: none;
+		min-height: 0;
 	}
 
 	.dhx_cal_tab, .dhx_cal_date, .dhx_cal_today_button, .dhx_cal_prev_button, .dhx_cal_next_button {
@@ -28,14 +54,17 @@
 	.dhx_cal_container,
 	.dhx_scale_bar,
 	.dhx_scale_hour,
-	.aplus-container .subject-list li,
-	.module {
+	.aplus-container .subject-list li {
 		background-color: transparent;
 	}
 
 	.aplus-container .module .lower_sec,
 	.dhx_cal_data {
 		scrollbar-color: currentColor transparent;
+	}
+
+	.aplus-container .module .lower_sec:has(>.subject-list) {
+		padding-inline: 0;
 	}
 
 	.dhx_scale_hour {
@@ -64,5 +93,26 @@
 	.aplus-container .dhx_cal_event.event_nocolor_default_dashed>div {
 		background-color: #4477bb40 !important;
 		color: inherit;
+	}
+
+	.aplus-container .top-bar {
+		background-color: var(--uclearn-accent-color);
+	}
+
+	.aplus-container ul.top-menu li a {
+		color: inherit;
+		transition: background-color var(--uclearn-transition-short);
+
+		&:is(:hover, :focus) {
+			background-color: var(--uclearn-hover-tint);
+		}
+
+		&:active {
+			background-color: var(--uclearn-active-tint);
+		}
+	}
+
+	.aplus-container input.text {
+		background-color: var(--uclearn-translucent-bg);
 	}
 }

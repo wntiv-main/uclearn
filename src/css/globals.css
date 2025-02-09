@@ -7,6 +7,8 @@
 
 	--uclearn-small-screen-size: var(--breakpoint-lg, 992px);
 
+	--uclearn-background-image: url("chrome-extension://__MSG_@@extension_id__/background.png");
+
 	--uclearn-foreground: light-dark(black, white);
 	--uclearn-background: light-dark(white, #1e1e1e);
 	--uclearn-foreground-muted: hsl(from var(--uclearn-foreground) h s calc(20 + 0.6 * l));
@@ -54,5 +56,12 @@
 
 	&.uclearn-light-mode {
 		color-scheme: light;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		& {
+			--uclearn-background-image: linear-gradient(0deg, var(--uclearn-translucent-bg), var(--uclearn-translucent-bg)),
+				url("chrome-extension://__MSG_@@extension_id__/background.png");
+		}
 	}
 }

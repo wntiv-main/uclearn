@@ -23,8 +23,15 @@
 	],
 	"web_accessible_resources": [
 		{
+			"resources": ["background.png"],
+			"matches": [
+				"*://learn.canterbury.ac.nz/*",
+				"*://preuc.canterbury.ac.nz/*",
+				"*://timetable.canterbury.ac.nz/*"
+			]
+		},
+		{
 			"resources": [
-				"background.png",
 				"fonts/**/*.woff",
 				"learn/hydration-worker.js",
 				"learn/pyright/*.js",
