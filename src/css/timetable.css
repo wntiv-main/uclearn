@@ -1,0 +1,68 @@
+@import "globals.css";
+
+:root:root:root:root:root:root:root:root {
+	#uc {
+		display: none;
+	}
+
+	#outer-container {
+		top: 0 !important;
+	}
+
+	.aplus-container {
+		max-width: none;
+		background-color: var(--uclearn-background);
+		color: var(--uclearn-foreground);
+	}
+
+	.aplus-container #dialog {
+		background-color: var(--uclearn-translucent-bg);
+		backdrop-filter: var(--uclearn-bg-effect);
+		box-shadow: 0 0 20px 0 var(--uclearn-shadow-color);
+	}
+
+	.dhx_cal_tab, .dhx_cal_date, .dhx_cal_today_button, .dhx_cal_prev_button, .dhx_cal_next_button {
+		color: var(--uclearn-foreground-muted);
+	}
+
+	.dhx_cal_container,
+	.dhx_scale_bar,
+	.dhx_scale_hour,
+	.aplus-container .subject-list li,
+	.module {
+		background-color: transparent;
+	}
+
+	.aplus-container .module .lower_sec,
+	.dhx_cal_data {
+		scrollbar-color: currentColor transparent;
+	}
+
+	.dhx_scale_hour {
+		height: 66px !important;
+		box-sizing: border-box;
+	}
+
+	.dhx_scale_holder {
+		background-image: linear-gradient(to bottom,
+				transparent 0% 50%,
+				var(--uclearn-hover-tint) 50% calc(50% + 1px),
+				transparent calc(50% + 1px) calc(100% - 1px),
+				var(--uclearn-active-tint) calc(100% - 1px) 100%);
+		background-size: auto 44px;
+
+		.aplus-container & {
+			background-size: auto 33px;
+		}
+	}
+
+	.aplus-container .dhx_cal_event.event_color_default>div {
+		background-color: #0066ff40;
+		color: inherit;
+	}
+
+	.aplus-container .dhx_cal_event.event_nocolor_default_dashed>div {
+		background-color: #4477bb40 !important;
+		color: inherit;
+	}
+}

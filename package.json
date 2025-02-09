@@ -11,15 +11,15 @@
 		"dev:scripts": "bun build --outfile=build/learn/index.js src/learn/index.ts --env \"UCLEARN_*\" --watch",
 		"dev:hydration-worker": "bun build --outfile=build/learn/hydration-worker.js src/learn/hydration-worker/index.ts --env \"UCLEARN_*\" --watch",
 		"dev:css-watcher": "bun onchange -i src/css/*.css -- bun run dev:css",
-		"dev:css": "lightningcss --bundle src/css/learn.css -o build/learn/index.css && lightningcss --bundle src/css/ace-code-shadow.css -o build/learn/ace-code-shadow.css",
+		"dev:css": "lightningcss --bundle src/css/learn.css -o build/learn/index.css && lightningcss --bundle src/css/ace-code-shadow.css -o build/learn/ace-code-shadow.css && lightningcss --bundle src/css/timetable.css -o build/timetable/index.css",
 		"dev:reload-watcher-server": "bun run ./devserver.ts",
 		"build": "export UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && run-s clean:dev clean:build bundle build:scripts build:hydration-worker build:css",
 		"build:scripts": "bun build --outfile=dist/learn/index.js src/learn/index.ts --drop=DOMInspector --drop=console --env \"UCLEARN_*\" --minify",
 		"build:hydration-worker": "bun build --outfile=dist/learn/hydration-worker.js src/learn/hydration-worker/index.ts --drop=console --env \"UCLEARN_*\" --minify",
-		"build:css": "lightningcss --minify --bundle src/css/learn.css -o dist/learn/index.css && lightningcss --minify --bundle src/css/ace-code-shadow.css -o dist/learn/ace-code-shadow.css",
+		"build:css": "lightningcss --minify --bundle src/css/learn.css -o dist/learn/index.css && lightningcss --minify --bundle src/css/ace-code-shadow.css -o dist/learn/ace-code-shadow.css && lightningcss --minify --bundle src/css/timetable.css -o dist/timetable/index.css",
 		"bundle": "mkdir dist && cp -R src/static/* dist && rm dist/manifest.json dist/**/dev-* && mv dist/manifest.production.json dist/manifest.json && mkdir dist/learn/highlight.js && cmd /C \"xcopy /s node_modules\\highlight.js\\styles dist\\learn\\highlight.js\" && cd node_modules/typeshed && bestzip ../../dist/learn/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 9 && cd ../..",
 		"clean:build": "rm -r -f dist",
-		"clean:dev": "(rm -r -f src/static/learn/index.js src/static/learn/hydration-worker.js src/static/learn/index.css src/static/learn/ace-code-shadow.css || true) && cmd /C \"rd src\\static\\learn\\highlight.js & rd build\" || true"
+		"clean:dev": "(rm -r -f src/static/learn/index.js src/static/learn/hydration-worker.js src/static/learn/index.css src/static/timetable/index.css src/static/learn/ace-code-shadow.css || true) && cmd /C \"rd src\\static\\learn\\highlight.js & rd build\" || true"
 	},
 	"devDependencies": {
 		"@trevorhanus/mathquill-types": "https://github.com/trevorhanus/mathquill-types",
