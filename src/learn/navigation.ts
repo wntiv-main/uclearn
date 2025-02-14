@@ -9,6 +9,8 @@ import { getYUIInstance, modals, Toast, videoJS } from './lib-hook';
 
 let vjs: typeof VideoJS;
 
+// let hydrationController: AbortController = new AbortController();
+
 const preHydrateHooks: (() => void)[] = [];
 const postHydrateHooks: (() => void)[] = [
 	// Quiz timer needs restart
@@ -338,15 +340,16 @@ export async function initNavigator() {
 		e.preventDefault();
 		const scrollPos = document.getElementById("page")?.scrollTop;
 		// TODO: is this good
-		if (link.href.startsWith('#')) {
+		if (target.host === location.host && target.pathname === location.pathname && target.search === location.search) {
 			// hash change only
-			const el = link.href && document.getElementById(link.href.substring(1));
-			if (el) el.scrollIntoView({
-				block: 'center',
-				inline: 'center',
-				behavior: 'smooth',
-			});
-			history.pushState({ scrollPos }, "", new URL(link.href));
+			// const el = target.hash.length > 1 && document.getElementById(target.hash.substring(1));
+			// if (el) el.scrollIntoView({
+			// 	block: 'center',
+			// 	inline: 'center',
+			// 	behavior: 'smooth',
+			// });
+			// history.pushState({ scrollPos }, "", target);
+			location.hash = target.hash;
 			return;
 		}
 		const [resp, content] = await safeFetch(link.href, {
@@ -355,12 +358,12 @@ export async function initNavigator() {
 				total && updateProgress([], 'fetching', loaded / total),
 			onError: () =>
 				updateProgress([], 'closed', 0),
+			// signal: hydrationController.signal
 		});
-		document.getElementById("page")?.scrollTo({
-			behavior: 'instant',
-			left: 0,
-			top: 0,
-		});
+		if (!resp.headers.get('Content-Type')?.includes('html')) {
+			location.assign(target);
+			return;
+		}
 		const toHydrate: HydrationHint[] = [];
 		if (link.id.startsWith('quiznavbutton')
 			|| link.classList.contains('mod_quiz-next-nav')
@@ -370,6 +373,11 @@ export async function initNavigator() {
 			toHydrate.push(['#page-footer']);
 		}
 		await hydrateFromResponse(resp, content, toHydrate);
+		document.getElementById("page")?.scrollTo({
+			behavior: 'instant',
+			left: 0,
+			top: 0,
+		});
 		const newLocation = new URL(resp.url);
 		const oldSearch = new URLSearchParams(location.search);
 		let searchesMatch = true;

@@ -1,3 +1,14 @@
+:root:root {
+	.aalink,
+	a.autolink,
+	#page-footer a:not([class]),
+	.arrow_link,
+	a:not([class]),
+	.activityinstance > a {
+		box-shadow: none;
+	}
+}
+
 :root:root:root:root:root:root:root:root {
 	* {
 		background-color: transparent;
@@ -16,7 +27,7 @@
 		display: contents;
 	}
 
-	.activity-navigation .row>:has(.urlselect) {
+	.activity-navigation .row > :has(.urlselect) {
 		align-self: center;
 	}
 
@@ -35,11 +46,16 @@
 		max-width: 100%;
 	} */
 
-	[class^="row-cols-"], [class*=" row-cols-"] {
+	:is(h1, h2, h3):has(br:only-child) {
+		display: none;
+	}
+
+	[class^="row-cols-"],
+	[class*=" row-cols-"] {
 		display: grid;
 		grid-template-columns: repeat(var(--uclearn-column-count, 1), 1fr);
 
-		>* {
+		> * {
 			max-width: none;
 		}
 	}
@@ -74,7 +90,8 @@
 		max-width: 100%
 	} */
 
-	[class^="col-"], [class*=" col-"] {
+	[class^="col-"],
+	[class*=" col-"] {
 		max-width: none;
 	}
 
@@ -507,7 +524,8 @@
 		height: 100%;
 	}
 
-	.bg-white, .bg-light {
+	.bg-white,
+	.bg-light {
 		background-color: transparent !important;
 	}
 
@@ -542,7 +560,7 @@
 	.form-control,
 	.popover-body,
 	.custom-select,
-	.course-section .sectionname>a,
+	.course-section .sectionname > a,
 	.yui3-button,
 	.table,
 	.generaltable,
@@ -567,7 +585,15 @@
 		padding: 0;
 	}
 
-	.dropdown-menu:not(:has(.dropdown-item:is([aria-current="true"], [aria-selected="true"]))) .dropdown-item {
+	.dropdown-menu:not(
+			:has(
+					.dropdown-item:is(
+							[aria-current="true"],
+							[aria-selected="true"]
+						)
+				)
+		)
+		.dropdown-item {
 		padding-inline: 0.75rem;
 	}
 
@@ -627,14 +653,19 @@
 		padding-top: 0.5rem;
 		margin-inline: -10px;
 		padding-inline: 10px;
-		mask-image: linear-gradient(to right, transparent 0%, white 10px calc(100% - 10px), transparent 100%);
+		mask-image: linear-gradient(
+			to right,
+			transparent 0%,
+			white 10px calc(100% - 10px),
+			transparent 100%
+		);
 	}
 
 	tr.spacer {
 		height: 0;
 	}
 
-	.block_multiblock:has(.multiblock):not(:has(.multiblock .row>*)) {
+	.block_multiblock:has(.multiblock):not(:has(.multiblock .row > *)) {
 		display: none;
 	}
 }

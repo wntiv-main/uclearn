@@ -18,6 +18,7 @@
 	"host_permissions": [
 		"*://learn.canterbury.ac.nz/*",
 		"*://preuc.canterbury.ac.nz/*",
+		"*://*.csse.canterbury.ac.nz/*",
 		"*://timetable.canterbury.ac.nz/*",
 		"*://login.microsoftonline.com/*"
 	],
@@ -27,6 +28,7 @@
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
 				"*://preuc.canterbury.ac.nz/*",
+				"*://*.csse.canterbury.ac.nz/*",
 				"*://timetable.canterbury.ac.nz/*"
 			]
 		},
@@ -42,14 +44,16 @@
 			],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
-				"*://preuc.canterbury.ac.nz/*"
+				"*://preuc.canterbury.ac.nz/*",
+				"*://*.csse.canterbury.ac.nz/*"
 			]
 		},
 		{
 			"resources": ["learn/inspector.css", "learn/highlight.js/*.css"],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
-				"*://preuc.canterbury.ac.nz/*"
+				"*://preuc.canterbury.ac.nz/*",
+				"*://*.csse.canterbury.ac.nz/*"
 			],
 			"match_about_blank": true
 		},
@@ -68,14 +72,22 @@
 		{
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
-				"*://preuc.canterbury.ac.nz/*"
+				"*://preuc.canterbury.ac.nz/*",
+				"*://*.csse.canterbury.ac.nz/*"
 			],
 			"js": ["learn/bootload.js", "learn/dev-watcher-content-script.js"],
 			"run_at": "document_start"
 		},
 		{
 			"matches": ["*://timetable.canterbury.ac.nz/*"],
-			"js": ["timetable/dev-watcher-content-script.js"]
+			"js": ["timetable/index.js"],
+			"world": "MAIN",
+			"run_at": "document_start"
+		},
+		{
+			"matches": ["*://timetable.canterbury.ac.nz/*"],
+			"js": ["timetable/dev-watcher-content-script.js"],
+			"run_at": "document_start"
 		}
 	],
 	"declarative_net_request": {

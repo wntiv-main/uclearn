@@ -1,4 +1,9 @@
-const INJECT_URLS = ["*://learn.canterbury.ac.nz/*", "*://preuc.canterbury.ac.nz/*", "*://timetable.canterbury.ac.nz/*"];
+const INJECT_URLS = [
+	"*://learn.canterbury.ac.nz/*",
+	"*://preuc.canterbury.ac.nz/*",
+	"*://*.csse.canterbury.ac.nz/*",
+	"*://timetable.canterbury.ac.nz/*"
+];
 
 function startSocket() {
 	/** @type WebSocket */
@@ -8,6 +13,7 @@ function startSocket() {
 	} catch(e) {
 		console.warn(e);
 		setTimeout(startSocket, 10e3);
+		return;
 	}
 
 	ws.addEventListener("message", async (e) => {

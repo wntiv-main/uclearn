@@ -3,9 +3,26 @@ import { Toast } from "./lib-hook";
 import { loadPage } from "./page-loader";
 import { DEBUG } from "../global/constants";
 import { patchAceEditor } from "./ace-patches";
+import type MathJax from 'mathjax';
 
 if (DEBUG) window.addEventListener("error", async (e) => {
 	(await Toast).add(e.message, { title: `ERROR in '${e.filename}':`, type: 'danger' });
+});
+
+declare module 'mathjax' {
+	const AuthorConfig: Config;
+}
+
+let _MathJax: typeof MathJax | null = null;
+Object.defineProperty(window, 'MathJax', {
+	get: () => _MathJax,
+	set(v: Partial<typeof MathJax & MathJax.Config>) {
+		if (!_MathJax || v.AuthorConfig) {
+			_MathJax = v as typeof MathJax;
+			return;
+		}
+		_MathJax.Hub.Config(v as MathJax.Config);
+	}
 });
 
 // Fix bug with jquery plugins

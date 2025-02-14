@@ -4,12 +4,12 @@
 		flex-flow: column;
 		gap: 1.5rem;
 
-		>:empty {
+		> :empty {
 			display: none;
 		}
 	}
 
-	.block-timeline :first-child .row+.border-bottom {
+	.block-timeline :first-child .row + .border-bottom {
 		padding: 0 !important;
 	}
 
@@ -99,7 +99,7 @@
 	.card-carousel {
 		margin: -1rem !important;
 		padding: 1rem;
-		column-gap: 1rem;
+		gap: 1rem;
 
 		.col {
 			margin: 0 !important;
@@ -110,13 +110,17 @@
 	.course-card {
 		margin: 0 !important;
 		background-color: transparent;
-		background-image: linear-gradient(0deg, var(--uclearn-card-background), var(--uclearn-card-background));
+		background-image: linear-gradient(
+			0deg,
+			var(--uclearn-card-background),
+			var(--uclearn-card-background)
+		);
 		box-shadow: 1px 2px 4px var(--uclearn-shadow-color) !important;
 		transition: box-shadow var(--uclearn-transition-short),
 			background-color var(--uclearn-transition-short),
 			transform var(--uclearn-transition-short);
 
-		&:is(:hover, :focus-within):not(:has(.dropdown-menu:is(:hover, :focus-within))) {
+		&:is(:hover, :focus-within) {
 			background-color: var(--uclearn-hover-tint);
 			box-shadow: 2px 4px 12px var(--uclearn-shadow-color) !important;
 			transform: translate(-1px, -2px);
@@ -124,6 +128,10 @@
 			& a:not(.dropdown-item) {
 				text-decoration: underline;
 			}
+		}
+
+		&:focus-within {
+			z-index: 1;
 		}
 	}
 
@@ -138,7 +146,7 @@
 		gap: 10px;
 		margin-inline: 0;
 
-		>* {
+		> * {
 			margin: 0;
 		}
 	}
