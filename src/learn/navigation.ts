@@ -131,10 +131,10 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 	}
 	console.timeEnd('hydration');
 	for (const hook of postHydrateHooks) try { hook(); } catch (e) { console.error('Error in post-hydrate hook', e); }
-	document.querySelector("#mod_quiz_navblock .thispage")?.scrollIntoView({
-		behavior: 'smooth',
-		block: 'center',
-	});
+	// document.querySelector("#mod_quiz_navblock .thispage")?.scrollIntoView({
+	// 	behavior: 'smooth',
+	// 	block: 'center',
+	// });
 	document.title = updated.title;
 	updateProgress([], 'closed', 0);
 	if (DEBUG) (await Toast).add(`Hydration in ${((performance.now() - startTime) / 1000).toFixed(2)}s`, { type: 'success' });

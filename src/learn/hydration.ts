@@ -191,20 +191,21 @@ function* precomputeCompare(
 
 type NodeCollectors = {
 	scripts: HTMLScriptElement[];
+	math: Set<Element>;
 };
 
 function handleNodeInsert(node: Node, collectors: NodeCollectors) {
-	if (!isElement(node)) return;
+	if (!isElement(node)) {
+		const math = node.parentElement?.closest(".filter_mathjaxloader_equation");
+		if (math) collectors.math.add(math);
+		return;
+	}
 	if (isElementTag(node, "script")) collectors.scripts.push(node);
 	else collectors.scripts.push(...node.getElementsByTagName("script"));
-	// if (node.classList.contains("filter_mathjaxloader_equation"))
-	// 	MathJax.Hub.Queue(["Typeset", MathJax.Hub, m]);
-	// else
-	// 	state.math.push(
-	// 		...newNode.getElementsByClassName(
-	// 			"filter_mathjaxloader_equation",
-	// 		),
-	// 	);
+	if (node.classList.contains("filter_mathjaxloader_equation"))
+		collectors.math.add(node);
+	else for (const el of node.getElementsByClassName("filter_mathjaxloader_equation"))
+		collectors.math.add(el);
 	// if (isElementTag(node, "video")
 	// 	&& node.classList.contains("video-js"))
 	// 	vjs(node, JSON.parse(node.getAttribute("data-setup") ?? node.getAttribute("data-setup-lazy") ?? '{}'));
@@ -334,6 +335,7 @@ async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 	const { config, elMap: map, root: dom } = hydrationStates[id];
 	const collectors: NodeCollectors = {
 		scripts: [],
+		math: new Set(),
 	};
 	if (DEBUG_HYDRATION && !config.evadeDebugging) {
 		const toUpdate: Set<Element> = new Set();
@@ -450,6 +452,8 @@ async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 				),
 		),
 	);
+
+	window.MathJax?.Hub?.Queue(["Typeset", window.MathJax.Hub, [...collectors.math]]);
 
 	// const scriptLoadCompletions = [];
 	// for (const script of collectors.scripts) {
