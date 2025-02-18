@@ -1,3 +1,7 @@
+input:is([type="text" i], [type="search" i], [type="number" i]) {
+	border: 1px solid currentColor;
+}
+
 :root:root {
 	.aalink,
 	a.autolink,
@@ -10,19 +14,31 @@
 }
 
 :root:root:root:root:root:root:root:root {
-	* {
+	/* * {
 		background-color: transparent;
+	} */
+
+	/* [style*="background"] {
+		background-color: transparent !important;
+	} */
+
+	.stack .stackinputfeedback {
+		display: none;
 	}
 
-	[style*="background"] {
-		background-color: transparent !important;
+	.stack .stackprtfeedback {
+		background-color: transparent;
+		display: inline-block;
+		vertical-align: middle;
+		margin-inline: 1ch;
+		padding: 0.2ch;
 	}
 
 	a {
 		color: var(--uclearn-color-link);
 	}
 
-	.activity-navigation .float-end {
+	.activity-navigation :is(.float-start, .float-end) {
 		float: none !important;
 		display: contents;
 	}
@@ -608,6 +624,12 @@
 		margin: 0 !important;
 	}
 
+	.ln-section-heading {
+		border-color: currentColor;
+		margin-top: 0.5rem;
+		display: inline-block;
+	}
+
 	.generaltable .sticky-column,
 	.generaltable tr,
 	.navigation,
@@ -616,10 +638,41 @@
 	.list-group-item,
 	.popover-header,
 	.overlay-icon-container,
+	.activity-header,
+	.quizreviewsummary .cell,
+	.que .specificfeedback,
+	.form-control,
+	.filter-ace-inline-output-display,
+	.activity,
+	.coderunner-test-results,
+	.que.coderunner :is(th, td),
 	.drawer {
 		background-color: transparent;
 	}
 
+	.coderunner-test-results tr:has(> td:not(:empty)):nth-of-type(odd) {
+		background-color: var(--uclearn-hover-tint);
+	}
+
+	input[type="radio"] {
+		border-radius: 100vmax !important;
+	}
+
+	.activity [style*="color"] {
+		background-color: transparent !important;
+		color: inherit !important;
+	}
+	.activity [style*="outline"] {
+		outline: none !important;
+	}
+
+	.container-fluid:has(> .row:only-child) {
+		padding-inline: 15px !important;
+	}
+
+	:is(#page-question-type-coderunner, .que.coderunner)
+		:is(.coderunner-test-results, .coderunnerexamples)
+		:is(td, th),
 	.popover-header {
 		border-color: currentColor;
 	}

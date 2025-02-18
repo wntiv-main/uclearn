@@ -2,7 +2,7 @@
 	#quiz-timer-wrapper {
 		pointer-events: none;
 
-		>* {
+		> * {
 			pointer-events: all;
 		}
 
@@ -14,7 +14,8 @@
 		}
 	}
 
-	.que, .que .correctness.badge {
+	.que,
+	.que .correctness.badge {
 		--uclearn-accent-color: #808080;
 
 		&.correct {
@@ -25,8 +26,24 @@
 			--uclearn-accent-color: var(--uclearn-color-warning);
 		}
 
-		&.incorrect, &.notanswered {
+		&.incorrect,
+		&.notanswered {
 			--uclearn-accent-color: var(--uclearn-color-error);
+		}
+	}
+
+	.automatic-completion-conditions .badge {
+		--uclearn-accent-color: var(--uclearn-translucent-bg);
+		color: inherit;
+		background-color: color-mix(
+			in srgb,
+			var(--uclearn-accent-color) 30%,
+			var(--uclearn-translucent-bg)
+		);
+		mix-blend-mode: normal;
+
+		&.alert-success {
+			--uclearn-accent-color: var(--uclearn-color-success);
 		}
 	}
 
@@ -56,7 +73,8 @@
 			margin-block: 0.5rem;
 		}
 
-		.table-responsive, .coderunner-examples {
+		.table-responsive,
+		.coderunner-examples {
 			width: auto;
 			max-width: 100%;
 		}
@@ -65,10 +83,10 @@
 			padding: 0;
 		}
 
-		.cr-test-table-div td:has(>textarea:only-child) {
+		.cr-test-table-div td:has(> textarea:only-child) {
 			padding: 0;
 
-			>textarea {
+			> textarea {
 				display: block;
 				border: none;
 				padding: 0.3rem;
@@ -76,18 +94,28 @@
 			}
 		}
 
-		.outcome, .comment {
+		.outcome,
+		.comment {
 			margin: 0;
 			padding: calc(var(--uclearn-radius) - 0.2em) var(--uclearn-radius);
 			border-radius: var(--uclearn-radius);
 			color: inherit;
-			background-color: color-mix(in srgb, var(--uclearn-accent-color) 10%, var(--uclearn-translucent-bg) 90%);
+			background-color: color-mix(
+				in srgb,
+				var(--uclearn-accent-color) 10%,
+				var(--uclearn-translucent-bg) 90%
+			);
 			width: fit-content;
 			margin-inline: auto;
 
 			.correctness.badge {
-				padding: 0;
-				color: color-mix(in srgb, var(--uclearn-accent-color) 50%, var(--uclearn-foreground) 50%);
+				padding: 0.1em 0.8ch 0.3em;
+				color: var(--uclearn-foreground);
+				background-color: color-mix(
+					in srgb,
+					var(--uclearn-accent-color) 50%,
+					var(--uclearn-background) 50%
+				);
 			}
 		}
 
@@ -96,6 +124,13 @@
 			padding: calc(0.5 * var(--uclearn-radius));
 			background-color: var(--uclearn-translucent-bg);
 			margin-bottom: 1rem;
+		}
+
+		.answer .specificfeedback {
+			border: 1px solid currentColor;
+			border-radius: var(--uclearn-radius);
+			padding: calc(var(--uclearn-radius) / 2);
+			margin-inline: 1ch;
 		}
 	}
 

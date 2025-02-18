@@ -1,6 +1,5 @@
-import { initNavigator } from "./navigation";
+import { initialPageLoad, initNavigator } from "./navigation";
 import { Toast } from "./lib-hook";
-import { loadPage } from "./page-loader";
 import { DEBUG } from "../global/constants";
 import { patchAceEditor } from "./ace-patches";
 import type MathJax from 'mathjax';
@@ -38,5 +37,5 @@ Object.defineProperty(window, "$", {
 });
 
 patchAceEditor();
-loadPage();
+initialPageLoad();
 initNavigator();

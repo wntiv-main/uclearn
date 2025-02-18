@@ -150,4 +150,17 @@
 			margin: 0;
 		}
 	}
+
+	/* Course overview */
+	.activity-item .activity-dates {
+		color: var(--uclearn-foreground-muted);
+	}
+
+	.activity-item .activity-completion .completion-dialog {
+		color: var(--uclearn-foreground-muted);
+	}
+
+	.course-section .availabilityinfo {
+		background-color: var(--uclearn-hover-tint);
+	}
 }

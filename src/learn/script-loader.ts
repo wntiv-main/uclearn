@@ -3,6 +3,7 @@ import { asyncTimeout } from "../global/util";
 import { Toast } from "./lib-hook";
 
 type Transcriber = (script: string) => string | null;
+export const SKIP_SCRIPT_CLASS = '__uclearn-skip-reload';
 
 export async function loadScript(script: HTMLScriptElement | string, transcriber?: Transcriber) {
 	if (typeof script === 'string' || script.src) {
@@ -94,6 +95,3 @@ export async function loadScripts(scripts: Iterable<HTMLScriptElement>, transcri
 	}
 	await runningAsyncScripts;
 }
-
-export const loadPage = async () => await loadScripts([...document.scripts].filter(
-	script => !script.classList.contains("__uclearn-skip-reload")));

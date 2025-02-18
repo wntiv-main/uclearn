@@ -37,6 +37,7 @@
 				"fonts/**/*.woff",
 				"learn/hydration-worker.js",
 				"learn/pyright/*.js",
+				"learn/mathlive/*",
 				"learn/python-typeshed.zip",
 				"learn/ace-code-shadow.css",
 				"learn/index.js",

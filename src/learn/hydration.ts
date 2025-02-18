@@ -24,7 +24,8 @@ import {
 } from "../global/hydration";
 import { assertNever, type ItemOf, type Shifted } from "../global/util";
 import { Toast } from "./lib-hook";
-import { loadScripts } from "./page-loader";
+import { loadScripts, SKIP_SCRIPT_CLASS } from "./script-loader";
+import { initField, MATH_FIELD_SELECTOR, MATHLIVE_FIELD_CLASS } from "./mathlive-loader";
 
 type TypedMessageWorker<T> = Omit<Worker, "postMessage"> & {
 	postMessage(
@@ -45,14 +46,14 @@ let disposeWorker: (() => void) | null = null;
 let disposeWorkerTimeout: ReturnType<typeof setTimeout> | null = null;
 let onWorkerReady: () => void;
 let hydrationIdCounter = 0;
-const hydrationStates: Record<HydrationId, {
+const hydrationStates: Partial<Record<HydrationId, {
 	elMap: ElementMap;
 	config: HydrationConfig;
 	root: Element;
 	progressPerNode: number;
 	nodesVisited: number;
 	resolve?(tasks: HydrationTasks): void;
-}> = {};
+}>> = {};
 
 function allocateEl(el: ElementRef, map: ElementMap) {
 	const id = map.idCounter++;
@@ -77,6 +78,7 @@ function* precomputeCompare(
 			continue;
 		if (isElement(el)) {
 			const tiedNodes: Node[] = [];
+			let root: Element = el;
 
 			if (
 				el.matches(
@@ -108,7 +110,11 @@ function* precomputeCompare(
 				continue;
 			}
 
-			if (el.classList.contains("coderunner-answer")) {
+			if (el.classList.contains(MATHLIVE_FIELD_CLASS)) {
+				const next = nodes[i + 1];
+				tiedNodes.push(el);
+				root = next as Element;
+			} else if (el.classList.contains("coderunner-answer")) {
 				const next = nodes[i + 1];
 				if (isElement(next) && next.getAttribute('id')?.includes("answer_wrapper")) {
 					tiedNodes.push(next);
@@ -116,29 +122,29 @@ function* precomputeCompare(
 				}
 			}
 
-			const id = (typeof el.id === "string"
-				? el.id
-				: el.getAttribute("id") ?? "");
+			const id = (typeof root.id === "string"
+				? root.id
+				: root.getAttribute("id") ?? "");
 
 			yield {
 				nodeId: allocateEl(
 					{
-						node: el,
+						node: root,
 						tiedNodes,
 					},
 					map,
 				),
 				type: HydrationNodeType.ELEMENT,
-				tag: el.tagName,
+				tag: root.tagName,
 				id: id.replace(ID_RGX, "$1$2"),
 				rawId: id,
-				classes: [...el.classList],
+				classes: [...root.classList],
 				attributes: new Map(
-					[...el.attributes].map(({ name, value }) => [name, value]),
+					[...root.attributes].map(({ name, value }) => [name, value]),
 				),
-				content: el.innerHTML,
+				content: root.innerHTML,
 				debugging: DOMInspector.debugging.has(el),
-				...(el.classList.contains("video-js")
+				...(root.classList.contains("video-js")
 					? {
 						elementType: HydrationElementType.VIDEOJS,
 						sources: [],
@@ -148,7 +154,7 @@ function* precomputeCompare(
 					}
 					: {
 						elementType:
-							el instanceof HTMLScriptElement
+							root instanceof HTMLScriptElement
 								? HydrationElementType.SCRIPT
 								: HydrationElementType.NORMAL,
 					}),
@@ -192,6 +198,7 @@ function* precomputeCompare(
 type NodeCollectors = {
 	scripts: HTMLScriptElement[];
 	math: Set<Element>;
+	fields: HTMLElement[];
 };
 
 function handleNodeInsert(node: Node, collectors: NodeCollectors) {
@@ -200,8 +207,8 @@ function handleNodeInsert(node: Node, collectors: NodeCollectors) {
 		if (math) collectors.math.add(math);
 		return;
 	}
-	if (isElementTag(node, "script")) collectors.scripts.push(node);
-	else collectors.scripts.push(...node.getElementsByTagName("script"));
+	if (isElementTag(node, "script") && !node.classList.contains(SKIP_SCRIPT_CLASS)) collectors.scripts.push(node);
+	else collectors.scripts.push(...node.querySelectorAll<HTMLScriptElement>(`script:not(.${SKIP_SCRIPT_CLASS})`));
 	if (node.classList.contains("filter_mathjaxloader_equation"))
 		collectors.math.add(node);
 	else for (const el of node.getElementsByClassName("filter_mathjaxloader_equation"))
@@ -213,8 +220,8 @@ function handleNodeInsert(node: Node, collectors: NodeCollectors) {
 	// 	state.videos.push(
 	// 		...newNode.querySelectorAll<HTMLVideoElement>("video.video-js"),
 	// 	);
-	// if (newNode.tagName === 'INPUT') state.inputs.push(newNode as HTMLInputElement);
-	// else state.inputs.push(...newNode.getElementsByTagName('input'));
+	if (node.matches(MATH_FIELD_SELECTOR)) collectors.fields.push(node as HTMLInputElement);
+	else collectors.fields.push(...node.querySelectorAll<HTMLInputElement>(MATH_FIELD_SELECTOR));
 	// if (
 	// 	newNode.classList.contains("matrixsquarebrackets") ||
 	// 	newNode.classList.contains("matrixroundbrackets") ||
@@ -330,13 +337,28 @@ function assignAlias(id: string, alias: string) {
 // 	return this.getElementById(aliasId[selector] ?? selector);
 // };
 
-const inspectors: Map<Element, DOMInspector> = new Map();
-async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
-	const { config, elMap: map, root: dom } = hydrationStates[id];
+export async function initDocumentParts() {
 	const collectors: NodeCollectors = {
 		scripts: [],
 		math: new Set(),
+		fields: [],
 	};
+	handleNodeInsert(document.documentElement, collectors);
+	await handlePostHydrateCollectors(collectors, true);
+}
+
+let lock: Promise<void> | null = null;
+const inspectors: Map<Element, DOMInspector> = new Map();
+async function applyHydration(tasks: HydrationTasks, { config, elMap: map, root: dom }: NonNullable<typeof hydrationStates[HydrationId]>) {
+	const collectors: NodeCollectors = {
+		scripts: [],
+		math: new Set(),
+		fields: [],
+	};
+	await lock;
+	// biome-ignore lint/style/noNonNullAssertion: immediately initialized
+	let unlock: (() => void) = null!;
+	lock = new Promise<void>(res => { unlock = res; });
 	if (DEBUG_HYDRATION && !config.evadeDebugging) {
 		const toUpdate: Set<Element> = new Set();
 		const inspector =
@@ -443,8 +465,14 @@ async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 	}
 	config.onProgress?.(PartialHydrationStage.APPLYING, 1);
 
+	await handlePostHydrateCollectors(collectors);
+	lock = null;
+	unlock();
+}
+
+async function handlePostHydrateCollectors(collectors: NodeCollectors, first?: boolean) {
 	await loadScripts(
-		collectors.scripts.filter(
+		first ? collectors.scripts : collectors.scripts.filter(
 			(script) =>
 				!/(var|let|const)\s+require/.test(script.text) &&
 				!/require(\.min)?\.js$|polyfill\.js$|yui-moodlesimple(?:-min)?\.js$|jquery\.php/i.test(
@@ -452,51 +480,8 @@ async function applyHydration(tasks: HydrationTasks, id: HydrationId) {
 				),
 		),
 	);
-
-	window.MathJax?.Hub?.Queue(["Typeset", window.MathJax.Hub, [...collectors.math]]);
-
-	// const scriptLoadCompletions = [];
-	// for (const script of collectors.scripts) {
-	// 	if (!script.src) continue;
-	// 	if (/require(\.min)?\.js$|polyfill\.js$|yui-moodlesimple(?:-min)?\.js$|jquery\.php/i.test(script.src)) continue;
-	// 	scriptLoadCompletions.push(new Promise((res, rej) => {
-	// 		const el = document.createElement("script");
-	// 		if (DEBUG_SCRIPTING) {
-	// 			const scriptStartTime = performance.now();
-	// 			el.addEventListener('load', e => {
-	// 				console.log('Executed script', el, 'in', performance.now() - scriptStartTime, 'ms');
-	// 			});
-	// 		}
-	// 		if (DEBUG) {
-	// 			el.addEventListener("error", async (e) => {
-	// 				console.warn("Script failed to run:", e, el);
-	// 				(await Toast).add("Script failed to run during hydration!", { type: "danger" });
-	// 			});
-	// 		}
-	// 		el.addEventListener("error", res);
-	// 		el.addEventListener("load", res);
-	// 		el.src = script.src;
-	// 		script.insertAdjacentElement("afterend", el);
-	// 		script.remove();
-	// 	}));
-	// }
-	// 	await Promise.all(scriptLoadCompletions); // Linked script loads
-	// 	for (const script of scripts) {
-	// 		if (script.src) continue;
-	// 		if (/(var|let|const)\s+require/.test(script.text)) continue;
-	// 		const el = document.createElement("script");
-	// 		if (DEBUG) el.addEventListener("error", async (e) => {
-	// 			console.warn("Script failed to run:", e, el);
-	// 			(await Toast).add('Script failed to run during hydration!', { type: 'danger' });
-	// 		});
-	// 		el.text = script.text;
-	// 		script.replaceWith(el);
-	// 		if (DEBUG_SCRIPTING) {
-	// 			const scriptStartTime = performance.now();
-	// 			await asyncTimeout(0); // Inline script loads
-	// 			console.log('Executed inline script', el, 'in', performance.now() - scriptStartTime, 'ms (with content:', el.text);
-	// 		}
-	// 	}
+	if (!first) window.MathJax?.Hub?.Queue(["Typeset", window.MathJax.Hub, [...collectors.math]]);
+	for (const field of collectors.fields) initField(field as HTMLInputElement);
 }
 
 async function handleWorkerMessage(
@@ -508,28 +493,32 @@ async function handleWorkerMessage(
 			onWorkerReady?.();
 			break;
 		case "tasks": {
-			hydrationStates[msg.hydrationId].resolve?.(msg.tasks);
+			hydrationStates[msg.hydrationId]?.resolve?.(msg.tasks);
 			break;
 		}
 		case "requestChildren": {
 			const id = msg.hydrationId;
-			const parent = hydrationStates[id].elMap[msg.nodeId];
+			const state = hydrationStates[id];
+			if (!state) break;
+			const parent = state.elMap[msg.nodeId];
 			worker.postMessage({
 				type: "hydrateChildren",
 				hydrationId: id,
 				nodeId: msg.nodeId,
-				children: [...precomputeCompare(parent.node.childNodes, hydrationStates[id].elMap)],
+				children: [...precomputeCompare(parent.node.childNodes, state.elMap)],
 			});
 			break;
 		}
 		case "visited": {
 			const state = hydrationStates[msg.hydrationId];
+			if (!state) break;
 			state.nodesVisited++;
 			state.config.onProgress?.(PartialHydrationStage.HYDRATING, state.nodesVisited * state.progressPerNode);
 			break;
 		}
 		case "visitedAll": {
 			const state = hydrationStates[msg.hydrationId];
+			if (!state) break;
 			const ref = state.elMap[msg.nodeId];
 			for (const node of [ref.node, ...ref.tiedNodes ?? []]) if (isElement(node))
 				state.nodesVisited += node.querySelectorAll('*').length + 1;
@@ -595,7 +584,8 @@ export async function hydrate(
 		nodesVisited: 0,
 		progressPerNode: 1 / treeSize,
 	};
-	const completion = new Promise<HydrationTasks>(res => { hydrationStates[id].resolve = res; });
+	config.signal?.addEventListener("abort", () => { hydrationStates[id] && delete hydrationStates[id]; });
+	const completion = new Promise<HydrationTasks>(res => { if (hydrationStates[id]) hydrationStates[id].resolve = res; });
 	const [el, up] = precomputeCompare([element, updated], elMap);
 	const leftChildren = [...precomputeCompare(element.childNodes, elMap)];
 	const rightChildren = [...precomputeCompare(updated.childNodes, elMap)];
@@ -625,7 +615,9 @@ export async function hydrate(
 		}
 	}
 
-	(await worker).postMessage({
+	const w = await worker;
+	if (config.signal?.aborted) return;
+	w.postMessage({
 		type: "hydrate",
 		hydrationId: id,
 		config: { needsCourseIndexRefresh: config.needsCourseIndexRefresh },
@@ -633,7 +625,11 @@ export async function hydrate(
 		children: [leftChildren, rightChildren],
 	});
 
-	await applyHydration(await completion, id);
+	config.signal?.addEventListener("abort", () => { w.postMessage({ type: 'abort', hydrationId: id }); });
+
+	const result = await completion;
+	if (config.signal?.aborted) return;
+	await applyHydration(result, hydrationStates[id]);
 	delete hydrationStates[id];
 }
 

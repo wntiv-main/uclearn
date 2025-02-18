@@ -2,6 +2,8 @@ import { assertNever, map, zip, type Shifted } from '../../global/util';
 import { type HydrationElement, HydrationElementType, HydrationNodeType, type HydrationTasks, type D2WMessage, type HydrationNode, type W2DMessage, type WHydrationNode, HydrationConfig, type WHydrationConfig, HydrationTextType, type HydrationId } from '../../global/hydration';
 import { Hirschberg } from '../../global/hirschberg';
 
+class Abortion extends Error { }
+
 declare const self: Omit<WorkerGlobalScope & typeof globalThis, 'postMessage'> & {
 	postMessage(message: W2DMessage, ...args: Shifted<Parameters<typeof globalThis.postMessage>>): void;
 };
@@ -154,7 +156,10 @@ async function calculateChanges(id: HydrationId, config: WHydrationConfig, tasks
 	}));
 }
 
-const waitingChildren: Record<HydrationId, Record<HydrationNode['nodeId'], (children: WHydrationNode[]) => void>> = {};
+const waitingChildren: Record<HydrationId, Record<HydrationNode['nodeId'], {
+	resolve: (children: WHydrationNode[]) => void,
+	reject: (e: Error) => void,
+}>> = {};
 
 function withChildren(node: HydrationElement, children: Promise<WHydrationNode[]>) {
 	const _node = node as WHydrationNode & HydrationElement;
@@ -164,8 +169,8 @@ function withChildren(node: HydrationElement, children: Promise<WHydrationNode[]
 
 function setupChildren(child: HydrationNode, id: HydrationId): WHydrationNode {
 	if (child.type === HydrationNodeType.ELEMENT)
-		return withChildren(child, new Promise<WHydrationNode[]>(res => {
-			waitingChildren[id][child.nodeId] = res;
+		return withChildren(child, new Promise<WHydrationNode[]>((resolve, reject) => {
+			waitingChildren[id][child.nodeId] = { resolve, reject };
 		}));
 	return child;
 }
@@ -179,11 +184,17 @@ self.addEventListener("message", async (e: MessageEvent) => {
 			waitingChildren[id] = {};
 			const [left, right] = msg.parent;
 			const [leftChildren, rightChildren] = msg.children;
-			await calculateChanges(id, msg.config, tasks,
-				withChildren(left, Promise.resolve(
-					leftChildren.map(child => setupChildren(child, id)))),
-				withChildren(right, Promise.resolve(
-					rightChildren.map(child => setupChildren(child, id)))));
+			try {
+				await calculateChanges(id, msg.config, tasks,
+					withChildren(left, Promise.resolve(
+						leftChildren.map(child => setupChildren(child, id)))),
+					withChildren(right, Promise.resolve(
+						rightChildren.map(child => setupChildren(child, id)))));
+			} catch (e) {
+				if (e instanceof Abortion)
+					return;
+				throw e;
+			}
 			delete waitingChildren[id];
 			self.postMessage({
 				type: 'tasks',
@@ -193,9 +204,19 @@ self.addEventListener("message", async (e: MessageEvent) => {
 			break;
 		}
 		case 'hydrateChildren':
-			waitingChildren[msg.hydrationId]?.[msg.nodeId](
+			waitingChildren[msg.hydrationId]?.[msg.nodeId].resolve(
 				msg.children.map(child => setupChildren(child, msg.hydrationId)));
 			break;
+		case 'abort': {
+			const children = waitingChildren[msg.hydrationId];
+			if (children) {
+				for (const { reject } of Object.values(children)) {
+					reject(new Abortion("Hydration aborted"));
+				}
+				delete waitingChildren[msg.hydrationId];
+			}
+			break;
+		}
 		default:
 			assertNever(msg);
 	}

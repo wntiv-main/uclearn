@@ -26,3 +26,42 @@
 	background-color: var(--uclearn-accent-color);
 	z-index: 9999;
 }
+
+.__uclearn-mathlive-field {
+	background-color: var(--uclearn-translucent-bg);
+	color: var(--uclearn-foreground);
+	transition: box-shadow var(--uclearn-transition-short);
+	border: 1px solid currentColor;
+	border-radius: calc(var(--uclearn-radius) / 2);
+	font-size: 1.2em;
+	--caret-color: currentColor;
+	--selection-color: white;
+	--selection-background-color: #0080ff60;
+	--contains-highlight-background-color: var(--uclearn-hover-tint);
+	--placeholder-color: var(--uclearn-foreground-muted);
+	--placeholder-opacity: 1;
+	--correct-color: var(--uclearn-color-success);
+	--incorrect-color: var(--uclearn-color-error);
+
+	&::part(container) {
+		padding: 0.2em 0.3ch;
+	}
+
+	@media (pointer: fine) {
+		&::part(virtual-keyboard-toggle) {
+			display: none;
+		}
+		&::part(menu-toggle) {
+			display: none;
+		}
+	}
+
+	&:focus-within {
+		outline: none;
+		box-shadow: var(--uclearn-focus-shadow);
+	}
+
+	& + input {
+		display: none !important;
+	}
+}

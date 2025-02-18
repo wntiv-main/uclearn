@@ -4,12 +4,12 @@ import type { YUI } from 'yui';
 import { DEBUG } from '../global/constants';
 import { type _HydrationStages, type HydrationConfig, type HydrationStage, precomputeStages } from "../global/hydration";
 import { update } from '../global/util';
-import { hydrate, SKIP_HYDRATION_CLASS } from './hydration';
+import { hydrate, initDocumentParts, SKIP_HYDRATION_CLASS } from './hydration';
 import { getYUIInstance, modals, Toast, videoJS } from './lib-hook';
 
 let vjs: typeof VideoJS;
 
-// let hydrationController: AbortController = new AbortController();
+let hydrationController: AbortController | null = null;
 
 const preHydrateHooks: (() => void)[] = [];
 const postHydrateHooks: (() => void)[] = [
@@ -33,14 +33,24 @@ type HydrationHint = [
 ];
 
 const parser = new DOMParser();
-async function hydrateFromResponse(resp: Response, content: string, hydrationHints: HydrationHint[] = []) {
+async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hydrationHints: HydrationHint[] = []) {
+	hydrationController?.abort('Hydrating from new target');
+	hydrationController = new AbortController();
+	const [resp, content] = await safeFetch(url, {
+		...options,
+		signal: hydrationController.signal,
+		onProgress: (loaded, total) =>
+			total && updateProgress([], 'fetching', loaded / total),
+		onError: () =>
+			updateProgress([], 'closed', 0),
+	});
+	hydrationController.signal.addEventListener("abort", () => updateProgress([], 'closed', 0));
 	const startTime = performance.now();
-	console.time('hydration-parsing');
 	const contentType = resp.headers.get("Content-Type")?.split(";")[0] ?? 'text/html';
 	if (!contentType.includes("html")) {
 		// We shoudln't handle this, load page normally
-		location.replace(resp.url);
-		return; // needed for typescript
+		location.assign(resp.url);
+		throw 'page unloaded'; // needed for typescript
 	}
 	updateProgress([], 'parsing', 0);
 	const updated = parser.parseFromString(
@@ -64,7 +74,6 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 		window.M = update(window.M ?? {}, M);
 		break;
 	}
-	console.timeEnd('hydration-parsing');
 	console.time('hydration');
 	const elPairs: [string, HTMLElement, HTMLElement, Partial<HydrationConfig & { weight: number; }>][] = [];
 	for (const [selector, config = {}] of hydrationHints) {
@@ -121,6 +130,7 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 	for (let i = 0; i < elPairs.length; i++) {
 		const [name, left, right, config] = elPairs[i];
 		await hydrate(left, right, {
+			signal: hydrationController.signal,
 			nameHint: name,
 			needsCourseIndexRefresh,
 			onProgress: (stage, percentage) => {
@@ -129,7 +139,6 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 			...config,
 		});
 	}
-	console.timeEnd('hydration');
 	for (const hook of postHydrateHooks) try { hook(); } catch (e) { console.error('Error in post-hydrate hook', e); }
 	// document.querySelector("#mod_quiz_navblock .thispage")?.scrollIntoView({
 	// 	behavior: 'smooth',
@@ -137,7 +146,10 @@ async function hydrateFromResponse(resp: Response, content: string, hydrationHin
 	// });
 	document.title = updated.title;
 	updateProgress([], 'closed', 0);
+	hydrationController = null;
+	console.timeEnd('hydration');
 	if (DEBUG) (await Toast).add(`Hydration in ${((performance.now() - startTime) / 1000).toFixed(2)}s`, { type: 'success' });
+	return resp;
 }
 
 async function safeFetch(input: RequestInfo | URL, { onProgress, onError, ...init }: RequestInit & {
@@ -195,51 +207,7 @@ async function safeFetch(input: RequestInfo | URL, { onProgress, onError, ...ini
 	return [resp, content] as const;
 }
 
-// async function safeFetch(url: string | URL, options?: {
-// 	method?: "GET" | 'POST',
-// 	body?: XMLHttpRequestBodyInit,
-// 	onProgress?(loaded: number, total: number | null): void;
-// 	onError?(e: Error): void;
-// }) {
-// 	try {
-// 		const req = new XMLHttpRequest();
-// 		req.open(options?.method ?? 'GET', url as string | URL);
-// 		req.addEventListener("progress", e => {
-// 			options?.onProgress?.(e.loaded, e.lengthComputable ? e.total : null);
-// 		});
-// 		await new Promise<void>((res) => {
-// 			req.addEventListener("readystatechange", (e) => {
-// 				if (req.readyState === req.DONE) res();
-// 			});
-// 			req.send(options?.body);
-// 		});
-// 		if (req.status < 200 || req.status >= 400)
-// 			throw new Error(
-// 				`Server responded with ${req.status}: ${req.statusText}`);
-// 		return req;
-// 	} catch (e) {
-// 		const [ModalRegistry, ModalEvents] = await modals;
-// 		const modal = await ModalRegistry.get('SAVE_CANCEL').module.create({
-// 			title: `Error: Failed to open '${typeof url === 'string' ? url : url.href}'`,
-// 			body: (e as Error).message,
-// 			buttons: { save: 'Follow link anyway', cancel: 'Remain here' },
-// 			removeOnClose: true,
-// 		});
-// 		modal.getRoot().on(ModalEvents.save, () => location.assign(url));
-// 		modal.show();
-// 		options?.onError?.(e as Error);
-// 		throw e;
-// 	}
-// }
-
 let loadingEl: HTMLElement | null = null;
-// const stageWidths: Record<HydrationStage, number> = {
-// 	[HydrationStage.FETCHING]: 0.1,
-// 	[HydrationStage.PARSING]: 0.1,
-// 	[HydrationStage.HYDRATING]: 0.4,
-// 	[HydrationStage.APPLYING]: 0.4,
-// 	[HydrationStage.CLOSE]: 0,
-// };
 function updateProgress(stages: _HydrationStages, stage: HydrationStage, percentage: number) {
 	loadingEl ??= (() => {
 		const el = document.createElement('div');
@@ -251,9 +219,6 @@ function updateProgress(stages: _HydrationStages, stage: HydrationStage, percent
 		return el;
 	})();
 	if (stage === 'closed') {
-		// setTimeout(() => {
-		// 	if (loadingEl) 
-		// }, 300);
 		loadingEl.style.width = '0';
 		return;
 	}
@@ -280,14 +245,6 @@ export async function initNavigator() {
 			if (!(form instanceof HTMLFormElement)) return;
 			if (form.method === 'dialog') return;
 			e.preventDefault();
-			const [resp, content] = await safeFetch(form.action, {
-				method: "POST",
-				body: new FormData(form, e.submitter),
-				onProgress: (loaded, total) =>
-					total && updateProgress([], 'fetching', loaded / total),
-				onError: () =>
-					updateProgress([], 'fetching', 0),
-			});
 			const scrollPos = document.getElementById("page")?.scrollTop;
 			if (!e.submitter?.classList.contains('submit'))
 				document.getElementById("page")?.scrollTo(0, 0);
@@ -310,7 +267,10 @@ export async function initNavigator() {
 				toHydrate.push(['#region-main', { updateUpTree: true, weight: 5 }]);
 				toHydrate.push(['#page-footer']);
 			}
-			await hydrateFromResponse(resp, content, toHydrate);
+			const resp = await hydrateFromFetch(form.action, {
+				method: "POST",
+				body: new FormData(form, e.submitter),
+			}, toHydrate);
 			const newLocation = new URL(resp.url);
 			const oldSearch = new URLSearchParams(location.search);
 			let searchesMatch = true;
@@ -336,7 +296,6 @@ export async function initNavigator() {
 		if (link.target === '_blank') return;
 		const target = new URL(link.href);
 		if (target.origin !== location.origin) return; // Cross-origin
-		if (/\.(?!x?html?|php)\w+$/i.test(target.pathname)) return; // not html
 		e.preventDefault();
 		const scrollPos = document.getElementById("page")?.scrollTop;
 		// TODO: is this good
@@ -352,18 +311,6 @@ export async function initNavigator() {
 			location.hash = target.hash;
 			return;
 		}
-		const [resp, content] = await safeFetch(link.href, {
-			method: "GET",
-			onProgress: (loaded, total) =>
-				total && updateProgress([], 'fetching', loaded / total),
-			onError: () =>
-				updateProgress([], 'closed', 0),
-			// signal: hydrationController.signal
-		});
-		if (!resp.headers.get('Content-Type')?.includes('html')) {
-			location.assign(target);
-			return;
-		}
 		const toHydrate: HydrationHint[] = [];
 		if (link.id.startsWith('quiznavbutton')
 			|| link.classList.contains('mod_quiz-next-nav')
@@ -372,7 +319,7 @@ export async function initNavigator() {
 			toHydrate.push(['#region-main', { updateUpTree: true, weight: 5 }]);
 			toHydrate.push(['#page-footer']);
 		}
-		await hydrateFromResponse(resp, content, toHydrate);
+		const resp = await hydrateFromFetch(link.href, { method: 'GET' }, toHydrate);
 		document.getElementById("page")?.scrollTo({
 			behavior: 'instant',
 			left: 0,
@@ -398,16 +345,13 @@ export async function initNavigator() {
 
 	window.addEventListener("popstate", async (e) => {
 		if (!e.state) return;
-		const [resp, content] = await safeFetch(location.href, {
-			method: "GET",
-			onProgress: (loaded, total) =>
-				total && updateProgress([], 'fetching', loaded / total),
-			onError: () =>
-				updateProgress([], 'closed', 0),
-		});
-		await hydrateFromResponse(resp, content, []);
+		await hydrateFromFetch(location.href, { method: 'GET' }, []);
 		if (e.state?.scrollPos) {
 			document.getElementById("page")?.scrollTo(0, e.state.scrollPos);
 		}
 	});
+}
+
+export async function initialPageLoad() {
+	await initDocumentParts();
 }

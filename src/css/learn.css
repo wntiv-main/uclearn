@@ -1,21 +1,20 @@
-@import 'globals.css';
-@import 'reset.css';
-@import 'layout.css';
-@import 'ui.css';
-@import 'buttons.css';
-@import 'effects.css';
-@import 'nav.css';
-@import 'sections.css';
-@import 'drawers.css';
-@import 'notifications.css';
-@import 'message-app.css';
-@import 'code.css';
-@import 'quiz.css';
-@import 'quiz-nav.css';
-@import 'injected.css';
+@import "globals.css";
+@import "reset.css";
+@import "layout.css";
+@import "ui.css";
+@import "buttons.css";
+@import "effects.css";
+@import "nav.css";
+@import "sections.css";
+@import "drawers.css";
+@import "notifications.css";
+@import "message-app.css";
+@import "code.css";
+@import "quiz.css";
+@import "quiz-nav.css";
+@import "injected.css";
 
 :root:root:root:root:root:root:root:root {
-
 	background-image: var(--uclearn-background-image);
 	background-attachment: fixed;
 	background-size: cover;
@@ -23,37 +22,45 @@
 
 	/* Theme */
 
-	&:has(>#page-login-index) {
+	&:has(> #page-login-index) {
 		display: grid;
 	}
 
-	img[src^="https://learn.canterbury.ac.nz/pix/"] {
+	img[src^="https://learn.canterbury.ac.nz/pix/"]
+	{
 		filter: var(--uclearn-translucent-filter);
 	}
 
-	.que img {
+	.que img,
+	.resourceimage,
+	.video-js .vjs-tech {
 		filter: var(--uclearn-translucent-filter);
 	}
 
-	a:has(img[src^="https://learn.canterbury.ac.nz/pix/"]) {
+	a:has(img[src^="https://learn.canterbury.ac.nz/pix/"])
+	{
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
 	}
 
-	.block_html div:not(:has(>:not(a))) {
+	.block_html div:not(:has(> :not(a))) {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		column-gap: 50px;
 
-		>a {
+		> a {
 			padding: 0 !important;
 		}
 	}
 
-	:is(.subcategories, #frontpage-category-names, #frontpage-category-combo) .coursebox>.info>.coursename a,
-	.course_category_tree .category.with_children>.info>.categoryname {
+	:is(.subcategories, #frontpage-category-names, #frontpage-category-combo)
+		.coursebox
+		> .info
+		> .coursename
+		a,
+	.course_category_tree .category.with_children > .info > .categoryname {
 		background-size: 0;
 		background-position: -100vmax -100vmax;
 		position: relative;
@@ -74,17 +81,34 @@
 		}
 	}
 
+	.video-js {
+		border-radius: var(--uclearn-radius);
+		background-color: var(--uclearn-translucent-bg);
+		contain: content;
+	}
+
 	@media (prefers-color-scheme: dark) {
-		img[src^="https://learn.canterbury.ac.nz/pix/"] {
-			filter: var(--uclearn-translucent-filter) invert(1) hue-rotate(180deg);
+		img[src^="https://learn.canterbury.ac.nz/pix/"]
+		{
+			filter: var(--uclearn-translucent-filter) invert(1)
+				hue-rotate(180deg);
 		}
 
-		.que img {
-			filter: var(--uclearn-translucent-filter) invert(1) hue-rotate(180deg);
+		.que img,
+		.resourceimage,
+		.video-js .vjs-tech {
+			filter: var(--uclearn-translucent-filter) invert(1)
+				hue-rotate(180deg);
 		}
 
-		.navbar .logo, img.icon, #logoimage, .questionflagimage {
+		.navbar .logo,
+		img.icon,
+		#logoimage,
+		.questionflagimage {
 			filter: invert(1) hue-rotate(180deg);
+		}
+		.activityicon {
+			filter: invert(1) hue-rotate(180deg) !important;
 		}
 
 		img[src$="/u/f1"] {
@@ -96,8 +120,19 @@
 			opacity: 0.5;
 		}
 
-		:is(.subcategories, #frontpage-category-names, #frontpage-category-combo) .coursebox>.info>.coursename a::before,
-		.course_category_tree .category.with_children>.info>.categoryname::before {
+		:is(
+				.subcategories,
+				#frontpage-category-names,
+				#frontpage-category-combo
+			)
+			.coursebox
+			> .info
+			> .coursename
+			a::before,
+		.course_category_tree
+			.category.with_children
+			> .info
+			> .categoryname::before {
 			filter: invert(1) hue-rotate(180deg);
 		}
 	}

@@ -70,6 +70,7 @@ export type HydrationConfig = WHydrationConfig & {
 	updateUpTree?: boolean;
 	evadeDebugging?: boolean;
 	nameHint: string;
+	signal?: AbortSignal;
 	onProgress?: HydrationProgressCallback;
 };
 export type HydrationTasks = ({ debug?: boolean; } & ({
@@ -107,6 +108,9 @@ export type D2WMessage = {
 	hydrationId: HydrationId;
 	nodeId: HydrationNode['nodeId'];
 	children: HydrationNode[];
+} | {
+	type: 'abort';
+	hydrationId: HydrationId;
 };
 
 export type W2DMessage = {
