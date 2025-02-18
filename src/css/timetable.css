@@ -86,7 +86,8 @@
 		transform: translateY(-50%);
 	}
 
-	.dhx_scale_holder {
+	.dhx_scale_holder,
+	.dhx_scale_holder_now {
 		background-image: linear-gradient(
 			to bottom,
 			transparent 0% 50%,
@@ -118,6 +119,10 @@
 				bottom: -0.5em;
 			}
 		}
+	}
+
+	.dhx_scale_holder_now {
+		background-color: var(--uclearn-active-tint);
 	}
 
 	.aplus-container .top-bar {
