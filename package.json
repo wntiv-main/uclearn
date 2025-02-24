@@ -16,7 +16,7 @@
 		"dev:css": "lightningcss --bundle src/css/learn.css -o build/learn/index.css && lightningcss --bundle src/css/ace-code-shadow.css -o build/learn/ace-code-shadow.css && lightningcss --bundle src/css/timetable.css -o build/timetable/index.css",
 		"dev:reload-watcher-server": "bun run ./devserver.ts",
 		"build": "export UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && run-s clean:dev clean:build bundle build:learn build:hydration-worker build:timetable build:css",
-		"build:learn": "bun build --outfile=dist/learn/index.js src/learn/index.ts --drop=DOMInspector --drop=console --env \"UCLEARN_*\" --minify",
+		"build:learn": "bun build --outfile=dist/learn/index.js src/learn/index.ts --drop=DOMInspector --env \"UCLEARN_*\" --minify",
 		"build:hydration-worker": "bun build --outfile=dist/learn/hydration-worker.js src/learn/hydration-worker/index.ts --drop=console --env \"UCLEARN_*\" --minify",
 		"build:timetable": "bun build --outfile=dist/timetable/index.js src/timetable/index.ts --drop=console --env \"UCLEARN_*\" --minify --format=cjs",
 		"build:css": "lightningcss --minify --bundle src/css/learn.css -o dist/learn/index.css && lightningcss --minify --bundle src/css/ace-code-shadow.css -o dist/learn/ace-code-shadow.css && lightningcss --minify --bundle src/css/timetable.css -o dist/timetable/index.css",
