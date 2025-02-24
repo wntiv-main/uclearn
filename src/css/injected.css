@@ -61,7 +61,7 @@
 		box-shadow: var(--uclearn-focus-shadow);
 	}
 
-	& + input {
+	:root:not(.__uclearn-mathlive-debug) & + input {
 		display: none !important;
 	}
 }

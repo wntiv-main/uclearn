@@ -22,11 +22,11 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		background-color: transparent !important;
 	} */
 
-	.stack .stackinputfeedback {
+	&:not(.__uclearn-mathlive-debug) .stack .stackinputfeedback {
 		display: none;
 	}
 
-	.stack .stackprtfeedback {
+	.stack .stackprtfeedback, .stack .stackinputfeedback {
 		background-color: transparent;
 		display: inline-block;
 		vertical-align: middle;

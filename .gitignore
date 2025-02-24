@@ -2,6 +2,7 @@ dist/
 build/
 node_modules/
 bun.lockb
+bun.lock
 
 src/static/python-typeshed.zip
 # dev script builds script in here
