@@ -21,10 +21,16 @@ const bracketIfNeededFactor = (x: string) => /[-+*/]/.test(x) ? `(${x})` : x;
 const bracketIfNeededExponent = (x: string) => /[-+*/^]/.test(x) ? `(${x})` : x;
 
 function mathJSONtoStack(mathJson: Expression): string {
-	if (typeof mathJson === 'string' || typeof mathJson === 'number') return `${mathJson}`.replaceAll("'", '"');
+	if (typeof mathJson === 'string' || typeof mathJson === 'number') switch(mathJson) {
+		case 'ExponentialE':
+			return 'e';
+		case 'Pi':
+			return 'pi';
+		default:
+			return `${mathJson}`.replaceAll("'", '"');
+	}
 	if (!Array.isArray(mathJson)) {
 		const obj = mathJson as Exclude<typeof mathJson, readonly unknown[]>;
-		// if(mathJson)
 		if ('num' in obj) return obj.num;
 		/* TODO: The following characters in a string representing a number are ignored:
 			U+0009	TAB
@@ -36,7 +42,7 @@ function mathJSONtoStack(mathJson: Expression): string {
 			U+00A0	UNBREAKABLE SPACE
 		*/
 		if ('str' in obj) return JSON.stringify(obj.str);
-		if ('sym' in obj) return obj.sym;
+		if ('sym' in obj) return mathJSONtoStack(obj.sym);
 		if ('fn' in obj) return mathJSONtoStack(obj.fn);
 		return '<TODO>' as never;
 	}// return '<TODO>'/* TODO */;
@@ -107,8 +113,11 @@ function mathJSONtoStack(mathJson: Expression): string {
 		case 'Sequence':
 			return args.map(mathJSONtoStack).join(' ');
 		case 'Complex': {
-			const [a, b] = args;
-			return `${mathJSONtoStack(a)} + ${bracketIfNeededFactor(mathJSONtoStack(b))}*i`;
+			const [a, b] = args.map(mathJSONtoStack);
+			const i = b === '1' ? 'i' : `${bracketIfNeededFactor(b)}*i`
+			return b === '0' ? a
+				: a === '0' ? i
+				: `${a} + ${i}`;
 		}
 		default:
 			return `<TODO: ${op}${args}>`;
