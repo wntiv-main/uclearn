@@ -65,6 +65,10 @@
 			margin: 0;
 		}
 
+		.stackprtfeedback .fa {
+			vertical-align: middle;
+		}
+
 		.coderunner-examples {
 			margin-block: 0.5rem 0;
 		}
@@ -132,6 +136,17 @@
 			padding: calc(var(--uclearn-radius) / 2);
 			margin-inline: 1ch;
 		}
+
+		&.stack :is(.matrixsquarebrackets, .matrixroundbrackets) {
+			border-color: currentColor;
+		}
+
+		&.stack .matrixsquarebrackets {
+			background-image: linear-gradient(currentColor, currentColor),
+				linear-gradient(currentColor, currentColor),
+				linear-gradient(currentColor, currentColor),
+				linear-gradient(currentColor, currentColor);
+		}
 	}
 
 	.que .content {
@@ -150,5 +165,10 @@
 		position: relative;
 		z-index: 1;
 		width: max-content;
+	}
+
+	.stack-hint {
+		background-color: transparent;
+		border: none;
 	}
 }

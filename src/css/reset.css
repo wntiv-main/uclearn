@@ -646,6 +646,8 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.activity,
 	.coderunner-test-results,
 	.que.coderunner :is(th, td),
+	.unread,
+	.unread .row.header,
 	.drawer {
 		background-color: transparent;
 	}

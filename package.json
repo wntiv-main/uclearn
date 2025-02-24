@@ -25,6 +25,7 @@
 		"clean:dev": "(rm -r -f src/static/learn/index.js src/static/learn/hydration-worker.js src/static/learn/index.css src/static/timetable/index.js src/static/timetable/index.css src/static/learn/ace-code-shadow.css || true) && cmd /C \"rd src\\static\\learn\\highlight.js & rd src\\static\\learn\\mathlive & rd build\" || true"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.21.0",
 		"@trevorhanus/mathquill-types": "https://github.com/trevorhanus/mathquill-types",
 		"@types/bun": "latest",
 		"@types/chrome": "^0.0.301",
@@ -32,9 +33,12 @@
 		"@types/requirejs": "^2.1.37",
 		"ace-code": "^1.37.5",
 		"bestzip": "^2.2.1",
+		"eslint": "^9.21.0",
+		"globals": "^16.0.0",
 		"lightningcss-cli": "^1.29.1",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0",
+		"typescript-eslint": "^8.24.1",
 		"watcher": "^2.3.1"
 	},
 	"peerDependencies": {

@@ -1,13 +1,13 @@
-import type VideoJS from 'video.js';
+// import type VideoJS from 'video.js';
 import type { YUI } from 'yui';
 
 import { DEBUG } from '../global/constants';
 import { type _HydrationStages, type HydrationConfig, type HydrationStage, precomputeStages } from "../global/hydration";
 import { update } from '../global/util';
 import { hydrate, initDocumentParts, SKIP_HYDRATION_CLASS } from './hydration';
-import { getYUIInstance, modals, Toast, videoJS } from './lib-hook';
+import { getYUIInstance, modals, Toast } from './lib-hook';
 
-let vjs: typeof VideoJS;
+// let vjs: typeof VideoJS;
 
 let hydrationController: AbortController | null = null;
 
@@ -49,8 +49,7 @@ async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hy
 	const contentType = resp.headers.get("Content-Type")?.split(";")[0] ?? 'text/html';
 	if (!contentType.includes("html")) {
 		// We shoudln't handle this, load page normally
-		location.assign(resp.url);
-		throw 'page unloaded'; // needed for typescript
+		location.assign(resp.url) as never;
 	}
 	updateProgress([], 'parsing', 0);
 	const updated = parser.parseFromString(
@@ -178,31 +177,43 @@ async function safeFetch(input: RequestInfo | URL, { onProgress, onError, ...ini
 			throw err;
 		});
 	const charset = (resp.headers.get('Content-Type') ?? '').match(/charset=([^\s;]*)/)?.[1] ?? 'utf-8';
+	const isText = resp.headers.get('Content-Type')?.startsWith('text/');
 	const total = Number.parseInt(resp.headers.get('Content-Length') ?? '');
 	let loaded = 0;
-	const data = new TextDecoderStream(charset, { fatal: true, ignoreBOM: false });
-	const writeData = data.writable.getWriter();
 
 	// biome-ignore lint/style/noNonNullAssertion: response must have body here
 	const reader = resp.body!.getReader();
-	const strReader = data.readable.getReader();
-	let readerDone = false;
 	let content = '';
-	while (true) {
-		if (!readerDone) {
-			const { done, value } = await reader.read();
-			if (done) {
-				writeData.close();
-				readerDone = true;
-			} else {
-				writeData.write(value);
-				loaded += value.byteLength;
-				onProgress?.(loaded, total);
+	if (isText) {
+		const data = new TextDecoderStream(charset, { fatal: true, ignoreBOM: false });
+		const writeData = data.writable.getWriter();
+
+		const strReader = data.readable.getReader();
+		let readerDone = false;
+		while (true) {
+			if (!readerDone) {
+				const { done, value } = await reader.read();
+				if (done) {
+					writeData.close();
+					readerDone = true;
+				} else {
+					writeData.write(value);
+					loaded += value.byteLength;
+					onProgress?.(loaded, total);
+				}
 			}
+			const { done, value } = await strReader.read();
+			if (done) break;
+			content += value ?? '';
 		}
-		const { done, value } = await strReader.read();
-		if (done) break;
-		content += value ?? '';
+	} else {
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			loaded += value.byteLength;
+			onProgress?.(loaded, total);
+			content += String.fromCharCode(...value);
+		}
 	}
 	return [resp, content] as const;
 }
@@ -236,7 +247,7 @@ function updateProgress(stages: _HydrationStages, stage: HydrationStage, percent
 }
 
 export async function initNavigator() {
-	vjs = await videoJS;
+	// vjs = await videoJS;
 	window.addEventListener(
 		"submit",
 		async (e) => {

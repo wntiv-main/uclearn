@@ -13,15 +13,21 @@
 			--uclearn-accent-bg: var(--uclearn-background);
 			margin-right: 0;
 			border-radius: var(--uclearn-radius);
-			height: auto;
+			height: calc(1lh + 10px);
 			padding-block: calc(var(--uclearn-radius) / 2);
 			overflow: hidden;
 			color: inherit !important;
 			text-shadow: 1px 1px 6px var(--uclearn-shadow-color);
 			text-decoration: none;
-			background-color: rgb(from color-mix(in srgb,
+			background-color: rgb(
+				from
+					color-mix(
+						in srgb,
 						var(--uclearn-accent-bg) 50%,
-						var(--uclearn-background) 50%) r g b / 0.4) !important;
+						var(--uclearn-background) 50%
+					)
+					r g b / 0.4
+			) !important;
 			box-shadow: inset 0 0 0 100vmax transparent !important;
 			transition: background-color var(--uclearn-transition-short),
 				box-shadow var(--uclearn-transition-short),
@@ -55,7 +61,7 @@
 					height: 100%;
 				}
 
-				&+& .thispageholder {
+				& + & .thispageholder {
 					border-left: none;
 				}
 
@@ -64,7 +70,7 @@
 				}
 			}
 
-			&+& {
+			& + & {
 				border-top-left-radius: 0;
 				border-bottom-left-radius: 0;
 

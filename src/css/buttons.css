@@ -17,14 +17,16 @@
 	.notification,
 	.courseindex-item,
 	.navbar-brand,
+	.pagination .page-link,
 	.drawertoggle.btn {
 		--uclearn-background-tint: transparent;
 		background-color: transparent;
-		box-shadow: var(--uclearn-pre-shadow, ) inset 0 0 0 100vmax var(--uclearn-background-tint) !important;
+		box-shadow: var(--uclearn-pre-shadow, /**/) inset 0 0 0 100vmax
+			var(--uclearn-background-tint) !important;
 		transition: box-shadow var(--uclearn-transition-short);
 
 		&:is(:hover, :focus-visible, .focus),
-		&.nav-item:has(>.nav-link:focus-visible),
+		&.nav-item:has(> .nav-link:focus-visible),
 		&.input-group:has(input:focus-visible) {
 			--uclearn-background-tint: var(--uclearn-hover-tint);
 			color: var(--uclearn-foreground-muted);
@@ -35,20 +37,27 @@
 		}
 	}
 
-	:is(.block-add.btn,
-		.custom-select,
-		.closewidget .btn-link,
-		.message-app [data-route="view-contacts"],
-		.courseindex-item,
-		.moodle-dialogue-base .closebutton):focus-visible {
-		box-shadow: inset 0 0 0 100vmax var(--uclearn-background-tint), var(--uclearn-focus-shadow) !important;
+	:is(
+			.block-add.btn,
+			.custom-select,
+			.closewidget .btn-link,
+			.message-app [data-route="view-contacts"],
+			.courseindex-item,
+			.moodle-dialogue-base .closebutton,
+			.pagination .page-link
+		):focus-visible {
+		box-shadow: inset 0 0 0 100vmax var(--uclearn-background-tint),
+			var(--uclearn-focus-shadow) !important;
 	}
 
-	.message-app :is(.view-overview-body, [data-region="view-contacts"]) :is(.list-group-item, .overview-section-toggle) {
-		--uclearn-pre-shadow: inset 0 0 transparent, inset 0 0 transparent, ;
+	.message-app
+		:is(.view-overview-body, [data-region="view-contacts"])
+		:is(.list-group-item, .overview-section-toggle) {
+		--uclearn-pre-shadow: inset 0 0 transparent, inset 0 0 transparent;
 
 		&:focus-visible {
-			box-shadow: var(--uclearn-focus-shadow-inset), inset 0 0 0 100vmax var(--uclearn-background-tint) !important;
+			box-shadow: var(--uclearn-focus-shadow-inset),
+				inset 0 0 0 100vmax var(--uclearn-background-tint) !important;
 		}
 	}
 
@@ -56,20 +65,20 @@
 	.navbar .dropdown .dropdown-toggle,
 	.editmode-switch-form .input-group,
 	#usernavigation .nav-link {
-		--uclearn-pre-shadow: inset 0 0 transparent, ;
+		--uclearn-pre-shadow: inset 0 0 transparent;
 
-		&:focus-visible, &:has(.nav-link:focus-visible), &.input-group:has(input:focus-visible) {
-			box-shadow:
-				inset 0 0 0 .2rem var(--uclearn-accent-color),
+		&:focus-visible,
+		&:has(.nav-link:focus-visible),
+		&.input-group:has(input:focus-visible) {
+			box-shadow: inset 0 0 0 0.2rem var(--uclearn-accent-color),
 				inset 0 0 0 100vmax var(--uclearn-background-tint) !important;
 		}
 	}
 
 	.drawer-toggler .btn:focus-visible,
 	.drawertoggle.btn:focus-visible {
-		box-shadow:
-			inset 0 0 0 100vmax var(--uclearn-background-tint),
-			0 0 0 .2rem var(--uclearn-accent-color) !important;
+		box-shadow: inset 0 0 0 100vmax var(--uclearn-background-tint),
+			0 0 0 0.2rem var(--uclearn-accent-color) !important;
 	}
 
 	/* Tabstrip */
@@ -96,10 +105,12 @@
 
 		&::after {
 			left: calc(100% - 0.5px);
-			box-shadow: calc(-1 * var(--uclearn-radius)) 0 var(--uclearn-shadow-color);
+			box-shadow: calc(-1 * var(--uclearn-radius)) 0
+				var(--uclearn-shadow-color);
 		}
 
-		&::before, &::after {
+		&::before,
+		&::after {
 			content: "";
 			--uclearn-shadow-color: transparent;
 			position: absolute;
@@ -121,7 +132,8 @@
 				--uclearn-shadow-color: var(--uclearn-bg-color);
 			}
 
-			&+&, .nav-item:has(>&)+.nav-item>& {
+			& + &,
+			.nav-item:has(> &) + .nav-item > & {
 				border-top-left-radius: 0;
 
 				&::before {
@@ -135,7 +147,8 @@
 				--uclearn-shadow-color: var(--uclearn-bg-color);
 			}
 
-			&:has(+ &), .nav-item:has(+.nav-item>&)>& {
+			&:has(+ &),
+			.nav-item:has(+ .nav-item > &) > & {
 				border-top-right-radius: 0;
 
 				&::after {
@@ -145,8 +158,10 @@
 			}
 		}
 
-		&:is(:active, .active)+&:is(:hover, :focus-visible, .focus),
-		.nav-item:has(> &:is(:active, .active))+.nav-item>&:is(:hover, :focus-visible, .focus) {
+		&:is(:active, .active) + &:is(:hover, :focus-visible, .focus),
+		.nav-item:has(> &:is(:active, .active))
+			+ .nav-item
+			> &:is(:hover, :focus-visible, .focus) {
 			border-top-left-radius: 0;
 			border-bottom-left-radius: var(--uclearn-radius);
 
@@ -157,7 +172,8 @@
 		}
 
 		&:is(:hover, :focus-visible, .focus):has(+ &:is(:active, .active)),
-		.nav-item:has(+ .nav-item>&:is(:active, .active))>&:is(:hover, :focus-visible, .focus) {
+		.nav-item:has(+ .nav-item > &:is(:active, .active))
+			> &:is(:hover, :focus-visible, .focus) {
 			border-top-right-radius: 0;
 			border-bottom-right-radius: var(--uclearn-radius);
 
@@ -177,7 +193,8 @@
 				--uclearn-shadow-color: var(--uclearn-bg-color);
 			}
 
-			&+&, .nav-item:has(>&)+.nav-item>& {
+			& + &,
+			.nav-item:has(> &) + .nav-item > & {
 				border-top-left-radius: 0;
 
 				&::before {
@@ -191,7 +208,8 @@
 				--uclearn-shadow-color: var(--uclearn-bg-color);
 			}
 
-			&:has(+ &), .nav-item:has(+.nav-item>&)>& {
+			&:has(+ &),
+			.nav-item:has(+ .nav-item > &) > & {
 				border-top-right-radius: 0;
 
 				&::after {
@@ -244,27 +262,30 @@
 
 	/* Cheverons */
 
-	.toggle-category, .icons-collapse-expand {
-		.collapsed, .expanded-icon {
+	.toggle-category,
+	.icons-collapse-expand {
+		.collapsed,
+		.expanded-icon {
 			display: inline-block;
 			rotate: 0deg;
 			transition: rotate var(--uclearn-transition-short);
 
-			[aria-expanded="false"]>&.collapsed,
-			.collapsed>& {
+			[aria-expanded="false"] > &.collapsed,
+			.collapsed > & {
 				position: absolute;
 				visibility: hidden;
 				rotate: -90deg;
 			}
 		}
 
-		.expanded, .collapsed-icon {
+		.expanded,
+		.collapsed-icon {
 			display: inline-block;
 			rotate: 0deg;
 			transition: rotate var(--uclearn-transition-short);
 
-			:not([aria-expanded="false"])>&.expanded,
-			:not(.collapsed)>&:not(.expanded) {
+			:not([aria-expanded="false"]) > &.expanded,
+			:not(.collapsed) > &:not(.expanded) {
 				position: absolute;
 				visibility: hidden;
 				rotate: 90deg;

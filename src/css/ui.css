@@ -254,4 +254,38 @@
 			}
 		}
 	}
+
+	/* Pagination */
+	ul.pagination {
+		margin-block: 5px;
+		background-color: var(--uclearn-translucent-bg);
+		border-radius: var(--uclearn-radius);
+
+		.page-link {
+			background-color: transparent;
+			border: none;
+			margin: 0;
+			border-radius: 0;
+		}
+
+		.page-item:first-child .page-link {
+			border-top-left-radius: var(--uclearn-radius);
+			border-bottom-left-radius: var(--uclearn-radius);
+		}
+
+		.page-item:last-child .page-link {
+			border-top-right-radius: var(--uclearn-radius);
+			border-bottom-right-radius: var(--uclearn-radius);
+		}
+
+		.page-item.disabled .page-link {
+			color: var(--uclearn-foreground-muted);
+			background-color: var(--uclearn-active-tint);
+		}
+
+		.page-link:is(:hover, :focus, :active),
+		.page-item.active .page-link {
+			border: none;
+		}
+	}
 }
