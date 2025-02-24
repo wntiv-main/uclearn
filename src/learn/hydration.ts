@@ -243,7 +243,8 @@ function debugTask(
 	toUpdate: Set<Element>,
 	collectors: NodeCollectors,
 ) {
-	// biome-ignore lint/suspicious/noDebugger: intentional
+	/* eslint-disable-next-line no-debugger
+	*/// biome-ignore lint/suspicious/noDebugger: intentional debugging tool
 	if (task.debug) debugger;
 	switch (task.type) {
 		case "setAttr": {
@@ -584,7 +585,7 @@ export async function hydrate(
 		nodesVisited: 0,
 		progressPerNode: 1 / treeSize,
 	};
-	config.signal?.addEventListener("abort", () => { hydrationStates[id] && delete hydrationStates[id]; });
+	config.signal?.addEventListener("abort", () => hydrationStates[id] && delete hydrationStates[id]);
 	const completion = new Promise<HydrationTasks>(res => { if (hydrationStates[id]) hydrationStates[id].resolve = res; });
 	const [el, up] = precomputeCompare([element, updated], elMap);
 	const leftChildren = [...precomputeCompare(element.childNodes, elMap)];
