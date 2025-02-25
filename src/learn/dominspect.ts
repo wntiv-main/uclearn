@@ -268,7 +268,7 @@ export class DOMInspector {
 			let matching: Iterable<Element>;
 			try {
 				matching = this.#rootSourceNode.querySelectorAll(filter.value);
-			} catch (e) {
+			} catch {
 				matching = [];
 			}
 			for (const el of matching) {

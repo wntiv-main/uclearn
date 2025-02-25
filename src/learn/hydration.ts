@@ -55,6 +55,13 @@ const hydrationStates: Partial<Record<HydrationId, {
 	resolve?(tasks: HydrationTasks): void;
 }>> = {};
 
+declare global {
+	interface Window {
+		__uclearnHydrationStates?: typeof hydrationStates;
+	}
+}
+if (DEBUG_HYDRATION) window.__uclearnHydrationStates = hydrationStates;
+
 function allocateEl(el: ElementRef, map: ElementMap) {
 	const id = map.idCounter++;
 	map[id] = el;
@@ -65,6 +72,13 @@ const ID_RGX =
 	/^((?:\w+-)+)(?:[0-9a-fA-F]{28}|[0-9a-fA-F]{13})((?:-\w+)*)$|^(single_button)[0-9a-fA-F]{15}$|^yui_.*$|^(url_select_).*$/;
 
 export const SKIP_HYDRATION_CLASS = "__uclearn-hydrate-remove";
+
+const MJ_SELECTOR = ":is(.MathJax, .MathJax_Display)";
+const MJ_SCRIPT_SELECTOR = 'script[type^="math/"]';
+
+const MATH_RX = /(\$.+?\$|\\\(.+?\\\)|\\\[.+?\\\])/gs;
+const MATH_INNER_RX = /^(\$|\\\(|\\\[)(.+)(\$|\\\)|\\\])$/s;
+
 function* precomputeCompare(
 	nodes: ArrayLike<Node>,
 	map: ElementMap,
@@ -82,17 +96,20 @@ function* precomputeCompare(
 
 			if (
 				el.matches(
-					'.MathJax_Preview:has(+ .MathJax + script[type^="math/"]), .MathJax:has(+ script[type^="math/"])',
+					`.MathJax_Preview:has(+ ${MJ_SELECTOR} + ${MJ_SCRIPT_SELECTOR
+					}), ${MJ_SELECTOR}:has(+ ${MJ_SCRIPT_SELECTOR})`,
 				)
 			) {
+				let content = '';
 				const next = nodes[i + 1];
-				if (isElement(next) && next.matches(".MathJax")) {
+				if (isElement(next) && next.matches(MJ_SELECTOR)) {
 					tiedNodes.push(next);
 					i++;
 				}
-				const next2 = nodes[i + 1];
-				if (isElement(next2) && next2.matches('script[type^="math/"]')) {
-					tiedNodes.push(next2);
+				const latexScript = nodes[i + 1];
+				if (isElement(latexScript) && latexScript.matches(MJ_SCRIPT_SELECTOR)) {
+					tiedNodes.push(latexScript);
+					content = latexScript.textContent ?? '';
 					i++;
 				}
 				yield {
@@ -105,13 +122,13 @@ function* precomputeCompare(
 					),
 					type: HydrationNodeType.TEXT,
 					textType: HydrationTextType.MATH,
-					content: el.textContent ?? "",
+					content,
 				};
 				continue;
 			}
 
 			if (el.classList.contains(MATHLIVE_FIELD_CLASS)) {
-				const next = nodes[i + 1];
+				const next = nodes[++i];
 				tiedNodes.push(el);
 				root = next as Element;
 			} else if (el.classList.contains("coderunner-answer")) {
@@ -163,22 +180,28 @@ function* precomputeCompare(
 		}
 		if (isTextNode(el)) {
 			if (el.parentElement?.closest(".filter_mathjaxloader_equation")) {
-				const math = /\$(.+?)\$|\\\((.+?)\\\)/g;
-				for (const [i, fragment] of Object.entries(el.data.split(math))) {
+				for (const fragment of el.data.split(MATH_RX)) {
 					if (!fragment) continue;
-					yield {
-						nodeId: allocateEl(
-							{
-								node: el.ownerDocument.createTextNode(fragment),
-							},
-							map,
-						),
-						type: HydrationNodeType.TEXT,
-						content: fragment,
-						textType:
-							+i % 2 ? HydrationTextType.MATH : HydrationTextType.NORMAL,
-					};
+					const nodeId = allocateEl({ node: el.ownerDocument.createTextNode(fragment) }, map);
+					const match = fragment.match(MATH_INNER_RX);
+					if (match) {
+						const [/* overall */, /* prefix */, content, /* suffix */] = match;
+						yield {
+							nodeId,
+							type: HydrationNodeType.TEXT,
+							content,
+							textType: HydrationTextType.MATH,
+						};
+					} else {
+						yield {
+							nodeId,
+							type: HydrationNodeType.TEXT,
+							content: fragment,
+							textType: HydrationTextType.NORMAL,
+						};
+					}
 				}
+				continue;
 			}
 			yield {
 				nodeId: allocateEl({ node: el }, map),
@@ -567,7 +590,7 @@ export async function hydrate(
 		return worker;
 	})();
 	if (disposeWorkerTimeout) clearTimeout(disposeWorkerTimeout);
-	disposeWorkerTimeout = setTimeout(() => {
+	if (!DEBUG_HYDRATION) disposeWorkerTimeout = setTimeout(() => {
 		disposeWorker?.();
 		worker = null;
 		disposeWorkerTimeout = null;

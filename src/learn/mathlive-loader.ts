@@ -21,11 +21,13 @@ const bracketIfNeededFactor = (x: string) => /[-+*/]/.test(x) ? `(${x})` : x;
 const bracketIfNeededExponent = (x: string) => /[-+*/^]/.test(x) ? `(${x})` : x;
 
 function mathJSONtoStack(mathJson: Expression): string {
-	if (typeof mathJson === 'string' || typeof mathJson === 'number') switch(mathJson) {
+	if (typeof mathJson === 'string' || typeof mathJson === 'number') switch (mathJson) {
 		case 'ExponentialE':
 			return 'e';
 		case 'Pi':
 			return 'pi';
+		case 'Nothing':
+			return '';
 		default:
 			return `${mathJson}`.replaceAll("'", '"');
 	}
@@ -45,16 +47,15 @@ function mathJSONtoStack(mathJson: Expression): string {
 		if ('sym' in obj) return mathJSONtoStack(obj.sym);
 		if ('fn' in obj) return mathJSONtoStack(obj.fn);
 		return '<TODO>' as never;
-	}// return '<TODO>'/* TODO */;
+	}
 	const [op, ...args] = mathJson as Extract<Expression, readonly unknown[]>;
 	switch (op) {
 		case 'Error': {
 			if (args[0] === "'missing'") return '';
 			return `<${args}>`;
 		}
-		case 'Add': {
+		case 'Add':
 			return args.map(mathJSONtoStack).join(' + ');
-		}
 		case 'Power': {
 			const [a, b] = args;
 			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^${bracketIfNeededExponent(mathJSONtoStack(b))}`;
@@ -112,15 +113,19 @@ function mathJSONtoStack(mathJson: Expression): string {
 			return `${op.replace('Arc', 'a')}(${args.map(mathJSONtoStack).join(', ')})`;
 		case 'Sequence':
 			return args.map(mathJSONtoStack).join(' ');
+		case 'Set':
+			return `{${args.map(mathJSONtoStack).join(', ')}}`;
+		case 'List':
+			return `[${args.map(mathJSONtoStack).join(', ')}]`;
 		case 'Complex': {
 			const [a, b] = args.map(mathJSONtoStack);
-			const i = b === '1' ? 'i' : `${bracketIfNeededFactor(b)}*i`
+			const i = b === '1' ? 'i' : `${bracketIfNeededFactor(b)}*i`;
 			return b === '0' ? a
 				: a === '0' ? i
-				: `${a} + ${i}`;
+					: `${a} + ${i}`;
 		}
 		default:
-			return `<TODO: ${op}${args}>`;
+			return `<TODO: ${op}(${args})>`;
 	}
 }
 
@@ -142,6 +147,13 @@ export function initField(field: HTMLInputElement & ChildNode) {
 	`;
 	mathField.addEventListener('mount', () => {
 		mathField.menuItems = mathField.menuItems.filter(item => !/color|variant|decoration/.test((item as { id?: string; }).id ?? ''));
+		mathField.keybindings = [
+			...mathField.keybindings,
+			{ key: 'alt+,', ifMode: 'math', command: 'addColumnAfter' },
+			{ key: 'shift+alt+,', ifMode: 'math', command: 'addColumnBefore' },
+			{ key: 'alt+;', ifMode: 'math', command: 'addRowAfter' },
+			{ key: 'shift+alt+;', ifMode: 'math', command: 'addRowBefore' },
+		];
 	});
 	mathField.shadowRoot?.append(styleOverrides);
 	mathField.readOnly = field.readOnly;
