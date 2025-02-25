@@ -171,4 +171,10 @@
 		background-color: transparent;
 		border: none;
 	}
+
+	pre:has(> [id^="stack-iframe-holder-"]) {
+		display: flex;
+		margin: 0.5rem;
+		overflow: hidden;
+	}
 }

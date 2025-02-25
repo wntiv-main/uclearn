@@ -1,5 +1,5 @@
 :root:root:root:root:root:root:root:root {
-	pre {
+	.que.coderunner pre {
 		margin-block: 0.2rem;
 		/* background-color: var(--uclearn-translucent-bg);
 		border-radius: var(--uclearn-radius);
@@ -179,8 +179,8 @@
 		}
 	}
 
-	code:not(:empty, pre > code),
-	pre:not(.ace_tooltip pre) {
+	.que.coderunner code:not(:empty, pre > code),
+	.que.coderunner pre:not(.ace_tooltip pre) {
 		background-color: var(--uclearn-hover-tint) !important;
 		box-shadow: 0 0 0 0.4ch var(--uclearn-hover-tint);
 		margin-inline: 0.4ch;

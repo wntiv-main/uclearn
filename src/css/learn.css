@@ -33,6 +33,7 @@
 
 	.que img,
 	.resourceimage,
+	iframe[title*="JSXGraph" i],
 	.video-js .vjs-tech {
 		filter: var(--uclearn-translucent-filter);
 	}
@@ -96,6 +97,7 @@
 
 		.que img,
 		.resourceimage,
+		iframe[title*="JSXGraph" i],
 		.video-js .vjs-tech {
 			filter: var(--uclearn-translucent-filter) invert(1)
 				hue-rotate(180deg);

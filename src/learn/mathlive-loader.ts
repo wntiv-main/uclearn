@@ -54,8 +54,14 @@ function mathJSONtoStack(mathJson: Expression): string {
 			if (args[0] === "'missing'") return '';
 			return `<${args}>`;
 		}
+		case 'Equal': {
+			const [a, b] = args;
+			return `${mathJSONtoStack(a)} = ${mathJSONtoStack(b)}`;
+		}
 		case 'Add':
 			return args.map(mathJSONtoStack).join(' + ');
+		case 'Subtract':
+			return args.map(mathJSONtoStack).join(' - ');
 		case 'Power': {
 			const [a, b] = args;
 			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^${bracketIfNeededExponent(mathJSONtoStack(b))}`;
@@ -63,6 +69,10 @@ function mathJSONtoStack(mathJson: Expression): string {
 		case 'Root': {
 			const [a, b] = args;
 			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^(1/${bracketIfNeededFactor(mathJSONtoStack(b))})`;
+		}
+		case 'Square': {
+			const [a] = args;
+			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^2`;
 		}
 		case 'Rational':
 		case 'Divide': {
@@ -81,6 +91,18 @@ function mathJSONtoStack(mathJson: Expression): string {
 			const [start, end] = args as [['Open' | 'Closed', Expression], ['Open' | 'Closed', Expression]];
 			return `${start[0] === 'Open' ? 'o' : 'c'}${end[0] === 'Open' ? 'o' : 'c'
 				}(${mathJSONtoStack(start[1])}, ${mathJSONtoStack(end[1])})`;
+		}
+		case 'Log': {
+			const [value, base = 10] = args;
+			return `log_${bracketIfNeededExponent(mathJSONtoStack(base))}(${mathJSONtoStack(value)})`;
+		}
+		case 'Lb': {
+			const [value] = args;
+			return `log_2(${mathJSONtoStack(value)})`;
+		}
+		case 'Lg': {
+			const [value] = args;
+			return `log_10(${mathJSONtoStack(value)})`;
 		}
 		case 'Ln':
 		case 'Exp':
@@ -124,6 +146,8 @@ function mathJSONtoStack(mathJson: Expression): string {
 				: a === '0' ? i
 					: `${a} + ${i}`;
 		}
+		case 'PartialDerivative':
+			return `pd(${args})`;
 		default:
 			return `<TODO: ${op}(${args})>`;
 	}
@@ -163,6 +187,7 @@ export function initField(field: HTMLInputElement & ChildNode) {
 
 	mathField.setValue(AMTparseAMtoTeX(field.value));
 	mathField.classList.add(MATHLIVE_FIELD_CLASS);
+	mathField.style.minWidth = field.style.minWidth || field.style.width;
 	mathField.addEventListener('input', e => {
 		const mathJson = JSON.parse(mathField.getValue('math-json'));
 		console.log(mathJson);
