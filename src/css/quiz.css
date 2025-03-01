@@ -85,16 +85,34 @@
 
 		.coderunner-test-results {
 			padding: 0;
+			background: transparent;
 		}
 
-		.cr-test-table-div td:has(> textarea:only-child) {
+		.cr-test-table-div {
+			background-color: transparent;
 			padding: 0;
 
-			> textarea {
-				display: block;
-				border: none;
-				padding: 0.3rem;
-				min-height: fit-content;
+			table {
+				height: 1px;
+			}
+
+			tr {
+				height: 100%;
+			}
+
+			td:has(> :is(textarea, input):only-child) {
+				padding: 0;
+				height: 100%;
+
+				> :is(textarea, input) {
+					background-color: transparent;
+					field-sizing: content;
+					display: block;
+					border: none;
+					padding: 0.3rem;
+					min-height: 100%;
+					resize: none !important;
+				}
 			}
 		}
 
@@ -157,14 +175,15 @@
 		background-color: transparent;
 		border: solid currentColor;
 		border-width: 0 0 1px 1px;
-		border-radius: 0 0 0 var(--uclearn-radius);
+		border-radius: 0 var(--uclearn-radius);
 		margin: 0 0 1ch 1ch;
 		padding: var(--uclearn-radius);
 		float: inline-end;
 		text-align: end;
-		position: relative;
 		z-index: 1;
 		width: max-content;
+		position: sticky;
+		top: var(--uclearn-nav-height);
 	}
 
 	.stack-hint {
@@ -176,5 +195,13 @@
 		display: flex;
 		margin: 0.5rem;
 		overflow: hidden;
+	}
+
+	.ddarea {
+		img {
+			padding: 0 !important;
+			object-fit: contain;
+			object-position: center;
+		}
 	}
 }

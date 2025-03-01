@@ -18,15 +18,28 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		background-color: transparent;
 	} */
 
-	/* [style*="background"] {
+	.formulation [style*="background"] {
 		background-color: transparent !important;
-	} */
+	}
 
-	&:not(.__uclearn-mathlive-debug) .stack .stackinputfeedback {
+	.stack .stackinputfeedback {
 		display: none;
 	}
 
-	.stack .stackprtfeedback, .stack .stackinputfeedback {
+	&.__uclearn-mathlive-debug .stack .stackinputfeedback {
+		display: inline-block;
+		opacity: 0.2;
+	}
+
+	.MathJax_Menu {
+		border: none;
+		border-radius: var(--uclearn-radius);
+		color: inherit;
+		padding: 0;
+	}
+
+	.stack .stackprtfeedback,
+	.stack .stackinputfeedback {
 		background-color: transparent;
 		display: inline-block;
 		vertical-align: middle;
@@ -585,6 +598,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.courseindex-link,
 	.courseindex-chevron,
 	.coderunner-test-results,
+	.precheck h3,
 	.block-cards .categoryname {
 		color: inherit;
 	}
@@ -648,6 +662,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.que.coderunner :is(th, td),
 	.unread,
 	.unread .row.header,
+	.filter-ace-inline-output-error,
 	.drawer {
 		background-color: transparent;
 	}
@@ -690,6 +705,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.text-dark,
 	.dimmed_text,
 	pre,
+	.MathJax_MenuDisabled,
 	.text-muted {
 		color: var(--uclearn-foreground-muted) !important;
 	}

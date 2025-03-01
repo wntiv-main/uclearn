@@ -15,7 +15,7 @@
 @import "injected.css";
 
 :root:root:root:root:root:root:root:root {
-	background-image: var(--uclearn-background-image);
+	background-image: var(--uclearn-background-imageset);
 	background-attachment: fixed;
 	background-size: cover;
 	background-position: center;

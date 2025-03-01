@@ -62,7 +62,75 @@
 		box-shadow: var(--uclearn-focus-shadow);
 	}
 
-	:root:not(.__uclearn-mathlive-debug) & + input {
+	+ :is(
+			input,
+			.matrixsquarebrackets,
+			.matrixroundbrackets,
+			.matrixbarbrackets
+		) {
 		display: none !important;
+
+		:root.__uclearn-mathlive-debug & {
+			display: inline-block !important;
+			opacity: 0.2;
+		}
+	}
+}
+
+#uclearn-settings-form {
+	max-height: 90vh;
+	overflow: auto;
+	min-width: 60vw;
+	display: flex;
+	flex-flow: column;
+	align-items: stretch;
+
+	.uclearn-bg-select {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+		gap: 0.5rem;
+		width: min-content;
+		min-width: 100%;
+
+		input[type="radio"],
+		input[type="file"] {
+			display: none;
+		}
+
+		.uclearn-custom-images-container {
+			display: contents;
+		}
+
+		label {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			aspect-ratio: 16/9;
+			border-radius: var(--uclearn-radius);
+			padding: calc(var(--uclearn-radius) / 2);
+			transition: background-color var(--uclearn-transition-short);
+			min-width: 0;
+			min-height: 0;
+
+			&:is(:hover, :focus) {
+				background-color: var(--uclearn-hover-tint);
+			}
+
+			&:active {
+				background-color: var(--uclearn-active-tint);
+			}
+
+			img {
+				width: 100%;
+				border-radius: calc(var(--uclearn-radius) / 2);
+				max-height: 100%;
+				object-fit: cover;
+			}
+
+			svg {
+				max-width: 100%;
+				max-height: 100%;
+			}
+		}
 	}
 }

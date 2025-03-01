@@ -4,6 +4,7 @@ import { DEBUG } from "../global/constants";
 import { patchAceEditor } from "./ace-patches";
 import type MathJax from 'mathjax';
 import { initKeybindings } from "./keybindings";
+import { initConfig } from "./config";
 
 if (DEBUG) window.addEventListener("error", async (e) => {
 	(await Toast).add(e.message, { title: `ERROR in '${e.filename}':`, type: 'danger' });
@@ -37,7 +38,17 @@ Object.defineProperty(window, "$", {
 	set(v) { _$ = v ?? _$; }
 });
 
+initConfig();
 patchAceEditor();
 initialPageLoad();
 initNavigator();
 initKeybindings();
+
+const nav = document.querySelector('nav.navbar');
+if (nav) {
+	const observer = new ResizeObserver((es) => {
+		for (const evt of es)
+			document.documentElement.style.setProperty("--uclearn-nav-height", `${evt.contentRect.height}px`);
+	});
+	observer.observe(nav);
+}

@@ -1,3 +1,5 @@
+@import "ace-code-shadow.css";
+
 :root:root:root:root:root:root:root:root {
 	.que.coderunner pre {
 		margin-block: 0.2rem;
@@ -14,6 +16,11 @@
 	}
 
 	.ace_editor {
+		color: inherit;
+	}
+
+	.ace-tm {
+		background-color: transparent;
 		color: inherit;
 	}
 
@@ -62,6 +69,10 @@
 		padding: calc(var(--uclearn-radius) / 2);
 		background-color: var(--uclearn-translucent-bg);
 		border: none;
+
+		li {
+			background-color: transparent;
+		}
 	}
 
 	[id*="_answer_run-output-text"] {
@@ -179,8 +190,10 @@
 		}
 	}
 
-	.que.coderunner code:not(:empty, pre > code),
-	.que.coderunner pre:not(.ace_tooltip pre) {
+	code:not(:empty, pre > code),
+	pre:has(> code),
+	.filter-ace-inline-output-text,
+	.que:is(.coderunner, .description) pre:not(.ace_tooltip pre) {
 		background-color: var(--uclearn-hover-tint) !important;
 		box-shadow: 0 0 0 0.4ch var(--uclearn-hover-tint);
 		margin-inline: 0.4ch;

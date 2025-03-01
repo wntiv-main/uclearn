@@ -1,11 +1,11 @@
-import type { YUI } from "yui";
+import type { YUI } from "./ucinterfaces/yui";
 import type Ace from 'ace-code';
 import type VideoJS from 'video.js';
 import type UCModalRegistry from './ucinterfaces/ModalRegistry';
 import type UCModalEvents from './ucinterfaces/ModalEvents';
 import type UCToast from './ucinterfaces/Toast';
 import { maybeUnwrap, type MapType, type MaybeUnwrap } from "../global/util";
-import { getRemappedName, patch, tailHook } from "./patch";
+import { getRemappedName, tailHook } from "./patch";
 import { onPreHydrate } from "./navigation";
 
 let _require_promise: Promise<Require>;
@@ -76,6 +76,8 @@ function patchDefine(define: RequireDefine) {
 			} else[name, deps, ready] = argArray;
 			switch (name) {
 				case "block_recentlyaccessedcourses/main": {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars -- typing stub
+					let visibleCoursesId: string | null;
 					ready = tailHook(
 						ready,
 						() => { onPreHydrate(() => { visibleCoursesId = null; }); },
@@ -90,7 +92,6 @@ function patchDefine(define: RequireDefine) {
 	});
 }
 
-declare let visibleCoursesId: string | null;
 getRequire().then(() => {
 	window.define = patchDefine(window.define);
 	// let _internalDefine: RequireDefine = patchDefine(window.define);
@@ -112,9 +113,7 @@ export function hookYUI(callback: (Y: YUI) => boolean | void) {
 
 declare global {
 	interface Window {
-		YUI?: YUI;
 		YUI_config?: Parameters<YUI['applyConfig']>[0];
-		Y?: YUI;
 		ace?: typeof Ace;
 		aceInlineCodeHighlightingDone?: boolean;
 		aceInlineCodeInteractiveDone?: boolean;

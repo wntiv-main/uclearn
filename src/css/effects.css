@@ -1,5 +1,4 @@
 :root:root:root:root:root:root:root:root {
-
 	/* Frosted */
 	.popover-region-toggle::after,
 	.popover-region-container,
@@ -9,6 +8,9 @@
 	.tooltip-inner,
 	.tooltip .arrow,
 	.moodle-dialogue-base .moodle-dialogue-wrap,
+	.MathJax_Menu,
+	#MathJax_Zoom,
+	.que .info,
 	.card.emoji-picker {
 		background-color: var(--uclearn-translucent-bg);
 		backdrop-filter: var(--uclearn-bg-effect);

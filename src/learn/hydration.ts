@@ -25,7 +25,7 @@ import {
 import { assertNever, type ItemOf, type Shifted } from "../global/util";
 import { Toast } from "./lib-hook";
 import { loadScripts, SKIP_SCRIPT_CLASS } from "./script-loader";
-import { initField, MATH_FIELD_SELECTOR, MATHLIVE_FIELD_CLASS } from "./mathlive-loader";
+import { initField, initMatrixField, MATH_FIELD_SELECTOR, MATHLIVE_FIELD_CLASS } from "./mathlive-loader";
 
 type TypedMessageWorker<T> = Omit<Worker, "postMessage"> & {
 	postMessage(
@@ -222,6 +222,7 @@ type NodeCollectors = {
 	scripts: HTMLScriptElement[];
 	math: Set<Element>;
 	fields: HTMLElement[];
+	matrixFields: HTMLElement[];
 };
 
 function handleNodeInsert(node: Node, collectors: NodeCollectors) {
@@ -245,18 +246,18 @@ function handleNodeInsert(node: Node, collectors: NodeCollectors) {
 	// 	);
 	if (node.matches(MATH_FIELD_SELECTOR)) collectors.fields.push(node as HTMLInputElement);
 	else collectors.fields.push(...node.querySelectorAll<HTMLInputElement>(MATH_FIELD_SELECTOR));
-	// if (
-	// 	newNode.classList.contains("matrixsquarebrackets") ||
-	// 	newNode.classList.contains("matrixroundbrackets") ||
-	// 	newNode.classList.contains("matrixbarbrackets")
-	// )
-	// 	state.matrixInputs.push(newNode);
-	// else
-	// 	state.matrixInputs.push(
-	// 		...newNode.querySelectorAll<HTMLElement>(
-	// 			":scope :is(.matrixsquarebrackets, .matrixroundbrackets, .matrixbarbrackets)",
-	// 		),
-	// 	);
+	if (
+		node.classList.contains("matrixsquarebrackets") ||
+		node.classList.contains("matrixroundbrackets") ||
+		node.classList.contains("matrixbarbrackets")
+	)
+		collectors.matrixFields.push(node as HTMLElement);
+	else
+		collectors.matrixFields.push(
+			...node.querySelectorAll<HTMLElement>(
+				":is(.matrixsquarebrackets, .matrixroundbrackets, .matrixbarbrackets)",
+			),
+		);
 }
 
 function debugTask(
@@ -366,6 +367,7 @@ export async function initDocumentParts() {
 		scripts: [],
 		math: new Set(),
 		fields: [],
+		matrixFields: [],
 	};
 	handleNodeInsert(document.documentElement, collectors);
 	await handlePostHydrateCollectors(collectors, true);
@@ -378,6 +380,7 @@ async function applyHydration(tasks: HydrationTasks, { config, elMap: map, root:
 		scripts: [],
 		math: new Set(),
 		fields: [],
+		matrixFields: [],
 	};
 	await lock;
 	// biome-ignore lint/style/noNonNullAssertion: immediately initialized
@@ -506,6 +509,7 @@ async function handlePostHydrateCollectors(collectors: NodeCollectors, first?: b
 	);
 	if (!first) window.MathJax?.Hub?.Queue(["Typeset", window.MathJax.Hub, [...collectors.math]]);
 	for (const field of collectors.fields) initField(field as HTMLInputElement);
+	for (const field of collectors.matrixFields) initMatrixField(field);
 }
 
 async function handleWorkerMessage(

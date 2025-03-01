@@ -1,5 +1,5 @@
 import { assertNever, map, zip, type Shifted } from '../../global/util';
-import { type HydrationElement, HydrationElementType, HydrationNodeType, type HydrationTasks, type D2WMessage, type HydrationNode, type W2DMessage, type WHydrationNode, HydrationConfig, type WHydrationConfig, HydrationTextType, type HydrationId } from '../../global/hydration';
+import { type HydrationElement, HydrationElementType, HydrationNodeType, type HydrationTasks, type D2WMessage, type HydrationNode, type W2DMessage, type WHydrationNode, type WHydrationConfig, HydrationTextType, type HydrationId } from '../../global/hydration';
 import { Hirschberg } from '../../global/hirschberg';
 
 class Abortion extends Error { }
@@ -10,10 +10,7 @@ declare const self: Omit<WorkerGlobalScope & typeof globalThis, 'postMessage'> &
 
 function similarClasses(classListA: string[], classListB: string[]) {
 	if (!classListA.length) return true;
-	for (const cls of classListA) {
-		if (classListB.includes(cls)) return true;
-	}
-	return false;
+	return classListA.reduce((a, b) => a + (classListB.includes(b) ? 1 : 0), 0) / classListA.length;
 }
 
 function compare(a: HydrationNode, b: HydrationNode) {
@@ -98,7 +95,8 @@ async function calculateChanges(id: HydrationId, config: WHydrationConfig, tasks
 	let lastElement: null | HydrationNode['nodeId'] = null;
 	if (dom.debugging) {
 		console.log([...diff]);
-		// biome-ignore lint/suspicious/noDebugger: intentional
+		/* eslint-disable-next-line no-debugger
+		*/// biome-ignore lint/suspicious/noDebugger: intentional
 		debugger;
 	}
 	await Promise.all(map(diff, async ([left, right]) => {

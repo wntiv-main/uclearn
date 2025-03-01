@@ -5,9 +5,11 @@ import { AMTparseAMtoTeX } from "asciimath";
 
 import { EXT_URL } from "./constants";
 import { DEBUG_MATHLIVE } from "../global/constants";
+import { isElementTag } from "./domutil";
 
 MathfieldElement.soundsDirectory = null;
 MathfieldElement.fontsDirectory = `${EXT_URL}/learn/mathlive/`;
+let engineInitialized = false;
 
 export const MATHLIVE_FIELD_CLASS = '__uclearn-mathlive-field';
 
@@ -26,10 +28,18 @@ function mathJSONtoStack(mathJson: Expression): string {
 			return 'e';
 		case 'Pi':
 			return 'pi';
+		case 'CatalanConstant':
+			return 'G'; // ?
 		case 'Nothing':
 			return '';
-		default:
-			return `${mathJson}`.replaceAll("'", '"');
+		case 'EmptySet':
+			return '{}';
+		default: {
+			const sym = `${mathJson}`.replaceAll("'", '"');
+			if (sym.includes('_'))
+				return sym.split('_').map(mathJSONtoStack).join('_');
+			return sym;
+		}
 	}
 	if (!Array.isArray(mathJson)) {
 		const obj = mathJson as Exclude<typeof mathJson, readonly unknown[]>;
@@ -58,6 +68,38 @@ function mathJSONtoStack(mathJson: Expression): string {
 			const [a, b] = args;
 			return `${mathJSONtoStack(a)} = ${mathJSONtoStack(b)}`;
 		}
+		case 'NotEqual': {
+			const [a, b] = args;
+			return `${mathJSONtoStack(a)} != ${mathJSONtoStack(b)}`;
+		}
+		case 'Greater': {
+			const [a, b] = args;
+			return `${mathJSONtoStack(a)} > ${mathJSONtoStack(b)}`;
+		}
+		case 'GreaterEqual': {
+			const [a, b] = args;
+			return `${mathJSONtoStack(a)} >= ${mathJSONtoStack(b)}`;
+		}
+		case 'Less': {
+			const [a, b] = args;
+			return `${mathJSONtoStack(a)} < ${mathJSONtoStack(b)}`;
+		}
+		case 'LessEqual': {
+			const [a, b] = args;
+			return `${mathJSONtoStack(a)} <= ${mathJSONtoStack(b)}`;
+		}
+		case 'Mod': {
+			const [a, b] = args;
+			return `${bracketIfNeededFactor(mathJSONtoStack(a))} % ${bracketIfNeededFactor(mathJSONtoStack(b))}`;
+		}
+		case 'Tuple':
+			if (args.length === 2) {
+				const [name, fnArgs] = args;
+				if (Array.isArray(fnArgs) && fnArgs[0] === 'Tuple')
+					return `${mathJSONtoStack(name)}(${(fnArgs as Extract<Expression, readonly unknown[]>).slice(1).map(mathJSONtoStack).join(', ')})`;
+				return `${mathJSONtoStack(name)}(${mathJSONtoStack(fnArgs)})`;
+			}
+			return `<TODO: ${op}(${args})>`;
 		case 'Add':
 			return args.map(mathJSONtoStack).join(' + ');
 		case 'Subtract':
@@ -65,6 +107,14 @@ function mathJSONtoStack(mathJson: Expression): string {
 		case 'Power': {
 			const [a, b] = args;
 			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^${bracketIfNeededExponent(mathJSONtoStack(b))}`;
+		}
+		case 'Superscript': {
+			const [a, b] = args;
+			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^${bracketIfNeededExponent(mathJSONtoStack(b))}`;
+		}
+		case 'Subscript': {
+			const [a, b] = args;
+			return `${bracketIfNeededExponent(mathJSONtoStack(a))}[${mathJSONtoStack(b)}]`;
 		}
 		case 'Root': {
 			const [a, b] = args;
@@ -104,6 +154,17 @@ function mathJSONtoStack(mathJson: Expression): string {
 			const [value] = args;
 			return `log_10(${mathJSONtoStack(value)})`;
 		}
+		case 'LogOnePlus': {
+			const [value] = args;
+			return `ln(1 + ${mathJSONtoStack(value)})`;
+		}
+		case 'pd':
+		case 'Abs':
+		case 'Ceil':
+		case 'Floor':
+		case 'Round':
+		case 'Max':
+		case 'Min':
 		case 'Ln':
 		case 'Exp':
 		case 'Cos':
@@ -153,47 +214,106 @@ function mathJSONtoStack(mathJson: Expression): string {
 	}
 }
 
-export function initField(field: HTMLInputElement & ChildNode) {
-	const mathField = new MathfieldElement({
-		contentPlaceholder: field.placeholder,
-	});
+function initMathField(mf: MathfieldElement) {
 	const styleOverrides = document.createElement('style');
 	styleOverrides.textContent = `
 		:host .ML__caret {
-			position: relative;
+			display: inline-flex;
+			align-items: center;
+			vertical-align: middle;
 		}
 
 		:host .ML__caret::after {
 			position: absolute;
 			height: 1lh;
-			bottom: calc(0.5em - 0.5lh);
+			inset: auto;
+		}
+
+		:host .ML__prompt {
+			margin-top: 0.2em;
 		}
 	`;
-	mathField.addEventListener('mount', () => {
-		mathField.menuItems = mathField.menuItems.filter(item => !/color|variant|decoration/.test((item as { id?: string; }).id ?? ''));
-		mathField.keybindings = [
-			...mathField.keybindings,
+	mf.shadowRoot?.append(styleOverrides);
+	mf.removeExtraneousParentheses = true;
+	mf.smartFence = true;
+	mf.smartSuperscript = true;
+	mf.addEventListener('mount', () => {
+		if (!engineInitialized && MathfieldElement.computeEngine) {
+			MathfieldElement.computeEngine.declare("pd", {
+				signature: "(unknown, unknown, ...unknown) -> unknown",
+			});
+			engineInitialized = true;
+		}
+		mf.menuItems = mf.menuItems.filter(item => !/color|variant|decoration/.test((item as { id?: string; }).id ?? ''));
+		mf.keybindings = [
+			...mf.keybindings,
 			{ key: 'alt+,', ifMode: 'math', command: 'addColumnAfter' },
 			{ key: 'shift+alt+,', ifMode: 'math', command: 'addColumnBefore' },
 			{ key: 'alt+;', ifMode: 'math', command: 'addRowAfter' },
 			{ key: 'shift+alt+;', ifMode: 'math', command: 'addRowBefore' },
 		];
+		mf.inlineShortcuts = {
+			...mf.inlineShortcuts,
+			pd: '\\operatorname{pd}'
+		};
 	});
-	mathField.shadowRoot?.append(styleOverrides);
-	mathField.readOnly = field.readOnly;
-	mathField.removeExtraneousParentheses = true;
-	mathField.smartFence = true;
-	mathField.smartSuperscript = true;
+}
 
-	mathField.setValue(AMTparseAMtoTeX(field.value));
+export function initMatrixField(field: HTMLElement) {
+	const mathField = new MathfieldElement({});
+	mathField.readOnly = true;
+	initMathField(mathField);
+	const rows = [...field.querySelectorAll('tr')];
+	const env = field.classList.contains('matrixroundbrackets') ? 'pmatrix'
+		: field.classList.contains('matrixsquarebrackets') ? 'bmatrix'
+			: field.classList.contains('matrixbarbrackets') ? 'vmatrix'
+				: 'matrix';
+	mathField.setValue(`\
+		\\begin{${env}}
+			${rows.map(row => {
+		const cells = [...row.querySelectorAll<HTMLInputElement>('td > input[data-stack-input-type="matrix"]')];
+		return cells.map(cell => {
+			const fieldValue = cell.value.match(/;"__uclearn-mltex-\(";(".*");"__uclearn-mltex-\)"/);
+			const cellValue = fieldValue ? JSON.parse(fieldValue[1]) : AMTparseAMtoTeX(cell.value.split(';')[0]);
+			return `\\placeholder[${cell.id}]{${cellValue}}`;
+		}).join('&');
+	}).join('\\\\')}
+		\\end{${env}}`);
+	mathField.classList.add(MATHLIVE_FIELD_CLASS);
+	const inputCb = (e: Event) => {
+		for (const prompt of mathField.getPrompts()) {
+			const mathJson = JSON.parse(mathField.getPromptValue(prompt, 'math-json'));
+			const fieldLatex = mathField.getPromptValue(prompt, 'latex');
+			const field = document.getElementById(prompt);
+			if (!field || !isElementTag(field, 'input')) continue;
+			field.value = `${mathJSONtoStack(mathJson)};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
+			field.dispatchEvent(new InputEvent(e.type, e));
+		}
+	};
+	mathField.addEventListener('input', inputCb);
+	mathField.addEventListener('change', inputCb);
+	field.before(mathField);
+}
+
+export function initField(field: HTMLInputElement & ChildNode) {
+	const mathField = new MathfieldElement({
+		contentPlaceholder: field.placeholder,
+	});
+	mathField.readOnly = field.readOnly;
+	initMathField(mathField);
+
+	const fieldValue = field.value.match(/;"__uclearn-mltex-\(";(".*");"__uclearn-mltex-\)"/);
+	mathField.setValue(fieldValue ? JSON.parse(fieldValue[1]) : AMTparseAMtoTeX(field.value.split(';')[0]));
 	mathField.classList.add(MATHLIVE_FIELD_CLASS);
 	mathField.style.minWidth = field.style.minWidth || field.style.width;
-	mathField.addEventListener('input', e => {
+	const inputCb = (e: Event) => {
 		const mathJson = JSON.parse(mathField.getValue('math-json'));
+		const fieldLatex = mathField.getValue('latex');
 		console.log(mathJson);
-		field.value = mathJSONtoStack(mathJson);
-		field.dispatchEvent(new InputEvent('input', e));
-	});
-	mathField.addEventListener('change', e => { field.dispatchEvent(new InputEvent('change', e)); });
+		field.value = `${mathJSONtoStack(mathJson)};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
+		field.dispatchEvent(new InputEvent(e.type, e));
+	};
+	mathField.addEventListener('input', inputCb);
+	mathField.addEventListener('change', inputCb);
 	field.before(mathField);
 }

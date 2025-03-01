@@ -1,5 +1,5 @@
 // import type VideoJS from 'video.js';
-import type { YUI } from 'yui';
+import type { YUI } from './ucinterfaces/yui';
 
 import { DEBUG } from '../global/constants';
 import { type _HydrationStages, type HydrationConfig, type HydrationStage, precomputeStages } from "../global/hydration";
@@ -14,7 +14,12 @@ let hydrationController: AbortController | null = null;
 const preHydrateHooks: (() => void)[] = [];
 const postHydrateHooks: (() => void)[] = [
 	// Quiz timer needs restart
-	() => window.M?.mod_quiz?.timer?.update(),
+	() => { try { window.M?.mod_quiz?.timer?.update(); } catch {/* ignore */ } },
+	() => {
+		for (const btn of document.querySelectorAll('form input[type="submit"]')) {
+			btn.removeAttribute('disabled');
+		}
+	},
 ];
 
 export const onPreHydrate = Array.prototype.push.bind(preHydrateHooks);
@@ -31,6 +36,15 @@ type HydrationHint = [
 	],
 	...[Partial<HydrationConfig & { weight: number; }>] | []
 ];
+
+let _transformDiv: HTMLElement | null = null;
+function contentTransformer(content: string) {
+	return content.replaceAll(/value\s*=\s*"([^"\n]*?;"__uclearn-mltex-\(";".*?";"__uclearn-mltex-\)".*?)"/g, (_match, data) => {
+		_transformDiv ??= document.createElement('div');
+		_transformDiv.setAttribute('data-uclearn-value', data);
+		return `value=${_transformDiv.outerHTML.match(/<[dD][iI][vV].*?data-uclearn-value=(".*").*?>/)?.[1]}`;
+	});
+}
 
 const parser = new DOMParser();
 async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hydrationHints: HydrationHint[] = []) {
@@ -53,7 +67,7 @@ async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hy
 	}
 	updateProgress([], 'parsing', 0);
 	const updated = parser.parseFromString(
-		content,
+		contentTransformer(content),
 		contentType as DOMParserSupportedType,
 	);
 	updateProgress([], 'parsing', 1);

@@ -1,4 +1,4 @@
-import type { YUI } from 'yui';
+import type { YUINode } from 'yui';
 interface Moodle {
 	cfg?: {
 		courseId: number;
@@ -14,6 +14,23 @@ interface Moodle {
 
 			toggleVisibility();
 			setVisibility(visible: boolean, updatePref = true);
+		};
+	};
+	core?: {
+		dialogue?: {
+			new(config: {
+				headerContent?: string | YUINode,
+				bodyContent: string | YUINode,
+				draggable?: boolean,
+				visible?: boolean,
+				center?: boolean,
+				modal?: boolean,
+				width?: number | null,
+				extraClasses?: string[],
+			}): {
+				show(): void;
+				hide(): void;
+			};
 		};
 	};
 }

@@ -3,7 +3,10 @@
 :host {
 	display: grid;
 	padding-block: 0.5rem;
+}
 
+:host,
+:root:root:root:root:root:root:root:root {
 	.ace_editor {
 		background-color: transparent;
 		color: inherit;

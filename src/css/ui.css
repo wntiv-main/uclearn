@@ -125,6 +125,13 @@
 		clip-path: polygon(0 0, 0 100%, 100% 50%);
 	}
 
+	#MathJax_Zoom {
+		border: none;
+		padding: calc(var(--uclearn-radius) / 2);
+		border-radius: var(--uclearn-radius);
+		box-shadow: 1px 2px 5px var(--uclearn-shadow-color);
+	}
+
 	/* Input Fields */
 	.input-group:has(input:not([type="checkbox"]).form-control) {
 		border: 1px solid #808080;
@@ -181,17 +188,31 @@
 	}
 
 	/* Dropdowns */
-	.dropdown-menu {
+	.MathJax_Menu {
+		bottom: 5px;
+		max-height: max-content;
+		min-height: 0;
+		height: -moz-available;
+		height: -webkit-fill-available;
+		height: fill-available;
+	}
+
+	.dropdown-menu,
+	.MathJax_Menu {
 		overflow-y: auto;
+		box-shadow: 1px 2px 5px var(--uclearn-shadow-color);
 
 		.dropdown-divider {
 			margin-block: 0.5rem;
 			border-color: currentColor;
 		}
 
-		.dropdown-item {
+		.dropdown-item,
+		.MathJax_MenuItem {
 			align-items: center;
 			display: flex;
+			padding-block: 0.2rem;
+			background-color: transparent;
 			transition: background-color var(--uclearn-transition-short),
 				box-shadow var(--uclearn-transition-short),
 				clip-path var(--uclearn-transition-short);
@@ -220,7 +241,9 @@
 				clip-path: inset(0 0 -0.5rem 0);
 			}
 
-			&:is(:hover, :focus-visible) {
+			&:is(:hover, :focus-visible, .MathJax_MenuActive):not(
+					.MathJax_MenuDisabled
+				) {
 				--uclearn-hover-tint: color-mix(
 					in srgb,
 					var(--uclearn-color-complete) 50%,
@@ -233,6 +256,14 @@
 					box-shadow: 0 0 0.5rem 0.25rem var(--uclearn-hover-tint);
 				}
 			}
+		}
+
+		.MathJax_MenuArrow {
+			color: transparent;
+			background-color: var(--uclearn-foreground-muted);
+			height: 0.7em;
+			width: 0.7em;
+			clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
 		}
 
 		.items .dropdown-item {
