@@ -1,11 +1,12 @@
-import { DatabaseHandler, DBStoreValue, type KeyValue, type WithKeyPath } from "./db";
+import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } from "./db";
 import { SKIP_HYDRATION_CLASS } from "./hydration";
-import { SETTINGS_ICON, UPLOAD_ICON } from "./icons";
+import { MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
 import { getYUIInstance } from "./lib-hook";
 
 type Config = {
 	userCss: string;
 	customBg: Blob | null;
+	theme: 'light' | 'dark' | null;
 };
 
 const uclearnDB = new DatabaseHandler<{
@@ -48,6 +49,29 @@ const configHandlers: {
 			URL.revokeObjectURL(url);
 			document.documentElement.style.removeProperty(CUSTOM_BACKGROUND_PROP);
 		};
+	},
+	theme(value) {
+		document.documentElement.classList.remove('uclearn-light-mode', 'uclearn-dark-mode');
+		switch (value) {
+			case 'light':
+				document.documentElement.classList.add('uclearn-light-mode');
+				break;
+			case 'dark':
+				document.documentElement.classList.add('uclearn-dark-mode');
+				break;
+			default: {
+				const media = window.matchMedia('(prefers-color-scheme: dark)');
+				document.documentElement.classList.add(
+					media.matches ? 'uclearn-dark-mode' : 'uclearn-light-mode');
+				const listener = () => {
+					document.documentElement.classList.remove('uclearn-light-mode', 'uclearn-dark-mode');
+					document.documentElement.classList.add(
+						media.matches ? 'uclearn-dark-mode' : 'uclearn-light-mode');
+				};
+				media.addEventListener('change', listener);
+				return () => media.removeEventListener('change', listener);
+			}
+		}
 	},
 };
 
@@ -212,7 +236,30 @@ async function prepareConfigModal() {
 	label.title = 'Upload Image';
 	label.innerHTML = UPLOAD_ICON;
 	backgroundImages.append(fileUpload, label);
-	form.append(backgroundImages);
+	const colorTheme = document.createElement('fieldset');
+	colorTheme.classList.add('uclearn-color-scheme');
+	const themeLegend = document.createElement('legend');
+	themeLegend.textContent = "Color Scheme";
+	const controller = document.createElement('div');
+	controller.classList.add('uclearn-color-scheme-select');
+	colorTheme.append(themeLegend, controller);
+	for (const [title, value, icon] of [["Light", 'light', SUN_ICON], ["System Scheme", null, MONITOR_ICON], ["Dark", 'dark', MOON_ICON]] as const) {
+		const radio = document.createElement('input');
+		radio.type = 'radio';
+		radio.id = `_uclearn-color-scheme-${value}`;
+		radio.name = 'uclearn-color-scheme-select';
+		radio.checked = (configCache.theme ?? null) === value;
+		radio.addEventListener('change', () => {
+			initConfigValue('theme', value);
+			uclearnDB.openStore('userConfig', 'readwrite').then(o => o.put({ key: 'theme', value }));
+		});
+		const label = document.createElement('label');
+		label.setAttribute('for', radio.id);
+		label.title = title;
+		label.innerHTML = icon;
+		controller.append(radio, label);
+	}
+	form.append(backgroundImages, colorTheme);
 	return new window.M.core.dialogue({
 		headerContent: 'Moodle Mod Settings',
 		bodyContent: Y.one(form),

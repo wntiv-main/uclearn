@@ -72,20 +72,15 @@
 
 	&.uclearn-dark-mode {
 		color-scheme: dark;
+		--uclearn-background-imageset: linear-gradient(
+				0deg,
+				var(--uclearn-translucent-bg),
+				var(--uclearn-translucent-bg)
+			),
+			var(--uclearn-background-image);
 	}
 
 	&.uclearn-light-mode {
 		color-scheme: light;
-	}
-
-	@media (prefers-color-scheme: dark) {
-		& {
-			--uclearn-background-imageset: linear-gradient(
-					0deg,
-					var(--uclearn-translucent-bg),
-					var(--uclearn-translucent-bg)
-				),
-				var(--uclearn-background-image);
-		}
 	}
 }

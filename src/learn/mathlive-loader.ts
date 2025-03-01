@@ -92,14 +92,6 @@ function mathJSONtoStack(mathJson: Expression): string {
 			const [a, b] = args;
 			return `${bracketIfNeededFactor(mathJSONtoStack(a))} % ${bracketIfNeededFactor(mathJSONtoStack(b))}`;
 		}
-		case 'Tuple':
-			if (args.length === 2) {
-				const [name, fnArgs] = args;
-				if (Array.isArray(fnArgs) && fnArgs[0] === 'Tuple')
-					return `${mathJSONtoStack(name)}(${(fnArgs as Extract<Expression, readonly unknown[]>).slice(1).map(mathJSONtoStack).join(', ')})`;
-				return `${mathJSONtoStack(name)}(${mathJSONtoStack(fnArgs)})`;
-			}
-			return `<TODO: ${op}(${args})>`;
 		case 'Add':
 			return args.map(mathJSONtoStack).join(' + ');
 		case 'Subtract':
@@ -194,8 +186,8 @@ function mathJSONtoStack(mathJson: Expression): string {
 		case 'Arcsech':
 		case 'Arccsch':
 			return `${op.replace('Arc', 'a')}(${args.map(mathJSONtoStack).join(', ')})`;
-		case 'Sequence':
-			return args.map(mathJSONtoStack).join(' ');
+		// case 'Sequence':
+		// 	return args.map(mathJSONtoStack).join(' ');
 		case 'Set':
 			return `{${args.map(mathJSONtoStack).join(', ')}}`;
 		case 'List':
@@ -209,8 +201,20 @@ function mathJSONtoStack(mathJson: Expression): string {
 		}
 		case 'PartialDerivative':
 			return `pd(${args})`;
+		case 'Tuple':
+			if (Array.isArray(args[0]) && args[0][0] === 'Error' && args[0][1] === "'unexpected-command'") {
+				if (args[0][2][1] === "'\\differentialD'")
+					return `d${args.slice(1).map(mathJSONtoStack).join('')}`;
+			}
+			// if (args.length === 2) {
+			// 	const [name, fnArgs] = args;
+			// 	if (Array.isArray(fnArgs) && fnArgs[0] === 'Tuple')
+			// 		return `${mathJSONtoStack(name)}(${(fnArgs as Extract<Expression, readonly unknown[]>).slice(1).map(mathJSONtoStack).join(', ')})`;
+			// 	return `${mathJSONtoStack(name)}(${mathJSONtoStack(fnArgs)})`;
+			// }
+			return `<TODO: ${op}(${args.map(mathJSONtoStack)})>`;
 		default:
-			return `<TODO: ${op}(${args})>`;
+			return `<TODO: ${op}(${args.map(mathJSONtoStack)})>`;
 	}
 }
 
@@ -309,7 +313,6 @@ export function initField(field: HTMLInputElement & ChildNode) {
 	const inputCb = (e: Event) => {
 		const mathJson = JSON.parse(mathField.getValue('math-json'));
 		const fieldLatex = mathField.getValue('latex');
-		console.log(mathJson);
 		field.value = `${mathJSONtoStack(mathJson)};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
 		field.dispatchEvent(new InputEvent(e.type, e));
 	};

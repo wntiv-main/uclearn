@@ -94,7 +94,9 @@
 
 		input[type="radio"],
 		input[type="file"] {
-			display: none;
+			position: absolute;
+			opacity: 0;
+			pointer-events: none;
 		}
 
 		.uclearn-custom-images-container {
@@ -112,7 +114,8 @@
 			min-width: 0;
 			min-height: 0;
 
-			&:is(:hover, :focus) {
+			&:hover,
+			input:focus + & {
 				background-color: var(--uclearn-hover-tint);
 			}
 
@@ -130,6 +133,40 @@
 			svg {
 				max-width: 100%;
 				max-height: 100%;
+			}
+		}
+	}
+
+	.uclearn-color-scheme-select {
+		display: flex;
+		border-radius: var(--uclearn-radius);
+		background-color: var(--uclearn-translucent-bg);
+		overflow: hidden;
+		width: fit-content;
+
+		input[type="radio"] {
+			position: absolute;
+			opacity: 0;
+			pointer-events: none;
+		}
+
+		label {
+			transition: background-color var(--uclearn-transition-short);
+			padding: calc(var(--uclearn-radius) / 2);
+			margin: 0;
+
+			svg {
+				height: 1.5em;
+			}
+
+			&:hover,
+			input:focus + & {
+				background-color: var(--uclearn-hover-tint);
+			}
+
+			&:active,
+			input:checked + & {
+				background-color: var(--uclearn-active-tint);
 			}
 		}
 	}

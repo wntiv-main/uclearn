@@ -88,7 +88,7 @@
 		contain: content;
 	}
 
-	@media (prefers-color-scheme: dark) {
+	&.uclearn-dark-mode {
 		img[src^="https://learn.canterbury.ac.nz/pix/"]
 		{
 			filter: var(--uclearn-translucent-filter) invert(1)
