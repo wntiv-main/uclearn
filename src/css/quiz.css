@@ -204,4 +204,29 @@
 			object-position: center;
 		}
 	}
+
+	.stackprtfeedback {
+		--uclearn-accent-color: #808080;
+		margin: 0.2rem 1ch;
+		background-color: color-mix(
+			in srgb,
+			var(--uclearn-accent-color) 10%,
+			var(--uclearn-translucent-bg) 90%
+		);
+		border-radius: var(--uclearn-radius);
+		padding: calc(var(--uclearn-radius) / 2);
+		padding-top: 0;
+
+		&:has(> .correct) {
+			--uclearn-accent-color: var(--uclearn-color-success);
+		}
+
+		&:has(> .partiallycorrect) {
+			--uclearn-accent-color: var(--uclearn-color-warning);
+		}
+
+		&:has(> .incorrect, > .notanswered) {
+			--uclearn-accent-color: var(--uclearn-color-error);
+		}
+	}
 }

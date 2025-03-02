@@ -26,6 +26,7 @@ import { assertNever, type ItemOf, type Shifted } from "../global/util";
 import { Toast } from "./lib-hook";
 import { loadScripts, SKIP_SCRIPT_CLASS } from "./script-loader";
 import { initField, initMatrixField, MATH_FIELD_SELECTOR, MATHLIVE_FIELD_CLASS } from "./mathlive-loader";
+import { initMessageApp } from "./messaging";
 
 type TypedMessageWorker<T> = Omit<Worker, "postMessage"> & {
 	postMessage(
@@ -258,6 +259,10 @@ function handleNodeInsert(node: Node, collectors: NodeCollectors) {
 				":is(.matrixsquarebrackets, .matrixroundbrackets, .matrixbarbrackets)",
 			),
 		);
+	if (node.classList.contains('message-app'))
+		initMessageApp(node as HTMLElement);
+	else for (const el of node.getElementsByClassName('message-app'))
+		initMessageApp(el as HTMLElement);
 }
 
 function debugTask(

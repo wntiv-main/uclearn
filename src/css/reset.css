@@ -22,13 +22,28 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		background-color: transparent !important;
 	}
 
-	.stack .stackinputfeedback {
+	p:has(+ .stackprtfeedback, + .stackinputfeedback ~ .stackprtfeedback) {
+		display: inline-block;
+	}
+
+	br:has(+ .stackprtfeedback, + .stackinputfeedback ~ .stackprtfeedback) {
 		display: none;
 	}
 
-	&.__uclearn-mathlive-debug .stack .stackinputfeedback {
+	.stackprtfeedback,
+	.stackinputfeedback {
+		background-color: transparent;
 		display: inline-block;
-		opacity: 0.2;
+		vertical-align: middle;
+	}
+
+	.stackinputfeedback {
+		display: none;
+
+		:root.__uclearn-mathlive-debug & {
+			display: inline-block;
+			opacity: 0.2;
+		}
 	}
 
 	.MathJax_Menu {
@@ -36,15 +51,6 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		border-radius: var(--uclearn-radius);
 		color: inherit;
 		padding: 0;
-	}
-
-	.stack .stackprtfeedback,
-	.stack .stackinputfeedback {
-		background-color: transparent;
-		display: inline-block;
-		vertical-align: middle;
-		margin-inline: 1ch;
-		padding: 0.2ch;
 	}
 
 	a {

@@ -29,6 +29,7 @@
 		{
 			"resources": [
 				"fonts/**/*.woff",
+				"learn/highlight.js/*.css",
 				"learn/hydration-worker.js",
 				"learn/pyright/*.js",
 				"learn/mathlive/*",

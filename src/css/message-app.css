@@ -1,13 +1,15 @@
 @font-face {
-	font-family: 'Noto Color Emoji';
+	font-family: "Noto Color Emoji";
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
-	src: url(chrome-extension://__MSG_@@extension_id__/fonts/noto-color-emoji/noto-color-emoji-only.woff) format('woff');
+	src: url(chrome-extension://__MSG_@@extension_id__/fonts/noto-color-emoji/noto-color-emoji-only.woff)
+		format("woff");
 }
 
 :root:root:root:root:root:root:root:root {
-	.drawer:has(>.message-app), .message-app {
+	.drawer:has(> .message-app),
+	.message-app {
 		overflow: visible;
 	}
 
@@ -59,7 +61,8 @@
 			}
 		}
 
-		:is(.view-overview-body, [data-region="view-contacts"]) .list-group-item {
+		:is(.view-overview-body, [data-region="view-contacts"])
+			.list-group-item {
 			border: none;
 			column-gap: 5px;
 			margin: 0;
@@ -77,12 +80,12 @@
 		&.border {
 			border: none !important;
 
-			>.container-fluid {
+			> .container-fluid {
 				padding: 0;
 			}
 		}
 
-		:has(>.message) {
+		:has(> .message) {
 			row-gap: 1lh;
 		}
 
@@ -104,7 +107,7 @@
 			align-items: center;
 			border-bottom: 1px solid currentColor;
 
-			>* {
+			> * {
 				border-bottom: none !important;
 				flex-grow: 1;
 				padding-block: 0.2rem !important;
@@ -118,12 +121,13 @@
 			border-radius: var(--uclearn-radius);
 			text-decoration: none;
 
-			:has(>&) {
+			:has(> &) {
 				margin-top: 0 !important;
 			}
 		}
 
-		.footer-container, .footer-container [data-region="view-conversation"]:not(.hidden) {
+		.footer-container,
+		.footer-container [data-region="view-conversation"]:not(.hidden) {
 			display: contents;
 		}
 
@@ -141,7 +145,7 @@
 			padding: 0 !important;
 			pointer-events: none;
 
-			>* {
+			> * {
 				padding: 0 !important;
 			}
 
@@ -201,16 +205,16 @@
 					border-bottom-left-radius: 0.2rem;
 				}
 
-				>.d-flex [data-region="retry-send"] {
+				> .d-flex [data-region="retry-send"] {
 					order: 4;
 				}
 			}
 
-			>.d-flex {
+			> .d-flex {
 				padding: 0 !important;
 				display: contents !important;
 
-				>* {
+				> * {
 					margin: 0 !important;
 				}
 
@@ -264,21 +268,23 @@
 				max-height: 35vh;
 			}
 
-			.d-flex:has(>textarea.form-control) {
+			.d-flex:has(> textarea.form-control) {
 				align-items: center;
 				background-color: var(--uclearn-translucent-bg);
 				border: 1px solid #808080;
 				border-radius: var(--uclearn-radius);
 				/* box-shadow: inset 0 0 0 100vmax transparent; */
 				transition: box-shadow var(--uclearn-transition-short);
+				position: relative;
 
-				&:has(>textarea.form-control:focus-visible) {
+				&:has(> textarea.form-control:focus-visible) {
 					box-shadow:
-						/* inset 0 0 0 100vmax var(--uclearn-hover-tint), */
-						var(--uclearn-focus-shadow);
+						/* inset 0 0 0 100vmax var(--uclearn-hover-tint), */ var(
+						--uclearn-focus-shadow
+					);
 				}
 
-				>div {
+				> div {
 					display: contents !important;
 
 					[data-enter-to-send="1"] & button[data-action*="send"] {
@@ -303,12 +309,33 @@
 				}
 			}
 		}
+
+		.emoji-auto-complete-container {
+			overflow: auto hidden;
+			scrollbar-width: thin;
+
+			.emoji-button {
+				transition: background-color var(--uclearn-transition-short);
+
+				&:hover {
+					background-color: var(--uclearn-hover-tint);
+				}
+
+				&:is(:active, .active) {
+					background-color: var(--uclearn-active-tint);
+				}
+			}
+		}
 	}
 
 	.drawer .message-app {
 		display: grid;
 		grid-template:
-			"header close"max-content "content content"minmax(max-content, 1fr) "footer footer"max-content / 1fr max-content;
+			"header close" max-content "content content" minmax(
+				max-content,
+				1fr
+			)
+			"footer footer" max-content / 1fr max-content;
 
 		.closewidget {
 			grid-area: close;
@@ -338,12 +365,14 @@
 		}
 	}
 
-	#page .main-inner-wrapper:has(#region-main>*>.message-app) {
-		display: flex;
-		flex-flow: column;
+	#page .main-inner-wrapper:has(#region-main > * > .message-app) {
+		/* display: flex;
+		flex-flow: column; */
 
 		#topofscroll {
-			padding: 0;
+			height: 100%;
+			grid-template-rows: 1fr;
+			/* padding: 0; */
 		}
 
 		#page-content {
@@ -355,19 +384,28 @@
 			height: 100%;
 		}
 
-		#region-main>* {
+		#region-main > * {
 			padding: 0;
 		}
 
 		.message-app {
+			> .container-fluid {
+				padding: 0 !important;
+
+				> .row {
+					flex-wrap: nowrap;
+				}
+			}
+
 			.conversationcontainer {
 				flex: 0 0 250px;
 				max-width: 250px;
 			}
 
-			.conversationcontainer+* {
+			.conversationcontainer + * {
 				flex: 1 0;
 				max-width: none;
+				min-width: 0;
 			}
 
 			.panel-header-container [data-region="view-overview"] {

@@ -35,6 +35,7 @@
 	border-radius: calc(var(--uclearn-radius) / 2);
 	font-size: 1.2em;
 	min-width: 3ch;
+	margin-inline: 0.2ch;
 	--caret-color: currentColor;
 	--selection-color: white;
 	--selection-background-color: #0080ff60;

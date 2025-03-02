@@ -226,7 +226,8 @@ async function safeFetch(input: RequestInfo | URL, { onProgress, onError, ...ini
 			if (done) break;
 			loaded += value.byteLength;
 			onProgress?.(loaded, total);
-			content += String.fromCharCode(...value);
+			for (const ch of value)
+				content += String.fromCharCode(ch);
 		}
 	}
 	return [resp, content] as const;
