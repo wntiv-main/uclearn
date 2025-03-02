@@ -86,6 +86,7 @@ export async function initConfig() {
 	for await (const { key, value } of uclearnDB.iterStore('userConfig')) {
 		initConfigValue(key, value);
 	}
+	if(!('theme' in configCache)) initConfigValue("theme", null);
 	const settingsButton = document.createElement('button');
 	settingsButton.innerHTML = `${SETTINGS_ICON('height: 1lh;margin-inline: -5px 5px;')}Moodle Mod Settings`;
 	settingsButton.classList.add('dropdown-item', SKIP_HYDRATION_CLASS);

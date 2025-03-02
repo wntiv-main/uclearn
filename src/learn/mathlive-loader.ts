@@ -272,6 +272,7 @@ export function initMatrixField(field: HTMLElement) {
 		: field.classList.contains('matrixsquarebrackets') ? 'bmatrix'
 			: field.classList.contains('matrixbarbrackets') ? 'vmatrix'
 				: 'matrix';
+	const lockStates: Record<string, boolean> = {};
 	mathField.setValue(`\
 		\\begin{${env}}
 			${rows.map(row => {
@@ -279,10 +280,12 @@ export function initMatrixField(field: HTMLElement) {
 		return cells.map(cell => {
 			const fieldValue = cell.value.match(/;"__uclearn-mltex-\(";(".*");"__uclearn-mltex-\)"/);
 			const cellValue = fieldValue ? JSON.parse(fieldValue[1]) : AMTparseAMtoTeX(cell.value.split(';')[0]);
+			lockStates[cell.id] = cell.readOnly;
 			return `\\placeholder[${cell.id}]{${cellValue}}`;
 		}).join('&');
 	}).join('\\\\')}
 		\\end{${env}}`);
+	for(const [id, locked] of Object.entries(lockStates)) mathField.setPromptState(id, undefined, locked);
 	mathField.classList.add(MATHLIVE_FIELD_CLASS);
 	const inputCb = (e: Event) => {
 		for (const prompt of mathField.getPrompts()) {
