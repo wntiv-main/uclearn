@@ -285,7 +285,9 @@ export function initMatrixField(field: HTMLElement) {
 		}).join('&');
 	}).join('\\\\')}
 		\\end{${env}}`);
-	for(const [id, locked] of Object.entries(lockStates)) mathField.setPromptState(id, undefined, locked);
+	mathField.addEventListener("mount", () => {
+		for(const [id, locked] of Object.entries(lockStates)) mathField.setPromptState(id, undefined, locked);
+	});
 	mathField.classList.add(MATHLIVE_FIELD_CLASS);
 	const inputCb = (e: Event) => {
 		for (const prompt of mathField.getPrompts()) {
