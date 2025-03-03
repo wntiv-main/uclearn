@@ -13,7 +13,6 @@ async function markMessage(msg: HTMLElement) {
 			const language = hljs.getLanguage(lang) ? lang : 'plaintext';
 			return hljs.highlight(code, { language }).value;
 		},
-		async: true,
 	}));
 	const node = msg.querySelector<HTMLElement>('[data-region="text-container"]');
 	if (!node) return;

@@ -57,6 +57,10 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		color: var(--uclearn-color-link);
 	}
 
+	hr {
+		border-color: rgba(from currentColor r g b / 0.1);
+	}
+
 	.activity-navigation :is(.float-start, .float-end) {
 		float: none !important;
 		display: contents;

@@ -313,18 +313,18 @@
 		.emoji-auto-complete-container {
 			overflow: auto hidden;
 			scrollbar-width: thin;
+		}
+	}
 
-			.emoji-button {
-				transition: background-color var(--uclearn-transition-short);
+	.emoji-button {
+		transition: background-color var(--uclearn-transition-short);
 
-				&:hover {
-					background-color: var(--uclearn-hover-tint);
-				}
+		&:is(:hover, :focus) {
+			background-color: var(--uclearn-hover-tint);
+		}
 
-				&:is(:active, .active) {
-					background-color: var(--uclearn-active-tint);
-				}
-			}
+		&:is(:active, .active) {
+			background-color: var(--uclearn-active-tint);
 		}
 	}
 
