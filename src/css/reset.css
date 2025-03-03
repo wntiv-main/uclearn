@@ -55,6 +55,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 
 	a {
 		color: var(--uclearn-color-link);
+		background-color: transparent;
 	}
 
 	hr {

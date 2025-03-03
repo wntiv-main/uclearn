@@ -1,7 +1,7 @@
 export function initKeybindings() {
 	document.addEventListener("keydown", e => {
 		const el = e.target as Element;
-		if (e.key.startsWith('Arrow')) {
+		if (e.key?.startsWith('Arrow')) {
 			const sstField = el.closest<HTMLInputElement>('.sst input');
 			if (sstField) {
 				// biome-ignore lint/style/noNonNullAssertion: must be present
