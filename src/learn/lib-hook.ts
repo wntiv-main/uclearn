@@ -7,6 +7,7 @@ import type UCToast from './ucinterfaces/Toast';
 import { maybeUnwrap, type MapType, type MaybeUnwrap } from "../global/util";
 import { getRemappedName, tailHook } from "./patch";
 import { onPreHydrate } from "./navigation";
+import type monaco from "monaco-editor";
 
 let _require_promise: Promise<Require>;
 export async function getRequire() {
@@ -28,6 +29,16 @@ export async function getRequire() {
 	);
 }
 
+declare global {
+	interface Window {
+		YUI_config?: Parameters<YUI['applyConfig']>[0];
+		ace?: typeof Ace;
+		aceInlineCodeHighlightingDone?: boolean;
+		aceInlineCodeInteractiveDone?: boolean;
+		monaco?: typeof monaco;
+	}
+}
+
 type ModuleTypesMap = {
 	"media_videojs/video-lazy": typeof VideoJS;
 	"core/modal_registry": UCModalRegistry;
@@ -40,6 +51,7 @@ type ModuleTypesMap = {
 	"block_recentlyaccessedcourses/main": {
 		init(userid: number, root: Element): void;
 	};
+	'vs/editor/editor.main': null;
 };
 
 export async function requireModule<T extends (keyof ModuleTypesMap)[]>(...deps: T) {
@@ -109,15 +121,6 @@ let YUICallbacks: ((Y: YUI) => boolean | void)[] = [];
 // biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
 export function hookYUI(callback: (Y: YUI) => boolean | void) {
 	if (!window.YUI || callback(window.YUI)) YUICallbacks.push(callback);
-}
-
-declare global {
-	interface Window {
-		YUI_config?: Parameters<YUI['applyConfig']>[0];
-		ace?: typeof Ace;
-		aceInlineCodeHighlightingDone?: boolean;
-		aceInlineCodeInteractiveDone?: boolean;
-	}
 }
 
 if (window.YUI) {

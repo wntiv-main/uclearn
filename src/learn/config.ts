@@ -1,7 +1,8 @@
+import { EXT_URL } from "./constants";
 import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } from "./db";
 import { SKIP_HYDRATION_CLASS } from "./hydration";
 import { MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
-import { getYUIInstance } from "./lib-hook";
+import { getRequire, getYUIInstance, requireModule } from "./lib-hook";
 
 type Config = {
 	userCss: string;
@@ -86,7 +87,7 @@ export async function initConfig() {
 	for await (const { key, value } of uclearnDB.iterStore('userConfig')) {
 		initConfigValue(key, value);
 	}
-	if(!('theme' in configCache)) initConfigValue("theme", null);
+	if (!('theme' in configCache)) initConfigValue("theme", null);
 	const settingsButton = document.createElement('button');
 	settingsButton.innerHTML = `${SETTINGS_ICON('height: 1lh;margin-inline: -5px 5px;')}Moodle Mod Settings`;
 	settingsButton.classList.add('dropdown-item', SKIP_HYDRATION_CLASS);
@@ -269,6 +270,36 @@ async function prepareConfigModal() {
 		modal: true,
 		width: null,
 	});
+}
+
+function initMonaco() {
+	const path = `${EXT_URL}/learn/monaco/`;
+
+	const container = document.createElement('div');
+	const shadowRoot = container.attachShadow({
+		mode: 'closed',
+	});
+
+	const innerContainer = document.createElement('div');
+	shadowRoot.appendChild(innerContainer);
+
+	const innerStyle = document.createElement('style');
+	innerStyle.innerText = `@import ${JSON.stringify(`${path}/editor/editor.main.css`)};`;
+	shadowRoot.appendChild(innerStyle);
+
+	return [container, (async () => {
+		const require = await getRequire();
+		require.config({
+			paths: { vs: path },
+			'vs/css': { disabled: true }
+		} as RequireConfig);
+
+		await requireModule("vs/editor/editor.main");
+		return window.monaco!.editor.create(innerContainer, {
+			value: '',
+			language: 'css',
+		});
+	})()] as const;
 }
 
 let _configModal: Awaited<ReturnType<typeof prepareConfigModal>> | null = null;
