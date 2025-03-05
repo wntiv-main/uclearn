@@ -750,4 +750,8 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.block_multiblock:has(.multiblock):not(:has(.multiblock .row > *)) {
 		display: none;
 	}
+
+	.pagelayout-login #page {
+		background: none;
+	}
 }

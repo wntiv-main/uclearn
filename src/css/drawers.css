@@ -196,8 +196,22 @@
 			align-items: center;
 			padding-block: 0;
 
+			a,
+			[tabindex] {
+				outline: none;
+			}
+
 			> :not(.courseindex-chevron, .courseindex-cmicon-container) {
 				padding-block: 0.5rem;
+			}
+
+			> .courseindex-chevron {
+				height: auto;
+				align-self: stretch;
+			}
+
+			> .courseindex-link {
+				flex: 1 1;
 			}
 		}
 

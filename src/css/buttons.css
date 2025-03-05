@@ -42,7 +42,6 @@
 			.custom-select,
 			.closewidget .btn-link,
 			.message-app [data-route="view-contacts"],
-			.courseindex-item,
 			.moodle-dialogue-base .closebutton,
 			.pagination .page-link
 		):focus-visible {
@@ -52,7 +51,8 @@
 
 	.message-app
 		:is(.view-overview-body, [data-region="view-contacts"])
-		:is(.list-group-item, .overview-section-toggle) {
+		:is(.list-group-item, .overview-section-toggle),
+	.courseindex-item {
 		--uclearn-pre-shadow: inset 0 0 transparent, inset 0 0 transparent, /**/;
 
 		&:focus-visible {
