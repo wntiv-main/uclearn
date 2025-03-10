@@ -91,6 +91,7 @@ class LatexParser {
 		const sup = obj && this.parseExp();
 		if (sup) {
 			this.#commit();
+			if (/^'+$/.test(sup)) return `${obj}${sup}`;
 			return `${obj}^${LatexParser.#closeExponent(sup)}`;
 		}
 		return obj ?? false;
@@ -116,6 +117,14 @@ class LatexParser {
 			if (obj) {
 				this.#commit();
 				if (products) products += '*';
+				products += obj;
+				continue;
+			}
+
+			const dot = this.parseMacro('cdot');
+			if (dot) {
+				this.#commit();
+				if (products) products += ' . ';
 				products += obj;
 				continue;
 			}
@@ -157,8 +166,8 @@ class LatexParser {
 		let collector = '';
 		let val = parser();
 		while (val) {
-			collector += val;
 			if (collector) this.#commit();
+			collector += val;
 			val = parser();
 		}
 		return collector;
@@ -167,10 +176,11 @@ class LatexParser {
 	parseExp() {
 		const exp = this.#consume('^');
 		const sup = exp && (
-			this.#parseN(() => this.parseMacro('prime') ? "'" : false)
-			|| this.parseNum()
+			this.parseNum()
 			|| this.parseSymbol()
 			|| this.parseD()
+			|| this.parseGroup('{', '}', () => this.#parseN(
+				() => this.parseMacro('doubleprime') ? "''" : this.parseMacro('prime') ? "'" : false))
 			|| this.parseGroup(/[{(]/));
 		if (sup) {
 			this.#commit();
@@ -238,13 +248,13 @@ class LatexParser {
 				'ln': 'exp'
 			}[fn] ?? `${fn}^-1`}${args}`;
 		}
-		if (sup.startsWith("'")) return `${fn}${sup}${args}`;
+		if (/^'+$/.test(sup)) return `${fn}${sup}${args}`;
 		return `(${fn}${args})^${LatexParser.#closeExponent(sup)}`;
 	}
 
-	parseGroup(open?: string | RegExp, close?: string | RegExp) {
+	parseGroup(open?: string | RegExp, close?: string | RegExp, internals = () => this.parseExpression()) {
 		const openFound = this.#consume(open ?? /(?:\\(?:left)?)?[{([]/);
-		const expr = openFound && (this.parseExpression());
+		const expr = openFound && internals();
 		const closeFound = expr && this.#consume(close ?? (
 			openFound.replace('left', 'right').slice(0, -1)
 			+ { '{': '}', '(': ')', '[': ']' }[openFound.slice(-1) ?? '']));
