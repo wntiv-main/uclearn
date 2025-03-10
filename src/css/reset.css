@@ -747,7 +747,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		height: 0;
 	}
 
-	.block_multiblock:has(.multiblock):not(:has(.multiblock .row > *)) {
+	.block_multiblock:has(.multiblock .row):not(:has(.multiblock .row > *)) {
 		display: none;
 	}
 

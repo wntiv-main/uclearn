@@ -1,6 +1,4 @@
 import { MathfieldElement } from "mathlive";
-import type { Expression } from "@cortex-js/compute-engine";
-import "@cortex-js/compute-engine";
 import { AMTparseAMtoTeX } from "asciimath";
 
 import { EXT_URL } from "./constants";
@@ -9,7 +7,6 @@ import { isElementTag } from "./domutil";
 
 MathfieldElement.soundsDirectory = null;
 MathfieldElement.fontsDirectory = `${EXT_URL}/learn/mathlive/`;
-let engineInitialized = false;
 
 export const MATHLIVE_FIELD_CLASS = '__uclearn-mathlive-field';
 
@@ -19,202 +16,268 @@ if (DEBUG_MATHLIVE) {
 	document.documentElement.classList.add('__uclearn-mathlive-debug');
 }
 
-const bracketIfNeededFactor = (x: string) => /[-+*/]/.test(x) ? `(${x})` : x;
-const bracketIfNeededExponent = (x: string) => /[-+*/^]/.test(x) ? `(${x})` : x;
+function latexToStack(latex: string) {
+	return (new LatexParser(latex)).parse();
+}
 
-function mathJSONtoStack(mathJson: Expression): string {
-	if (typeof mathJson === 'string' || typeof mathJson === 'number') switch (mathJson) {
-		case 'ExponentialE':
-			return 'e';
-		case 'Pi':
-			return 'pi';
-		case 'CatalanConstant':
-			return 'G'; // ?
-		case 'Nothing':
-			return '';
-		case 'EmptySet':
-			return '{}';
-		default: {
-			const sym = `${mathJson}`.replaceAll("'", '"');
-			if (sym.includes('_'))
-				return sym.split('_').map(mathJSONtoStack).join('_');
-			return sym;
-		}
+class LatexParser {
+	readonly #latex: string;
+	#i = [0];
+	constructor (latex: string) {
+		this.#latex = latex;
 	}
-	if (!Array.isArray(mathJson)) {
-		const obj = mathJson as Exclude<typeof mathJson, readonly unknown[]>;
-		if ('num' in obj) return obj.num;
-		/* TODO: The following characters in a string representing a number are ignored:
-			U+0009	TAB
-			U+000A	LINE FEED
-			U+000B	VERTICAL TAB
-			U+000C	FORM FEED
-			U+000D	CARRIAGE RETURN
-			U+0020	SPACE
-			U+00A0	UNBREAKABLE SPACE
-		*/
-		if ('str' in obj) return JSON.stringify(obj.str);
-		if ('sym' in obj) return mathJSONtoStack(obj.sym);
-		if ('fn' in obj) return mathJSONtoStack(obj.fn);
-		return '<TODO>' as never;
+
+	#consumeRx(regex: RegExp) {
+		const i = this.#i.at(-1) ?? 0;
+		if (i >= this.#latex.length) return null;
+		const rx = new RegExp(`^(?:${regex.source})`);
+		const match = this.#latex.slice(i).match(rx);
+		if (match) this.#i.push(i + match[0].length);
+		return match;
 	}
-	const [op, ...args] = mathJson as Extract<Expression, readonly unknown[]>;
-	switch (op) {
-		case 'Error': {
-			if (args[0] === "'missing'") return '';
-			return `<${args}>`;
-		}
-		case 'Equal': {
-			const [a, b] = args;
-			return `${mathJSONtoStack(a)} = ${mathJSONtoStack(b)}`;
-		}
-		case 'NotEqual': {
-			const [a, b] = args;
-			return `${mathJSONtoStack(a)} != ${mathJSONtoStack(b)}`;
-		}
-		case 'Greater': {
-			const [a, b] = args;
-			return `${mathJSONtoStack(a)} > ${mathJSONtoStack(b)}`;
-		}
-		case 'GreaterEqual': {
-			const [a, b] = args;
-			return `${mathJSONtoStack(a)} >= ${mathJSONtoStack(b)}`;
-		}
-		case 'Less': {
-			const [a, b] = args;
-			return `${mathJSONtoStack(a)} < ${mathJSONtoStack(b)}`;
-		}
-		case 'LessEqual': {
-			const [a, b] = args;
-			return `${mathJSONtoStack(a)} <= ${mathJSONtoStack(b)}`;
-		}
-		case 'Mod': {
-			const [a, b] = args;
-			return `${bracketIfNeededFactor(mathJSONtoStack(a))} % ${bracketIfNeededFactor(mathJSONtoStack(b))}`;
-		}
-		case 'Add':
-			return args.map(mathJSONtoStack).join(' + ');
-		case 'Subtract':
-			return args.map(mathJSONtoStack).join(' - ');
-		case 'Power': {
-			const [a, b] = args;
-			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^${bracketIfNeededExponent(mathJSONtoStack(b))}`;
-		}
-		case 'Superscript': {
-			const [a, b] = args;
-			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^${bracketIfNeededExponent(mathJSONtoStack(b))}`;
-		}
-		case 'Subscript': {
-			const [a, b] = args;
-			return `${bracketIfNeededExponent(mathJSONtoStack(a))}[${mathJSONtoStack(b)}]`;
-		}
-		case 'Root': {
-			const [a, b] = args;
-			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^(1/${bracketIfNeededFactor(mathJSONtoStack(b))})`;
-		}
-		case 'Square': {
-			const [a] = args;
-			return `${bracketIfNeededExponent(mathJSONtoStack(a))}^2`;
-		}
-		case 'Rational':
-		case 'Divide': {
-			const [a, b] = args;
-			return `${bracketIfNeededFactor(mathJSONtoStack(a))}/${bracketIfNeededFactor(mathJSONtoStack(b))}`;
-		}
-		case 'Multiply':
-			return args.map(mathJSONtoStack).map(bracketIfNeededFactor).join('*');
-		case 'Negate':
-			return `-${bracketIfNeededExponent(mathJSONtoStack(args[0]))}`;
-		case 'Function': {
-			const [name, ...fnArgs] = args;
-			return `${name}(${fnArgs.map(mathJSONtoStack).join(', ')})`;
-		}
-		case 'Interval': {
-			const [start, end] = args as [['Open' | 'Closed', Expression], ['Open' | 'Closed', Expression]];
-			return `${start[0] === 'Open' ? 'o' : 'c'}${end[0] === 'Open' ? 'o' : 'c'
-				}(${mathJSONtoStack(start[1])}, ${mathJSONtoStack(end[1])})`;
-		}
-		case 'Log': {
-			const [value, base = 10] = args;
-			return `log_${bracketIfNeededExponent(mathJSONtoStack(base))}(${mathJSONtoStack(value)})`;
-		}
-		case 'Lb': {
-			const [value] = args;
-			return `log_2(${mathJSONtoStack(value)})`;
-		}
-		case 'Lg': {
-			const [value] = args;
-			return `log_10(${mathJSONtoStack(value)})`;
-		}
-		case 'LogOnePlus': {
-			const [value] = args;
-			return `ln(1 + ${mathJSONtoStack(value)})`;
-		}
-		case 'pd':
-		case 'Abs':
-		case 'Ceil':
-		case 'Floor':
-		case 'Round':
-		case 'Max':
-		case 'Min':
-		case 'Ln':
-		case 'Exp':
-		case 'Cos':
-		case 'Sin':
-		case 'Tan':
-		case 'Cot':
-		case 'Sec':
-		case 'Csc':
-		case 'Cosh':
-		case 'Sinh':
-		case 'Tanh':
-		case 'Coth':
-		case 'Sech':
-		case 'Csch':
-		case 'Sqrt':
-			return `${op.toLowerCase()}(${args.map(mathJSONtoStack).join(', ')})`;
-		case 'Arccos':
-		case 'Arcsin':
-		case 'Arctan':
-		case 'Arccot':
-		case 'Arcsec':
-		case 'Arccsc':
-		case 'Arccosh':
-		case 'Arcsinh':
-		case 'Arctanh':
-		case 'Arccoth':
-		case 'Arcsech':
-		case 'Arccsch':
-			return `${op.replace('Arc', 'a')}(${args.map(mathJSONtoStack).join(', ')})`;
-		// case 'Sequence':
-		// 	return args.map(mathJSONtoStack).join(' ');
-		case 'Set':
-			return `{${args.map(mathJSONtoStack).join(', ')}}`;
-		case 'List':
-			return `[${args.map(mathJSONtoStack).join(', ')}]`;
-		case 'Complex': {
-			const [a, b] = args.map(mathJSONtoStack);
-			const i = b === '1' ? 'i' : `${bracketIfNeededFactor(b)}*i`;
-			return b === '0' ? a
-				: a === '0' ? i
-					: `${a} + ${i}`;
-		}
-		case 'PartialDerivative':
-			return `pd(${args})`;
-		case 'Tuple':
-			if (Array.isArray(args[0]) && args[0][0] === 'Error' && args[0][1] === "'unexpected-command'") {
-				if (args[0][2][1] === "'\\differentialD'")
-					return `d${args.slice(1).map(mathJSONtoStack).join('')}`;
+
+	#consume(regex: RegExp | string) {
+		if (typeof regex === 'string') {
+			const i = this.#i.at(-1) ?? 0;
+			if (i >= this.#latex.length) return false;
+			const slice = this.#latex.slice(i);
+			if (slice.startsWith(regex)) {
+				this.#i.push(i + regex.length);
+				return regex;
 			}
-			// if (args.length === 2) {
-			// 	const [name, fnArgs] = args;
-			// 	if (Array.isArray(fnArgs) && fnArgs[0] === 'Tuple')
-			// 		return `${mathJSONtoStack(name)}(${(fnArgs as Extract<Expression, readonly unknown[]>).slice(1).map(mathJSONtoStack).join(', ')})`;
-			// 	return `${mathJSONtoStack(name)}(${mathJSONtoStack(fnArgs)})`;
-			// }
-			return `<TODO: ${op}(${args.map(mathJSONtoStack)})>`;
-		default:
-			return `<TODO: ${op}(${args.map(mathJSONtoStack)})>`;
+			return false;
+		}
+		const match = this.#consumeRx(regex);
+		return match?.[0] ?? false;
+	}
+
+	static readonly #close = (x: string | false) => !x || /^\(.*\)$/.test(x) ? x : `(${x})`;
+	static readonly #closeFactor = (x: string | false) => x && /[-+*/]/.test(x) ? LatexParser.#close(x) : x;
+	static readonly #closeExponent = (x: string | false) => x && /[-+*/^]/.test(x) ? LatexParser.#close(x) : x;
+
+	#push() {
+		this.#i.push(this.#i.at(-1) ?? 0);
+	}
+
+	#commit(n = 1) {
+		this.#i.splice(this.#i.length - n - 1, n);
+	}
+
+	#pop(n = 1) {
+		this.#i.splice(this.#i.length - n, n);
+	}
+
+	parse() {
+		const result = this.parseExpression();
+		this.#commit();
+		return result;
+	}
+
+	parseNum() {
+		return this.#consume(/-?\d+(?:\.\d+)?/);
+	}
+
+	// TODO: pdiff, binom
+	// https://cortexjs.io/mathfield/reference/commands
+
+	parseObject(): string | false {
+		const obj = this.parseNum() || this.parseFunction() || this.parseSymbol() || this.parseD() || this.parseGroup() || this.parsePDiff()
+			|| this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, 2)
+				?.map((_, [num, denom]) => `${LatexParser.#closeFactor(num)}/${LatexParser.#closeFactor(denom)}`)
+			|| this.parseMacro(/[dt]?frac\d{2}/)?.map(name => {
+				const [n, d] = [...name.slice(-2)].map(n => Number.parseInt(n));
+				return `${n}/${d}`;
+			});
+		const sup = obj && this.parseExp();
+		if (sup) {
+			this.#commit();
+			return `${obj}^${LatexParser.#closeExponent(sup)}`;
+		}
+		return obj ?? false;
+	}
+
+	parseExpression() {
+		this.#push();
+		let sums = '';
+		let products = '';
+		let end = false;
+		do {
+			if (this.#consume(/\s+/)) this.#commit();
+
+			const sum = this.#consume(/[+=-]/) || this.parseMacro('pm')?.map(() => '#pm#');
+			if (sum) {
+				this.#commit();
+				sums += `${products} ${sum} `;
+				products = '';
+				continue;
+			}
+
+			const obj = this.parseObject();
+			if (obj) {
+				this.#commit();
+				if (products) products += '*';
+				products += obj;
+				continue;
+			}
+
+			const sep = this.#consume(/[,;]/);
+			if (sep) {
+				this.#commit();
+				sums += `${products}${sep} `;
+				products = '';
+				continue;
+			}
+			end = true;
+		} while (!end);
+		return sums + products;
+	}
+
+	parseMacro(name: string | RegExp, args = 0) {
+		const bs = this.#consume('\\');
+		const n = bs && this.#consume(name);
+		const argValues: string[] = [];
+		if (n) for (let i = 0; i < args; i++) {
+			const val = this.parseGroup('{', '}');
+			if (!val) break;
+			argValues.push(val);
+		}
+		if (!n || argValues.length < args) {
+			this.#pop(+!!bs + +!!n + argValues.length);
+			return;
+		}
+		this.#commit(args + 1);
+		return {
+			name: n, args: argValues, map<T>(mapper: (name: string, args: string[]) => T) {
+				return mapper(n, argValues);
+			}
+		};
+	}
+
+	#parseN(parser: () => string | false) {
+		let collector = '';
+		let val = parser();
+		while (val) {
+			collector += val;
+			if (collector) this.#commit();
+			val = parser();
+		}
+		return collector;
+	}
+
+	parseExp() {
+		const exp = this.#consume('^');
+		const sup = exp && (
+			this.#parseN(() => this.parseMacro('prime') ? "'" : false)
+			|| this.parseNum()
+			|| this.parseSymbol()
+			|| this.parseD()
+			|| this.parseGroup(/[{(]/));
+		if (sup) {
+			this.#commit();
+			return sup;
+		}
+		if (exp) throw [exp, sup, this.#latex, this.#i.at(-1)];
+		return false;
+	}
+
+	parseSub() {
+		const score = this.#consume('_');
+		const sub = score && (
+			this.parseNum()
+			|| this.parseSymbol()
+			|| LatexParser.#closeExponent(this.parseGroup('{', '}'))
+		);
+		if (sub) {
+			this.#commit();
+			return sub;
+		}
+		if (score) {
+			this.#commit();
+			return false; // Ignore unnecesary subscript
+		}
+		return false;
+	}
+
+	parsePDiff() {
+		const frac = this.#consume(/\\(?:[dt]?frac|cfrac\[[lr]\])\s*\{\s*/);
+		const p1 = frac && this.parseMacro(/partial\s*/);
+		const s1 = p1 && this.parseSymbol();
+		const center = s1 && this.#consume(/\s*}\s*{\s*/);
+		const p2 = center && this.parseMacro(/partial\s*/);
+		const s2 = p2 && this.parseSymbol();
+		const end = s2 && this.#consume(/\s*}/);
+		const consts = end && this.parseSub();
+		if (!end) {
+			this.#pop(+!!frac + +!!p1 + +!!s1 + +!!center + +!!p2 + +!!s2);
+			return false;
+		}
+		this.#commit(6);
+		if (consts) {
+			this.#commit();
+			return `pd(${s1}, ${s2}, ${consts})`;
+		}
+		return `pd(${s1}, ${s2})`;
+	}
+
+	parseFunction() {
+		const fn = this.parseSymbol(true) || this.parseMacro(
+			/arc(?:cos|sin|tan)|csc|cosec|sec|(?:cos|sin|tan|cot)h?|exp|ln|sqrt|ker|det|arg|dim|gcd|argmin|argmax|plim/)
+			?.map(name => ({ cosec: 'csc' }[name] ?? name));
+		const sup = fn && this.parseExp();
+		const args = fn && LatexParser.#close(this.parseGroup(/(?:\\(?:left)?)?\(|{/));
+		if (!args) {
+			this.#pop(+!!fn + +!!sup);
+			return false;
+		}
+		this.#commit(+!!sup + +!!args);
+		if (!sup) return `${fn}${args}`;
+		if (sup === '-1') {
+			if (/(?:cos|sin|tan)/.test(fn)) return `arc${fn}${args}`;
+			return `${{
+				'exp': 'ln',
+				'ln': 'exp'
+			}[fn] ?? `${fn}^-1`}${args}`;
+		}
+		if (sup.startsWith("'")) return `${fn}${sup}${args}`;
+		return `(${fn}${args})^${LatexParser.#closeExponent(sup)}`;
+	}
+
+	parseGroup(open?: string | RegExp, close?: string | RegExp) {
+		const openFound = this.#consume(open ?? /(?:\\(?:left)?)?[{([]/);
+		const expr = openFound && (this.parseExpression());
+		const closeFound = expr && this.#consume(close ?? (
+			openFound.replace('left', 'right').slice(0, -1)
+			+ { '{': '}', '(': ')', '[': ']' }[openFound.slice(-1) ?? '']));
+		if (closeFound) {
+			this.#commit(2);
+			return openFound === '{' ? expr : `${openFound.slice(-1)}${expr}${closeFound.slice(-1)}`;
+		}
+		this.#pop(+!!openFound + +!!expr);
+		return false;
+	}
+
+	parseD() {
+		const d = this.parseMacro('differentialD');
+		const space = d && this.#consume(/\s+/);
+		const sym = d && this.parseSymbol();
+		if (!sym) {
+			this.#pop(+!!d + +!!space);
+			return false;
+		}
+		this.#commit(+!!space + 1);
+		return `d${sym}`;
+	}
+
+	parseSymbol(fn = false) {
+		let sym = this.#consume(fn ? /(?![abijkwxyz])[a-zA-Z]/ : /[a-zA-Z]/) || this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI/)?.name;
+		if (!sym) return false;
+		const sub = this.parseSub();
+		if (sub) {
+			sym += `_${sub}`;
+			this.#commit();
+		}
+		if (sym.startsWith('\\')) sym = { '\\exponentialE': 'e', 'imaginaryI': 'i' }[sym] ?? sym.slice(1);
+		return sym;
 	}
 }
 
@@ -242,12 +305,6 @@ function initMathField(mf: MathfieldElement) {
 	mf.smartFence = true;
 	mf.smartSuperscript = true;
 	mf.addEventListener('mount', () => {
-		if (!engineInitialized && MathfieldElement.computeEngine) {
-			MathfieldElement.computeEngine.declare("pd", {
-				signature: "(unknown, unknown, ...unknown) -> unknown",
-			});
-			engineInitialized = true;
-		}
 		mf.menuItems = mf.menuItems.filter(item => !/color|variant|decoration/.test((item as { id?: string; }).id ?? ''));
 		mf.keybindings = [
 			...mf.keybindings,
@@ -286,16 +343,15 @@ export function initMatrixField(field: HTMLElement) {
 	}).join('\\\\')}
 		\\end{${env}}`);
 	mathField.addEventListener("mount", () => {
-		for(const [id, locked] of Object.entries(lockStates)) mathField.setPromptState(id, undefined, locked);
+		for (const [id, locked] of Object.entries(lockStates)) mathField.setPromptState(id, undefined, locked);
 	});
 	mathField.classList.add(MATHLIVE_FIELD_CLASS);
 	const inputCb = (e: Event) => {
 		for (const prompt of mathField.getPrompts()) {
-			const mathJson = JSON.parse(mathField.getPromptValue(prompt, 'math-json'));
 			const fieldLatex = mathField.getPromptValue(prompt, 'latex');
 			const field = document.getElementById(prompt);
 			if (!field || !isElementTag(field, 'input')) continue;
-			field.value = `${mathJSONtoStack(mathJson)};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
+			field.value = `${latexToStack(fieldLatex)};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
 			field.dispatchEvent(new InputEvent(e.type, e));
 		}
 	};
@@ -316,9 +372,8 @@ export function initField(field: HTMLInputElement & ChildNode) {
 	mathField.classList.add(MATHLIVE_FIELD_CLASS);
 	mathField.style.minWidth = field.style.minWidth || field.style.width;
 	const inputCb = (e: Event) => {
-		const mathJson = JSON.parse(mathField.getValue('math-json'));
 		const fieldLatex = mathField.getValue('latex');
-		field.value = `${mathJSONtoStack(mathJson)};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
+		field.value = `${latexToStack(fieldLatex)};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
 		field.dispatchEvent(new InputEvent(e.type, e));
 	};
 	mathField.addEventListener('input', inputCb);

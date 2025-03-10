@@ -4,11 +4,22 @@
 	border-top-left-radius: var(--uclearn-radius);
 	position: fixed;
 	bottom: 0;
-	right: 0;
 	width: fit-content;
 	z-index: 9999;
 	border-top: 1px solid currentColor;
 	border-left: 1px solid currentColor;
+	display: grid;
+	grid-template-columns: repeat(3, max-content);
+	max-height: 50vh;
+	overflow: auto;
+	right: 0;
+	translate: calc(100% - var(--uclearn-radius)) 0;
+	transition: translate var(--uclearn-transition-short);
+
+	&:hover,
+	:root:not(:hover) & {
+		translate: 0;
+	}
 }
 
 #uclearn-inspector-highlight {
@@ -74,13 +85,18 @@
 		:root.__uclearn-mathlive-debug & {
 			display: inline-block !important;
 			opacity: 0.2;
+			field-sizing: content;
+			width: auto !important;
+
+			& input {
+				field-sizing: content;
+				width: 100% !important;
+			}
 		}
 	}
 }
 
 #uclearn-settings-form {
-	max-height: 90vh;
-	overflow: auto;
 	min-width: 60vw;
 	display: flex;
 	flex-flow: column;

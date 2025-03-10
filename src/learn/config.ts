@@ -3,6 +3,8 @@ import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } f
 import { SKIP_HYDRATION_CLASS } from "./hydration";
 import { MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
 import { getRequire, getYUIInstance, requireModule } from "./lib-hook";
+import type monaco from "monaco-editor";
+import { onPostHydrate } from "./navigation";
 
 type Config = {
 	userCss: string;
@@ -28,10 +30,12 @@ const CUSTOM_BACKGROUND_PROP = '--uclearn-custom-bg-blob';
 
 const configCache: Partial<Config> = {};
 
+let userCssEditorModel: monaco.editor.ITextModel | null = null;
 const configHandlers: {
 	[K in keyof Config]: ((value: Config[K]) => void) | ((value: Config[K]) => (() => void) | Promise<() => void>)
 } = {
 	userCss(src) {
+		userCssEditorModel?.setValue(src);
 		const css = document.getElementById('uclearn-usercss') as HTMLStyleElement | null ?? (() => {
 			const css = document.createElement("style");
 			css.id = 'uclearn-usercss';
@@ -92,7 +96,12 @@ export async function initConfig() {
 	settingsButton.innerHTML = `${SETTINGS_ICON('height: 1lh;margin-inline: -5px 5px;')}Moodle Mod Settings`;
 	settingsButton.classList.add('dropdown-item', SKIP_HYDRATION_CLASS);
 	settingsButton.addEventListener('click', () => showConfigModal());
-	document.querySelector('#user-action-menu a[href*="preferences"]')?.before(settingsButton);
+	const installButton = () =>
+		document
+			.querySelector('#user-action-menu a[href*="preferences"]')
+			?.before(settingsButton);
+	onPostHydrate(installButton);
+	installButton();
 }
 
 const toSet: [prop: string, value: string][] = [];
@@ -134,6 +143,11 @@ async function prepareConfigModal() {
 	const Y = await getYUIInstance();
 	await new Promise<void>(res => Y.require(['moodle-core-notification-dialogue'], () => res()));
 	if (!window.M?.core?.dialogue) return;
+	const center = window.M.core.dialogue.prototype.centerDialogOnDialogSizeChange;
+	window.M.core.dialogue.prototype.centerDialogOnDialogSizeChange = function (e: { get(key: string): unknown; }) {
+		if (e.get('draggable')) return;
+		return center.call(this, e);
+	};
 	const form = document.createElement("form");
 	form.id = 'uclearn-settings-form';
 	const backgroundImages = document.createElement('fieldset');
@@ -261,7 +275,46 @@ async function prepareConfigModal() {
 		label.innerHTML = icon;
 		controller.append(radio, label);
 	}
-	form.append(backgroundImages, colorTheme);
+	const [cssEditorContainer, innerEditor, monacoPromise] = initMonaco({
+		value: configCache.userCss,
+		language: 'css',
+		scrollBeyondLastLine: false,
+		theme: 'vs-dark',
+		minimap: {
+			enabled: false,
+		},
+		scrollbar: {
+			alwaysConsumeMouseWheel: false,
+		},
+	});
+	monacoPromise.then(([monaco, editor]) => {
+		userCssEditorModel = editor.getModel();
+		function handleResize(height: number) {
+			innerEditor.style.height = `${Math.min(height, window.innerHeight)}px`;
+			editor.layout();
+		}
+		editor.onDidContentSizeChange((e) => handleResize(e.contentHeight));
+		handleResize(editor.getContentHeight());
+		editor.addAction({
+			id: 'save',
+			label: 'Save User CSS',
+			keybindings: [
+				monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+				monaco.KeyMod.WinCtrl | monaco.KeyCode.KeyS,
+			],
+			run: async () => {
+				const value = editor.getValue();
+				initConfigValue('userCss', value);
+				const store = await uclearnDB.openStore('userConfig', 'readwrite');
+				store.put({ key: 'userCss', value });
+			}
+		});
+	});
+	const cssField = document.createElement('fieldset');
+	const cssFieldLabel = document.createElement('legend');
+	cssFieldLabel.textContent = 'User CSS';
+	cssField.append(cssFieldLabel, cssEditorContainer);
+	form.append(backgroundImages, colorTheme, cssField);
 	return new window.M.core.dialogue({
 		headerContent: 'Moodle Mod Settings',
 		bodyContent: Y.one(form),
@@ -272,8 +325,11 @@ async function prepareConfigModal() {
 	});
 }
 
-function initMonaco() {
-	const path = `${EXT_URL}/learn/monaco/`;
+type MonacoConfig = NonNullable<Parameters<typeof monaco.editor.create>[1]>;
+
+let _codiconFont: Promise<FontFace> | null = null;
+function initMonaco(config?: Omit<MonacoConfig, 'model'> & { model?: (m: typeof monaco) => PromiseLike<MonacoConfig['model']>; }) {
+	const path = `${EXT_URL}/learn/vs`;
 
 	const container = document.createElement('div');
 	const shadowRoot = container.attachShadow({
@@ -287,18 +343,28 @@ function initMonaco() {
 	innerStyle.innerText = `@import ${JSON.stringify(`${path}/editor/editor.main.css`)};`;
 	shadowRoot.appendChild(innerStyle);
 
-	return [container, (async () => {
+	return [container, innerContainer, (async () => {
 		const require = await getRequire();
 		require.config({
 			paths: { vs: path },
 			'vs/css': { disabled: true }
 		} as RequireConfig);
 
+		_codiconFont ??= (async () => {
+			const font = new FontFace('codicon',
+				`url(${JSON.stringify(`${path}/base/browser/ui/codicons/codicon/codicon.ttf`)
+				}) format('truetype')`);
+			await font.load();
+			document.fonts.add(font);
+			return font;
+		})();
+
 		await requireModule("vs/editor/editor.main");
-		return window.monaco!.editor.create(innerContainer, {
-			value: '',
-			language: 'css',
-		});
+		// biome-ignore lint/style/noNonNullAssertion: hope
+		const monaco = window.monaco!;
+		const cfg = config as MonacoConfig | undefined;
+		if (cfg) cfg.model = await config?.model?.(monaco);
+		return [monaco, monaco.editor.create(innerContainer, cfg)] as const;
 	})()] as const;
 }
 

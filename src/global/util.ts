@@ -1,3 +1,5 @@
+export type Override<T, U> = Omit<T, keyof U> & U;
+
 export function assertNever(value: never): asserts value is never {
 	console.error('Assertion failed: did not expect', value);
 	throw new Error;
@@ -58,17 +60,13 @@ export function deferAccess<T extends object>(awaitable: PromiseLike<T>) {
 	const wrapper: typeof internal = new Proxy(internal, {
 		apply(target, thisArg, argArray) {
 			if (typeof target.__value !== 'undefined')
-				// biome-ignore lint/suspicious/noExplicitAny: pass error up if invalid
-				return Reflect.apply(target.__value as any, thisArg, argArray);
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			return deferAccess(target.__promise.then((t) => Reflect.apply(t as any, thisArg, argArray)));
+				return Reflect.apply(target.__value as () => unknown, thisArg, argArray);
+			return deferAccess(target.__promise.then((t) => Reflect.apply(t as () => unknown, thisArg, argArray)));
 		},
 		construct(target, argArray, newTarget) {
 			if (typeof target.__value !== 'undefined')
-				// biome-ignore lint/suspicious/noExplicitAny: pass error up if invalid
-				return Reflect.construct(target.__value as any, argArray, newTarget);
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-			return deferAccess(target.__promise.then((t) => Reflect.construct(t as any, argArray, newTarget)));
+				return Reflect.construct(target.__value as { new(): unknown; }, argArray, newTarget);
+			return deferAccess(target.__promise.then((t) => Reflect.construct(t as { new(): unknown; }, argArray, newTarget)));
 		},
 		defineProperty(target, property, attributes) {
 			if (typeof target.__value !== 'undefined')
@@ -84,13 +82,13 @@ export function deferAccess<T extends object>(awaitable: PromiseLike<T>) {
 		},
 		get(target, p, receiver) {
 			if (typeof target.__value !== 'undefined')
-				return Reflect.get(target.__value, p);
-			return deferAccess(target.__promise.then((t) => Reflect.get(t, p)));
+				return Reflect.get(target.__value, p, receiver);
+			return deferAccess(target.__promise.then((t) => Reflect.get(t, p, receiver)));
 		},
 		getOwnPropertyDescriptor(target, p) {
 			if (typeof target.__value !== 'undefined')
 				return Reflect.getOwnPropertyDescriptor(target.__value, p);
-			// biome-ignore lint/style/noNonNullAssertion: pretend its fine for now
+			// biome-ignore lint/style/noNonNullAssertion: shh
 			return deferAccess(target.__promise.then((t) => Reflect.getOwnPropertyDescriptor(t, p)!));
 		},
 		getPrototypeOf(target) {
@@ -122,8 +120,8 @@ export function deferAccess<T extends object>(awaitable: PromiseLike<T>) {
 		},
 		set(target, p, newValue, receiver) {
 			if (typeof target.__value !== 'undefined')
-				return Reflect.set(target.__value, p, newValue);
-			target.__promise.then((t) => Reflect.set(t, p, newValue));
+				return Reflect.set(target.__value, p, newValue, receiver);
+			target.__promise.then((t) => Reflect.set(t, p, newValue, receiver));
 			return true; // spoof
 		},
 		setPrototypeOf(target, v) {

@@ -46,7 +46,7 @@ export const patch: <A extends unknown[], R>(
 		return new Function(...localNames.map(local => `$uc_${local}`), `return ${newContent.replaceAll(localRx, '$$uc_$1')};`)(...Object.values(locals));
 	};
 
-const patchObj = <A extends unknown[], R, T extends { [key in S]: (...args: A) => R }, S extends keyof T>(
+export const patchObj = <A extends unknown[], R, T extends { [key in S]: (...args: A) => R }, S extends keyof T>(
 	obj: T,
 	method: S,
 	transformer: (code: string) => string,

@@ -6,6 +6,7 @@ import { type _HydrationStages, type HydrationConfig, type HydrationStage, preco
 import { update } from '../global/util';
 import { hydrate, initDocumentParts, SKIP_HYDRATION_CLASS } from './hydration';
 import { getYUIInstance, modals, Toast } from './lib-hook';
+import { contentTransformer } from './html-patcher';
 
 // let vjs: typeof VideoJS;
 
@@ -36,15 +37,6 @@ type HydrationHint = [
 	],
 	...[Partial<HydrationConfig & { weight: number; }>] | []
 ];
-
-let _transformDiv: HTMLElement | null = null;
-function contentTransformer(content: string) {
-	return content.replaceAll(/value\s*=\s*"([^"\n]*?;"__uclearn-mltex-\(";".*?";"__uclearn-mltex-\)".*?)"/g, (_match, data) => {
-		_transformDiv ??= document.createElement('div');
-		_transformDiv.setAttribute('data-uclearn-value', data);
-		return `value=${_transformDiv.outerHTML.match(/<[dD][iI][vV].*?data-uclearn-value=(".*").*?>/)?.[1]}`;
-	});
-}
 
 const parser = new DOMParser();
 async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hydrationHints: HydrationHint[] = []) {

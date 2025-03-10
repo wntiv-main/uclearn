@@ -1,18 +1,19 @@
-type Override<T, U> = Omit<T, keyof U> & U;
+import type { Override } from "../global/util";
 
 declare const KEY_PATH: unique symbol;// = Symbol('KeyPath');
 
 // type KEYPATH = unique symbol;
-export type WithKeyPath<T extends ObjectStoreDescription, Key extends keyof T> = T & { [KEY_PATH]: Key; };
+export type WithKeyPath<T extends ObjectStoreDescription, Key extends keyof T> = T & { [K in typeof KEY_PATH]: Key; };
 
 type ObjectStoreDescription = {
-	[KEY_PATH]?: string;
+	[K in typeof KEY_PATH]?: string;
+} & {
 	[key: string | number]: unknown;
 };
 
-type ObjectStoreValue<T extends ObjectStoreDescription> = Omit<T, typeof KEY_PATH>;
+type ObjectStoreValue<T extends ObjectStoreDescription> = T extends unknown ? Omit<T, typeof KEY_PATH> : never;
 
-type DatabaseDescription = {
+export type DatabaseDescription = {
 	[key: string]: ObjectStoreDescription;
 };
 
@@ -33,7 +34,7 @@ type ObjectStoreTypeOverrides<T extends ObjectStoreDescription> = {
 	add(value: ObjectStoreValue<T>, key?: IDBValidKey): IDBRequest<IDBValidKey>,
 	get(query: IDBKeyRange): IDBRequest<ObjectStoreValue<T>[] | undefined>,
 } & (T[typeof KEY_PATH] extends string | symbol | number ? {
-	get<K extends IDBValidKey & T[T[typeof KEY_PATH] & keyof T]>(query: K): IDBRequest<ObjectStoreValue<Extract<T, { [I in NonNullable<T[typeof KEY_PATH]>]: K }>> | undefined>,
+	get<K extends IDBValidKey & T[T[typeof KEY_PATH]]>(query: K): IDBRequest<ObjectStoreValue<Extract<T, { [I in NonNullable<T[typeof KEY_PATH]>]: K }>> | undefined>,
 } : {
 	get(query: IDBValidKey): IDBRequest<ObjectStoreValue<T> | undefined>,
 });
@@ -45,7 +46,23 @@ type TransactionTypeOverrides<T extends DatabaseDescription, M extends IDBTransa
 };
 export type TypedTransaction<T extends DatabaseDescription, M extends IDBTransactionMode> = Override<IDBTransaction, TransactionTypeOverrides<T, M>>;
 
-export class DatabaseHandler<T extends DatabaseDescription> {
+export interface IDatabaseHandler<T extends DatabaseDescription> {
+	transaction<M extends IDBTransactionMode>(
+		storeNames: keyof T & string | (keyof T & string)[],
+		mode: M,
+		options?: IDBTransactionOptions
+	): Promise<TypedTransaction<T, M>>;
+
+	openStore<S extends string & keyof T, M extends IDBTransactionMode>(store: S, accessMode: M): Promise<TypedObjectStore<T[S], M>>;
+
+	iterStore<S extends string & keyof T>(
+		store: S,
+		accessMode?: IDBTransactionMode,
+		...cursorOptions: Parameters<typeof IDBObjectStore.prototype.openCursor>
+	): AsyncGenerator<ObjectStoreValue<T[S]>, void>;
+}
+
+export class DatabaseHandler<T extends DatabaseDescription> implements IDatabaseHandler<T> {
 	#db?: TypedDatabase<T>;
 	#versionHandlers: DatabaseVersionHandler<T>[];
 	DB_NAME: string;

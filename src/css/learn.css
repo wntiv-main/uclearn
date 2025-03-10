@@ -13,6 +13,7 @@
 @import "quiz.css";
 @import "quiz-nav.css";
 @import "injected.css";
+@import url("../../node_modules/monaco-editor/min/vs/editor/editor.main.css");
 
 :root:root:root:root:root:root:root:root {
 	background-image: var(--uclearn-background-imageset);
@@ -34,6 +35,7 @@
 	.que img,
 	.resourceimage,
 	iframe[title*="JSXGraph" i],
+	img[role="presentation"],
 	.video-js .vjs-tech {
 		filter: var(--uclearn-translucent-filter);
 	}
@@ -98,6 +100,7 @@
 		.que img,
 		.resourceimage,
 		iframe[title*="JSXGraph" i],
+		img[role="presentation"],
 		.video-js .vjs-tech {
 			filter: var(--uclearn-translucent-filter) invert(1)
 				hue-rotate(180deg);
@@ -163,5 +166,126 @@
 		background-color: transparent !important;
 		border-color: currentColor !important;
 		color: inherit !important;
+	}
+
+	.mytimetable {
+		display: grid;
+		grid-template-columns: max-content repeat(5, minmax(min-content, 1fr)) min-content min-content;
+		grid-template-rows: max-content;
+		grid-auto-flow: row;
+		grid-auto-rows: minmax(30px, 1fr);
+		gap: calc(var(--uclearn-radius) / 2);
+		overflow: hidden auto;
+		max-height: 80vh;
+		border-radius: var(--uclearn-radius);
+
+		tbody {
+			display: contents;
+		}
+
+		tr {
+			display: contents;
+		}
+
+		.days {
+			display: grid;
+			grid-column: 1 / -1;
+			grid-template-columns: subgrid;
+			position: sticky;
+			top: 0;
+			background-color: var(--uclearn-translucent-bg);
+			backdrop-filter: var(--uclearn-bg-effect);
+			z-index: 10;
+			margin-bottom: 0.5em;
+			font-size: 1.1em;
+			padding-block: 0.2em;
+			height: auto;
+		}
+
+		td,
+		th {
+			display: block;
+			border: none;
+			overflow: hidden;
+			min-height: 20px;
+			height: 100%;
+			width: 100%;
+			user-select: none;
+
+			&[rowspan="2"] {
+				grid-row: span 2;
+			}
+
+			&[rowspan="3"] {
+				grid-row: span 3;
+			}
+
+			&[rowspan="4"] {
+				grid-row: span 4;
+			}
+
+			&[rowspan="5"] {
+				grid-row: span 5;
+			}
+
+			&[rowspan="6"] {
+				grid-row: span 6;
+			}
+		}
+
+		.time {
+			grid-column: 1;
+			position: relative;
+			overflow: visible;
+			padding-right: 1ch;
+			line-height: 0;
+			margin-top: calc(var(--uclearn-radius) / -4 - 0.5px);
+			text-align: right;
+			color: var(--uclearn-foreground-muted);
+			text-transform: uppercase;
+
+			&::before {
+				content: "";
+				position: absolute;
+				inset: 0 -100vw auto 100%;
+				border-top: 1px solid var(--uclearn-active-tint);
+				z-index: -1;
+			}
+
+			&::after {
+				content: "";
+				position: absolute;
+				margin-top: calc(var(--uclearn-radius) / 4);
+				inset: 50% -100vw auto 50%;
+				border-bottom: 1px solid var(--uclearn-active-tint);
+				z-index: -1;
+			}
+		}
+
+		.busy {
+			padding: calc(var(--uclearn-radius) / 2);
+			border-radius: var(--uclearn-radius);
+			background-color: color-mix(
+				in srgb,
+				var(--uclearn-color-complete) 20%,
+				var(--uclearn-translucent-bg)
+			);
+			user-select: all;
+			min-height: 100%;
+			/* biome-ignore lint/correctness/noUnknownProperty: modern */
+			interpolate-size: allow-keywords;
+			transition: min-height var(--uclearn-transition-short),
+				background-color var(--uclearn-transition-short);
+
+			&:hover {
+				z-index: 1;
+				min-height: max-content;
+				background-color: color-mix(
+					in srgb,
+					var(--uclearn-color-complete) 30%,
+					var(--uclearn-background)
+				);
+			}
+		}
 	}
 }

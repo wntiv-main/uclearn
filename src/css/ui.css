@@ -53,12 +53,26 @@
 	}
 
 	/* Modals */
-	.moodle-dialogue-base {
+	.moodle-dialogue {
 		border-radius: 1rem;
+		bottom: 5px;
+		overflow: hidden;
 
 		.moodle-dialogue-wrap {
 			border: none;
 			border-radius: var(--uclearn-radius);
+			display: flex;
+			flex-flow: column;
+			max-height: 100%;
+		}
+
+		.moodle-dialogue-hd {
+			flex: 0 0 max-content;
+		}
+
+		.moodle-dialogue-bd {
+			flex: 1 1 max-content;
+			overflow: auto;
 		}
 	}
 
