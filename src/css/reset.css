@@ -690,6 +690,10 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		margin-block: 0.5rem;
 	}
 
+	.activity table :is(td, th) {
+		border-color: currentColor !important;
+	}
+
 	/* .activity [style*="color"] {
 		background-color: transparent !important;
 		color: inherit !important;
