@@ -4,6 +4,7 @@ import { markedHighlight } from 'marked-highlight';
 import { isElement } from './domutil';
 import hljs from 'highlight.js';
 import { EXT_URL } from './constants';
+import { onNodeInsert } from './hydration';
 
 
 let marked: Marked | null = null;
@@ -50,7 +51,7 @@ async function markMessage(msg: HTMLElement) {
 	}).append(styles, hljsTheme, content);
 }
 
-export function initMessageApp(root: HTMLElement) {
+function initMessageApp(root: HTMLElement) {
 	const messageContainer = root.querySelector('.content-message-container');
 	if (!messageContainer) return;
 	const observer = new MutationObserver(es => {
@@ -69,4 +70,8 @@ export function initMessageApp(root: HTMLElement) {
 		childList: true,
 		subtree: true,
 	});
+}
+
+export function initMessaging() {
+	onNodeInsert('.message-app', el => initMessageApp(el));
 }

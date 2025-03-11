@@ -686,10 +686,14 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		border-radius: 100vmax !important;
 	}
 
-	.activity [style*="color"] {
+	.activity div:has(> table) {
+		margin-block: 0.5rem;
+	}
+
+	/* .activity [style*="color"] {
 		background-color: transparent !important;
 		color: inherit !important;
-	}
+	} */
 	.activity [style*="outline"] {
 		outline: none !important;
 	}

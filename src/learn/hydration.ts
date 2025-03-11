@@ -26,7 +26,6 @@ import { assertNever, type ItemOf, type Shifted } from "../global/util";
 import { Toast } from "./lib-hook";
 import { loadScripts, SKIP_SCRIPT_CLASS } from "./script-loader";
 import { initField, initMatrixField, MATH_FIELD_SELECTOR, MATHLIVE_FIELD_CLASS } from "./mathlive-loader";
-import { initMessageApp } from "./messaging";
 
 type TypedMessageWorker<T> = Omit<Worker, "postMessage"> & {
 	postMessage(
@@ -226,6 +225,21 @@ type NodeCollectors = {
 	matrixFields: HTMLElement[];
 };
 
+type QuerySelect<T extends string> = T extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[T]
+	: T extends keyof SVGElementTagNameMap ? SVGElementTagNameMap[T]
+	: T extends keyof MathMLElementTagNameMap ? MathMLElementTagNameMap[T]
+	/** @deprecated */
+	: T extends keyof HTMLElementDeprecatedTagNameMap ? HTMLElementDeprecatedTagNameMap[T]
+	: T extends `.${string}` ? HTMLElement : Element;
+
+const insertHandlers: [string, (node: Node) => void][] = [];
+
+export function onNodeInsert<S extends string>(selector: S, cb: (node: QuerySelect<S>) => void): void;
+export function onNodeInsert<T extends Node>(selector: string, cb: (node: T) => void): void;
+export function onNodeInsert(selector: string, cb: (node: Node) => void) {
+	insertHandlers.push([selector, cb]);
+}
+
 function handleNodeInsert(node: Node, collectors: NodeCollectors) {
 	if (!isElement(node)) {
 		const math = node.parentElement?.closest(".filter_mathjaxloader_equation");
@@ -259,10 +273,10 @@ function handleNodeInsert(node: Node, collectors: NodeCollectors) {
 				":is(.matrixsquarebrackets, .matrixroundbrackets, .matrixbarbrackets)",
 			),
 		);
-	if (node.classList.contains('message-app'))
-		initMessageApp(node as HTMLElement);
-	else for (const el of node.getElementsByClassName('message-app'))
-		initMessageApp(el as HTMLElement);
+	for (const [selector, handler] of insertHandlers) {
+		if (node.matches(selector)) handler(node);
+		node.querySelectorAll(selector).forEach(handler);
+	}
 }
 
 function debugTask(

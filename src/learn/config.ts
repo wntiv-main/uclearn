@@ -1,10 +1,11 @@
 import { EXT_URL } from "./constants";
 import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } from "./db";
-import { SKIP_HYDRATION_CLASS } from "./hydration";
+import { onNodeInsert, SKIP_HYDRATION_CLASS } from "./hydration";
 import { MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
 import { getRequire, getYUIInstance, requireModule } from "./lib-hook";
 import type monaco from "monaco-editor";
 import { onPostHydrate } from "./navigation";
+import { assertNever, ItemOf } from "../global/util";
 
 type Config = {
 	userCss: string;
@@ -29,6 +30,16 @@ const uclearnDB = new DatabaseHandler<{
 const CUSTOM_BACKGROUND_PROP = '--uclearn-custom-bg-blob';
 
 const configCache: Partial<Config> = {};
+
+const themeListeners: ((theme: NonNullable<Config['theme']>) => void)[] = [];
+export function onThemeChange(cb: ItemOf<typeof themeListeners>) {
+	themeListeners.push(cb);
+	return () => {
+		const idx = themeListeners.indexOf(cb);
+		if (idx < 0) return;
+		themeListeners.splice(idx, 1);
+	};
+}
 
 let userCssEditorModel: monaco.editor.ITextModel | null = null;
 const configHandlers: {
@@ -56,29 +67,68 @@ const configHandlers: {
 		};
 	},
 	theme(value) {
-		document.documentElement.classList.remove('uclearn-light-mode', 'uclearn-dark-mode');
 		switch (value) {
 			case 'light':
-				document.documentElement.classList.add('uclearn-light-mode');
-				break;
 			case 'dark':
-				document.documentElement.classList.add('uclearn-dark-mode');
+				_setTheme(value);
 				break;
 			default: {
 				const media = window.matchMedia('(prefers-color-scheme: dark)');
-				document.documentElement.classList.add(
-					media.matches ? 'uclearn-dark-mode' : 'uclearn-light-mode');
-				const listener = () => {
-					document.documentElement.classList.remove('uclearn-light-mode', 'uclearn-dark-mode');
-					document.documentElement.classList.add(
-						media.matches ? 'uclearn-dark-mode' : 'uclearn-light-mode');
-				};
+				const listener = () => _setTheme(media.matches ? 'dark' : 'light');
+				_setTheme(media.matches ? 'dark' : 'light');
 				media.addEventListener('change', listener);
 				return () => media.removeEventListener('change', listener);
 			}
 		}
 	},
 };
+
+function _setTheme(theme: 'light' | 'dark') {
+	configCache.theme = theme; // shhhh
+	document.documentElement.classList.remove('uclearn-light-mode', 'uclearn-dark-mode');
+	switch (theme) {
+		case 'light':
+			document.documentElement.classList.add('uclearn-light-mode');
+			break;
+		case 'dark':
+			document.documentElement.classList.add('uclearn-dark-mode');
+			break;
+		default: assertNever(theme);
+	}
+	for (const handler of themeListeners) handler(theme);
+}
+
+let coloredNodes: (readonly [HTMLElement, { color: string | null, backgroundColor: string | null; }])[] = [];
+
+function handleColoredNode(el: HTMLElement) {
+	const { color, backgroundColor } = el.style;
+	const node = [el, { color, backgroundColor }] as const;
+	coloredNodes.push(node);
+	if (configCache.theme === 'dark') colorNode(node);
+}
+
+function colorNode([el, colors]: ItemOf<typeof coloredNodes>) {
+	if (colors.color) el.style.color = `hsl(from ${colors.color} h s calc(1 - l))`;
+	if (colors.backgroundColor) el.style.backgroundColor = `hsl(from ${colors.backgroundColor} h s calc(100 - l * 0.8) / 0.4)`;
+}
+
+onNodeInsert('.activity :is([style*=color], [style*=background])', handleColoredNode);
+onThemeChange(theme => {
+	if (theme === 'dark') {
+		coloredNodes = coloredNodes.filter(node => {
+			if (!document.body.contains(node[0])) return false;
+			colorNode(node);
+			return true;
+		});
+	} else {
+		coloredNodes = coloredNodes.filter(([el, colors]) => {
+			if (!document.body.contains(el)) return false;
+			if (colors.color) el.style.color = colors.color;
+			if (colors.backgroundColor) el.style.backgroundColor = colors.backgroundColor;
+			return true;
+		});
+	}
+});
 
 const destructors: Partial<Record<keyof Config, () => void>> = {};
 async function initConfigValue<K extends keyof Config>(key: K, value: Config[K]) {
