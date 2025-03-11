@@ -125,7 +125,11 @@ class LatexParser {
 			if (dot) {
 				this.#commit();
 				if (products) products += ' . ';
-				products += obj;
+				const obj = this.parseObject();
+				if (obj) {
+					this.#commit();
+					products += obj;
+				}
 				continue;
 			}
 
@@ -155,6 +159,7 @@ class LatexParser {
 			return;
 		}
 		this.#commit(args + 1);
+		if (n && this.#consume(/\s+/)) this.#commit();
 		return {
 			name: n, args: argValues, map<T>(mapper: (name: string, args: string[]) => T) {
 				return mapper(n, argValues);
@@ -279,7 +284,7 @@ class LatexParser {
 	}
 
 	parseSymbol(fn = false) {
-		let sym = this.#consume(fn ? /(?![abijkwxyz])[a-zA-Z]/ : /[a-zA-Z]/) || this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI/)?.name;
+		let sym = this.#consume(fn ? /(?![abeijkwxyz])[a-zA-Z]/ : /[a-zA-Z]/) || this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI/)?.name;
 		if (!sym) return false;
 		const sub = this.parseSub();
 		if (sub) {
