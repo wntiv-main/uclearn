@@ -234,6 +234,7 @@
 		text-wrap-style: balance;
 		place-content: center;
 		padding: 3px;
+		transition: background-color var(--uclearn-transition-short);
 
 		&:is(:hover, :focus-visible) {
 			--uclearn-background-tint: var(--uclearn-hover-tint);
