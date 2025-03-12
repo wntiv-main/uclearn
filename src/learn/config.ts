@@ -108,7 +108,7 @@ function handleColoredNode(el: HTMLElement) {
 }
 
 function colorNode([el, colors]: ItemOf<typeof coloredNodes>) {
-	if (colors.color) el.style.color = `hsl(from ${colors.color} h s calc(1 - l))`;
+	if (colors.color) el.style.color = `hsl(from ${colors.color} h s calc(100 - l))`;
 	if (colors.backgroundColor) el.style.backgroundColor = `hsl(from ${colors.backgroundColor} h s calc(100 - l * 0.8) / 0.4)`;
 }
 
