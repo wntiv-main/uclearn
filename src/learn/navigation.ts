@@ -1,7 +1,7 @@
 // import type VideoJS from 'video.js';
 import type { YUI } from './ucinterfaces/yui';
 
-import { DEBUG } from '../global/constants';
+import { DEBUG, DEBUG_HYDRATION } from '../global/constants';
 import { type _HydrationStages, type HydrationConfig, type HydrationStage, precomputeStages } from "../global/hydration";
 import { update } from '../global/util';
 import { hydrate, initDocumentParts, SKIP_HYDRATION_CLASS } from './hydration';
@@ -259,9 +259,9 @@ export async function initNavigator() {
 		"submit",
 		async (e) => {
 			const form = e.target;
-			console.log(e.submitter);
+			if (DEBUG_HYDRATION) console.log(e.submitter);
 			if (!(form instanceof HTMLFormElement)) return;
-			if (form.method === 'dialog') return;
+			if (form.getAttribute('method') === 'dialog') return;
 			e.preventDefault();
 			const scrollPos = document.getElementById("page")?.scrollTop;
 			if (!e.submitter?.classList.contains('submit'))
@@ -285,7 +285,7 @@ export async function initNavigator() {
 				toHydrate.push(['#region-main', { updateUpTree: true, weight: 5 }]);
 				toHydrate.push(['#page-footer']);
 			}
-			const resp = await hydrateFromFetch(form.action, {
+			const resp = await hydrateFromFetch(form.getAttribute('action') ?? '#', {
 				method: "POST",
 				body: new FormData(form, e.submitter),
 			}, toHydrate);
