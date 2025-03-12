@@ -5,7 +5,8 @@ import { MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from ".
 import { getRequire, getYUIInstance, requireModule } from "./lib-hook";
 import type monaco from "monaco-editor";
 import { onPostHydrate } from "./navigation";
-import { assertNever, ItemOf } from "../global/util";
+import { assertNever, type ItemOf } from "../global/util";
+import { DEBUG } from "../global/constants";
 
 type Config = {
 	userCss: string;
@@ -110,9 +111,10 @@ function handleColoredNode(el: HTMLElement) {
 function colorNode([el, colors]: ItemOf<typeof coloredNodes>) {
 	if (colors.color) el.style.color = `hsl(from ${colors.color} h s calc(100 - l))`;
 	if (colors.backgroundColor) el.style.backgroundColor = `hsl(from ${colors.backgroundColor} h s calc(100 - l * 0.8) / 0.4)`;
+	if (DEBUG) el.style.border = '1px solid red';
 }
 
-onNodeInsert('.activity :is([style*=color], [style*=background])', handleColoredNode);
+onNodeInsert('.course-content', ':is([style*=color], [style*=background])', handleColoredNode);
 onThemeChange(theme => {
 	if (theme === 'dark') {
 		coloredNodes = coloredNodes.filter(node => {

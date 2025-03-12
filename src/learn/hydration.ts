@@ -232,15 +232,15 @@ type QuerySelect<T extends string> = T extends keyof HTMLElementTagNameMap ? HTM
 	: T extends keyof HTMLElementDeprecatedTagNameMap ? HTMLElementDeprecatedTagNameMap[T]
 	: T extends `.${string}` ? HTMLElement : Element;
 
-const insertHandlers: [string, (node: Node) => void][] = [];
+const insertHandlers: [string | null, string, (node: Node) => void][] = [];
 
-export function onNodeInsert<S extends string>(selector: S, cb: (node: QuerySelect<S>) => void): void;
-export function onNodeInsert<T extends Node>(selector: string, cb: (node: T) => void): void;
-export function onNodeInsert(selector: string, cb: (node: Node) => void) {
-	insertHandlers.push([selector, cb]);
+export function onNodeInsert<S extends string>(parent: string | null, selector: S, cb: (node: QuerySelect<S>) => void): void;
+export function onNodeInsert<T extends Node>(parent: string | null, selector: string, cb: (node: T) => void): void;
+export function onNodeInsert(parent: string | null, selector: string, cb: (node: Node) => void) {
+	insertHandlers.push([parent, selector, cb]);
 }
 
-function handleNodeInsert(node: Node, collectors: NodeCollectors) {
+function handleNodeInsert(parent: Node, node: Node, collectors: NodeCollectors) {
 	if (!isElement(node)) {
 		const math = node.parentElement?.closest(".filter_mathjaxloader_equation");
 		if (math) collectors.math.add(math);
@@ -273,9 +273,14 @@ function handleNodeInsert(node: Node, collectors: NodeCollectors) {
 				":is(.matrixsquarebrackets, .matrixroundbrackets, .matrixbarbrackets)",
 			),
 		);
-	for (const [selector, handler] of insertHandlers) {
-		if (node.matches(selector)) handler(node);
-		node.querySelectorAll(selector).forEach(handler);
+	for (const [parentSel, selector, handler] of insertHandlers) {
+		console.log(parentSel, selector, node, parentSel && node.closest(parentSel), node.querySelectorAll(selector), node.querySelectorAll(`:is(${parent}) :is(${selector})`));
+		if (!parentSel || isElement(parent) && parent.closest(parentSel)) {
+			if (node.matches(selector)) handler(node);
+			node.querySelectorAll(selector).forEach(handler);
+		} else if (node.matches(parentSel)) {
+			node.querySelectorAll(selector).forEach(handler);
+		} else node.querySelectorAll(`:is(${parentSel}) :is(${selector})`).forEach(handler);
 	}
 }
 
@@ -327,7 +332,7 @@ function debugTask(
 			const dom = parent.ownerDocument ?? document;
 			const nodes = [ref.node, ...(ref.tiedNodes ?? [])].map((node) => {
 				const newNode = dom.adoptNode(node);
-				handleNodeInsert(newNode, collectors);
+				handleNodeInsert(parent, newNode, collectors);
 				return newNode;
 			});
 			const fragment = dom.createDocumentFragment();
@@ -388,7 +393,7 @@ export async function initDocumentParts() {
 		fields: [],
 		matrixFields: [],
 	};
-	handleNodeInsert(document.documentElement, collectors);
+	handleNodeInsert(document, document.documentElement, collectors);
 	await handlePostHydrateCollectors(collectors, true);
 }
 
@@ -487,7 +492,7 @@ async function applyHydration(tasks: HydrationTasks, { config, elMap: map, root:
 					const dom = parent.ownerDocument ?? document;
 					const nodes = [ref.node, ...(ref.tiedNodes ?? [])].map((node) => {
 						const newNode = dom.adoptNode(node);
-						handleNodeInsert(newNode, collectors);
+						handleNodeInsert(parent, newNode, collectors);
 						return newNode;
 					});
 					const fragment = dom.createDocumentFragment();

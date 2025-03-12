@@ -73,5 +73,5 @@ function initMessageApp(root: HTMLElement) {
 }
 
 export function initMessaging() {
-	onNodeInsert('.message-app', el => initMessageApp(el));
+	onNodeInsert(null, '.message-app', el => initMessageApp(el));
 }
