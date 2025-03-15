@@ -18,7 +18,6 @@ async function markMessage(msg: HTMLElement) {
 	const node = msg.querySelector<HTMLElement>('[data-region="text-container"]');
 	if (!node) return;
 	const content = sanitize(await marked.parse(node.innerText, {
-		async: true,
 		gfm: true,
 		breaks: true,
 	}), { RETURN_DOM_FRAGMENT: true });

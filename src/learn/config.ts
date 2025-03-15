@@ -91,9 +91,17 @@ function _setTheme(theme: 'light' | 'dark') {
 	switch (theme) {
 		case 'light':
 			document.documentElement.classList.add('uclearn-light-mode');
+			for (const el of document.getElementsByClassName('navbar-dark')) {
+				el.classList.add('navbar-light');
+				el.classList.remove('navbar-dark');
+			}
 			break;
 		case 'dark':
 			document.documentElement.classList.add('uclearn-dark-mode');
+			for (const el of document.getElementsByClassName('navbar-light')) {
+				el.classList.add('navbar-dark');
+				el.classList.remove('navbar-light');
+			}
 			break;
 		default: assertNever(theme);
 	}

@@ -73,8 +73,8 @@ async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hy
 		// Eval script
 		const [M, YUI_config]: [typeof window.M, Parameters<YUI['applyConfig']>[0]] = new Function(`${script.text};return [M, YUI_config];`)();
 		(await getYUIInstance()).applyConfig(YUI_config);
-		console.log('updated YUI config to', YUI_config, 'from', oldConfig);
-		console.log('updated Moodle state with', M, 'from', update({ cfg: {} }, window.M));
+		if (DEBUG) console.log('updated YUI config to', YUI_config, 'from', oldConfig);
+		if (DEBUG) console.log('updated Moodle state with', M, 'from', update({ cfg: {} }, window.M));
 		needsCourseIndexRefresh ||= window.M?.cfg?.courseId !== M?.cfg?.courseId;
 		window.M = update(window.M ?? {}, M);
 		break;

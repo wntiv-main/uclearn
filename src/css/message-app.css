@@ -63,10 +63,7 @@
 
 		:is(.view-overview-body, [data-region="view-contacts"])
 			.list-group-item {
-			border: none;
 			column-gap: 5px;
-			margin: 0;
-			outline: none;
 		}
 
 		[data-region="view-contacts"] .list-group-item {

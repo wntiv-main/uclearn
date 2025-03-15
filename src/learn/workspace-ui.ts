@@ -81,5 +81,5 @@ export function initQuizWorkspace() {
 		(selectedJaxDisplay ? el.querySelector('.MathJax') : el)?.append(jaxOptionsContainer);
 	};
 	document.addEventListener('mouseenter', activateJaxOptions, { capture: true });
-	// document.addEventListener('focus', activateJaxOptions, { capture: true });
+	document.addEventListener('focus', activateJaxOptions, { capture: true });
 }

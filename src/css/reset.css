@@ -614,6 +614,10 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		color: inherit;
 	}
 
+	.navbar a .icon {
+		color: inherit !important;
+	}
+
 	.moremenu {
 		opacity: 1;
 	}

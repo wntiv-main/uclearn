@@ -93,6 +93,14 @@
 			padding-top: 10px;
 			overflow: visible;
 			pointer-events: none;
+			min-width: 0;
+			padding-inline: 0.5rem;
+
+			.logo {
+				flex: 1 1 0;
+				min-width: 0;
+				max-width: 200px;
+			}
 
 			> * {
 				pointer-events: all;
@@ -110,6 +118,17 @@
 	[data-region="right-hand-drawer"].drawer {
 		grid-area: page / drawer-right / page-end / drawer-right-end;
 		/* border-left: var(--border-style) currentColor; */
+	}
+
+	@media (max-width: 767.98px) {
+		.drawer-left,
+		[data-region="left-hand-drawer"].drawer,
+		.drawer-right,
+		[data-region="right-hand-drawer"].drawer {
+			grid-column: far-left / far-right;
+			max-width: none !important;
+			width: 100%;
+		}
 	}
 
 	@media (min-width: 992px) {
@@ -177,6 +196,15 @@
 
 	.btn.drawertoggle {
 		display: initial;
+
+		.drawer-primary & {
+			margin-inline: 0 0.5rem;
+		}
+	}
+
+	#discussion-settings-drawer {
+		position: fixed !important;
+		inset: var(--uclearn-nav-height) 0 0 auto;
 	}
 
 	#theme_boost-drawers-courseindex .drawercontent {

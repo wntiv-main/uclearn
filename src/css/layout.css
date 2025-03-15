@@ -103,6 +103,10 @@
 				}
 			}
 
+			#page-content {
+				padding-bottom: 1rem !important;
+			}
+
 			/* >* {
 				grid-area: page / page-left / page-end / page-right;
 				min-height: 0;
