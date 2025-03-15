@@ -36,11 +36,20 @@ interface Moodle {
 				show(): void;
 				hide(): void;
 				destroy(): void;
-				on(event: string, cb: (e: unknown) => void): void;
+				// on(event: string, cb: (e: unknown) => void): void;
+				after<E extends keyof MoodleDialogEvents>(event: E, cb: (e: {
+					oldVal: MoodleDialogEvents[E] | undefined,
+					newVal: MoodleDialogEvents[E];
+				}) => void, unknown?: unknown): void;
 			};
 		};
 	};
 }
+
+type MoodleDialogEvents = {
+	'visibleChange': boolean;
+	[key: string]: unknown;
+};
 
 declare global {
 	interface Window {

@@ -23,7 +23,7 @@ async function createMathModal(value = '') {
 	dialog.applyAndTrapFocus = () => { };
 	dialog.trapFocus = () => { };
 	dialog.show();
-	dialog.on('visibilityChanged', () => dialog.destroy());
+	dialog.after('visibleChange', e => e.newVal || dialog.destroy(), dialog);
 }
 
 function createWorkspaceButtons(host: Element) {

@@ -70,6 +70,9 @@
 
 		.yui3-widget-buttons {
 			display: inline flex;
+			justify-content: end;
+			margin: 0;
+			flex-grow: 1;
 		}
 
 		.moodle-dialogue-hd {
@@ -81,10 +84,13 @@
 
 		.closebutton {
 			margin: -0.5rem;
-			padding: 0.5rem 0.8rem;
-			display: block;
+			padding: 0.7rem;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 0;
 			border-radius: 0;
-			height: fit-content;
+			aspect-ratio: 1;
 		}
 
 		.moodle-dialogue-bd {
