@@ -274,7 +274,6 @@ function handleNodeInsert(parent: Node, node: Node, collectors: NodeCollectors) 
 			),
 		);
 	for (const [parentSel, selector, handler] of insertHandlers) {
-		console.log(parentSel, selector, node, parentSel && node.closest(parentSel), node.querySelectorAll(selector), node.querySelectorAll(`:is(${parent}) :is(${selector})`));
 		if (!parentSel || isElement(parent) && parent.closest(parentSel)) {
 			if (node.matches(selector)) handler(node);
 			node.querySelectorAll(selector).forEach(handler);

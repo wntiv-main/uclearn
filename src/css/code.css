@@ -95,6 +95,7 @@
 	pre,
 	code {
 		user-select: all;
+		text-shadow: none;
 	}
 
 	.coderunner-answer:has(

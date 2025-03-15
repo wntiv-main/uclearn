@@ -7,6 +7,7 @@ import type monaco from "monaco-editor";
 import { onPostHydrate } from "./navigation";
 import { assertNever, type ItemOf } from "../global/util";
 import { DEBUG } from "../global/constants";
+import { moodleDialog } from "./yui-modal";
 
 type Config = {
 	userCss: string;
@@ -192,14 +193,7 @@ const BG_IMAGES = [
 ];
 
 async function prepareConfigModal() {
-	const Y = await getYUIInstance();
-	await new Promise<void>(res => Y.require(['moodle-core-notification-dialogue'], () => res()));
-	if (!window.M?.core?.dialogue) return;
-	const center = window.M.core.dialogue.prototype.centerDialogOnDialogSizeChange;
-	window.M.core.dialogue.prototype.centerDialogOnDialogSizeChange = function (e: { get(key: string): unknown; }) {
-		if (e.get('draggable')) return;
-		return center.call(this, e);
-	};
+	const dialog = await moodleDialog;
 	const form = document.createElement("form");
 	form.id = 'uclearn-settings-form';
 	const backgroundImages = document.createElement('fieldset');
@@ -367,9 +361,9 @@ async function prepareConfigModal() {
 	cssFieldLabel.textContent = 'User CSS';
 	cssField.append(cssFieldLabel, cssEditorContainer);
 	form.append(backgroundImages, colorTheme, cssField);
-	return new window.M.core.dialogue({
+	return new dialog({
 		headerContent: 'Moodle Mod Settings',
-		bodyContent: Y.one(form),
+		bodyContent: (await getYUIInstance()).one(form),
 		draggable: true,
 		center: true,
 		modal: true,

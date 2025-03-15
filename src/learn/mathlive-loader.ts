@@ -296,7 +296,21 @@ class LatexParser {
 	}
 }
 
-function initMathField(mf: MathfieldElement) {
+// const depths = new Map<EventTarget, number>();
+// const _handle = MathfieldElement.prototype.handleEvent;
+// MathfieldElement.prototype.handleEvent = function (e) {
+// 	if ((e as { isSimulated?: boolean; }).isSimulated || !e.isTrusted) return;
+// 	if (!e.target) return;
+// 	const el = e.target;
+// 	const depth = (depths.get(el) ?? 0);
+// 	if (depth > 5) return;
+// 	depths.set(el, depth + 1);
+// 	_handle.call(this, e);
+// 	if (depth) depths.set(el, depth);
+// 	else depths.delete(el);
+// };
+
+export function initMathField(mf: MathfieldElement) {
 	const styleOverrides = document.createElement('style');
 	styleOverrides.textContent = `
 		:host .ML__caret {
@@ -319,6 +333,7 @@ function initMathField(mf: MathfieldElement) {
 	mf.removeExtraneousParentheses = true;
 	mf.smartFence = true;
 	mf.smartSuperscript = true;
+	mf.classList.add(MATHLIVE_FIELD_CLASS);
 	mf.addEventListener('mount', () => {
 		mf.menuItems = mf.menuItems.filter(item => !/color|variant|decoration/.test((item as { id?: string; }).id ?? ''));
 		mf.keybindings = [
@@ -360,7 +375,6 @@ export function initMatrixField(field: HTMLElement) {
 	mathField.addEventListener("mount", () => {
 		for (const [id, locked] of Object.entries(lockStates)) mathField.setPromptState(id, undefined, locked);
 	});
-	mathField.classList.add(MATHLIVE_FIELD_CLASS);
 	const inputCb = (e: Event) => {
 		for (const prompt of mathField.getPrompts()) {
 			const fieldLatex = mathField.getPromptValue(prompt, 'latex');
@@ -384,7 +398,6 @@ export function initField(field: HTMLInputElement & ChildNode) {
 
 	const fieldValue = field.value.match(/;"__uclearn-mltex-\(";(".*");"__uclearn-mltex-\)"/);
 	mathField.setValue(fieldValue ? JSON.parse(fieldValue[1]) : AMTparseAMtoTeX(field.value.split(';')[0]));
-	mathField.classList.add(MATHLIVE_FIELD_CLASS);
 	mathField.style.minWidth = field.style.minWidth || field.style.width;
 	const inputCb = (e: Event) => {
 		const fieldLatex = mathField.getValue('latex');

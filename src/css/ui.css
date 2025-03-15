@@ -57,6 +57,7 @@
 		border-radius: 1rem;
 		bottom: 5px;
 		overflow: hidden;
+		pointer-events: none;
 
 		.moodle-dialogue-wrap {
 			border: none;
@@ -64,10 +65,26 @@
 			display: flex;
 			flex-flow: column;
 			max-height: 100%;
+			pointer-events: all;
+		}
+
+		.yui3-widget-buttons {
+			display: inline flex;
 		}
 
 		.moodle-dialogue-hd {
 			flex: 0 0 max-content;
+			padding: 0.5rem;
+			min-height: 0;
+			border-color: currentColor;
+		}
+
+		.closebutton {
+			margin: -0.5rem;
+			padding: 0.5rem 0.8rem;
+			display: block;
+			border-radius: 0;
+			height: fit-content;
 		}
 
 		.moodle-dialogue-bd {

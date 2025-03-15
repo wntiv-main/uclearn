@@ -5,6 +5,10 @@ export function assertNever(value: never): asserts value is never {
 	throw new Error;
 }
 
+export function raise(...args: ConstructorParameters<ErrorConstructor>): never {
+	throw new Error(...args);
+}
+
 export type MapType<M, T extends (keyof M)[]> = { [K in keyof T]: M[T[K]]; };
 export type MaybeUnwrap<T> = T extends [infer R] ? R : T;
 

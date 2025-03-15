@@ -17,6 +17,11 @@
 			}
 		}
 
+		.page-context-header {
+			padding: 0;
+			margin: 0 !important;
+		}
+
 		&:has(+ .secondary-navigation) {
 			margin-bottom: 0;
 		}
@@ -24,13 +29,15 @@
 
 	body:not(#page-login-index) #page-wrapper {
 		display: grid;
-		grid: [navbar] max-content [navbar-end page] 1fr [page-end] / [far-left drawer-left] max-content [drawer-left-end left-gutter] minmax(
-				5px,
-				1fr
-			) [left-gutter-end page-left] minmax(0, 80vw) [page-right right-gutter] minmax(
-				5px,
-				1fr
-			) [right-gutter-end drawer-right] max-content [drawer-right-end scrollbar-gutter far-right] min-content [scrollbar-gutter-end];
+		grid:
+			[navbar] max-content [navbar-end page] 1fr [page-end]
+			/ [far-left drawer-left] max-content
+			[drawer-left-end left-gutter] minmax(5px, 1fr)
+			[left-gutter-end page-left] minmax(0, min-content)
+			[nav-split] minmax(0, 80vw)
+			[page-right right-gutter] minmax(5px, 1fr)
+			[right-gutter-end drawer-right] max-content
+			[drawer-right-end scrollbar-gutter far-right] min-content [scrollbar-gutter-end];
 		overflow: clip;
 		width: 100%;
 
@@ -102,6 +109,66 @@
 				height: fit-content;
 				display: subgrid;
 			} */
+		}
+	}
+
+	body#page-mod-quiz-attempt #page-wrapper #page {
+		#page-header {
+			display: grid;
+			grid-template: subgrid / subgrid;
+			grid-row: 1 / 3;
+
+			> .w-100 {
+				display: contents;
+
+				> * {
+					grid-column: 1 / -1;
+				}
+
+				> :has(.page-context-header) {
+					grid-column: nav-split / -1;
+				}
+			}
+		}
+
+		#page-content {
+			grid-row: 2 / 50;
+			display: grid;
+			grid-template: subgrid / subgrid;
+			padding-inline: 1rem;
+			pointer-events: none;
+
+			:has(#region-main),
+			#region-main {
+				display: contents;
+			}
+
+			.tertiary-navigation {
+				grid-area: 2 / 1 / 2 / nav-split;
+				min-width: fit-content;
+
+				.navitem {
+					margin: 0;
+				}
+			}
+
+			#region-main > * {
+				grid-column: 1 / -1;
+				pointer-events: all;
+			}
+
+			#region-main > div[role="main"] {
+				display: contents;
+
+				> * {
+					grid-column: 1 / -1;
+				}
+
+				> .tertiary-navigation {
+					grid-column: 1 / nav-split;
+					grid-row: 1;
+				}
+			}
 		}
 	}
 }

@@ -18,12 +18,14 @@
 	.courseindex-item,
 	.navbar-brand,
 	.pagination .page-link,
+	#__uclearn-jax-options button,
 	.drawertoggle.btn {
 		--uclearn-background-tint: transparent;
 		background-color: transparent;
 		box-shadow: var(--uclearn-pre-shadow, /**/) inset 0 0 0 100vmax
 			var(--uclearn-background-tint) !important;
 		transition: box-shadow var(--uclearn-transition-short);
+		outline: none;
 
 		&:is(:hover, :focus-visible, .focus),
 		&.nav-item:has(> .nav-link:focus-visible),
@@ -43,7 +45,8 @@
 			.closewidget .btn-link,
 			.message-app [data-route="view-contacts"],
 			.moodle-dialogue-base .closebutton,
-			.pagination .page-link
+			.pagination .page-link,
+			#__uclearn-jax-options button
 		):focus-visible {
 		box-shadow: inset 0 0 0 100vmax var(--uclearn-background-tint),
 			var(--uclearn-focus-shadow) !important;
