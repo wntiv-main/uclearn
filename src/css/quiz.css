@@ -128,6 +128,7 @@
 				var(--uclearn-translucent-bg) 90%
 			);
 			width: fit-content;
+			max-width: 100%;
 			margin-inline: auto;
 
 			.correctness.badge {

@@ -97,7 +97,7 @@
 				hue-rotate(180deg);
 		}
 
-		.que img,
+		.que :is(img, canvas),
 		.resourceimage,
 		iframe[title*="JSXGraph" i],
 		img[role="presentation"],

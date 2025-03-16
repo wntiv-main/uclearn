@@ -92,7 +92,7 @@
 		background-color: transparent !important;
 	}
 
-	pre,
+	pre:not(:has(> *)),
 	code {
 		user-select: all;
 		text-shadow: none;
@@ -193,6 +193,7 @@
 
 	code:not(:empty, pre > code),
 	pre:has(> code),
+	pre:not(:has(> *)),
 	.filter-ace-inline-output-text,
 	.que:is(.coderunner, .description) pre:not(.ace_tooltip pre) {
 		background-color: var(--uclearn-hover-tint) !important;
