@@ -24,17 +24,10 @@
 	],
 	"web_accessible_resources": [
 		{
-			"resources": ["background.png"],
-			"matches": [
-				"*://learn.canterbury.ac.nz/*",
-				"*://preuc.canterbury.ac.nz/*",
-				"*://*.csse.canterbury.ac.nz/*",
-				"*://timetable.canterbury.ac.nz/*"
-			]
-		},
-		{
 			"resources": [
 				"fonts/**/*.woff",
+				"learn/help.md",
+				"learn/assets/*",
 				"learn/hydration-worker.js",
 				"learn/pyright/*.js",
 				"learn/mathlive/*",

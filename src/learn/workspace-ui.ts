@@ -12,7 +12,7 @@ async function createMathModal(value = '') {
 	const container = document.createElement('form');
 	const field = new MathfieldElement({});
 	initMathField(field);
-	field.setValue(value.includes('\\begin') ? value : `\\begin{matrix} ${value}`);
+	field.setValue(value.includes('\\begin') ? value : `\\displaylines{ ${value}`);
 	container.append(field);
 	const dialog = new Dialog({
 		bodyContent: (await getYUIInstance()).one(container),
@@ -59,6 +59,7 @@ export function initQuizWorkspace() {
 			container.id = '__uclearn-jax-options';
 			const copyButton = document.createElement('button');
 			copyButton.innerHTML = COPY_ICON;
+			copyButton.title = 'Copy as LaTeX';
 			copyButton.addEventListener('click', e => {
 				e.preventDefault();
 				e.stopPropagation();
@@ -66,6 +67,7 @@ export function initQuizWorkspace() {
 			});
 			const editButton = document.createElement('button');
 			editButton.innerHTML = EDIT_ICON;
+			editButton.title = 'Edit in math field';
 			editButton.addEventListener('click', e => {
 				e.preventDefault();
 				e.stopPropagation();

@@ -58,6 +58,7 @@
 		"js-beautify": "^1.15.1",
 		"jszip": "^3.10.1",
 		"marked": "^15.0.7",
+		"marked-base-url": "^1.1.6",
 		"marked-highlight": "^2.2.1",
 		"mathlive": "^0.104.0",
 		"monaco-editor": "^0.52.2",

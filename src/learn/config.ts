@@ -1,18 +1,21 @@
 import { EXT_URL } from "./constants";
 import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } from "./db";
 import { onNodeInsert, SKIP_HYDRATION_CLASS } from "./hydration";
-import { MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
+import { HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
 import { getRequire, getYUIInstance, requireModule } from "./lib-hook";
 import type monaco from "monaco-editor";
 import { onPostHydrate } from "./navigation";
 import { assertNever, type ItemOf } from "../global/util";
 import { DEBUG } from "../global/constants";
 import { moodleDialog } from "./yui-modal";
+import { Marked } from "marked";
+import { baseUrl } from "marked-base-url";
 
 type Config = {
 	userCss: string;
 	customBg: Blob | null;
 	theme: 'light' | 'dark' | null;
+	hasSeenHelpMenu: boolean;
 };
 
 const uclearnDB = new DatabaseHandler<{
@@ -83,6 +86,7 @@ const configHandlers: {
 			}
 		}
 	},
+	hasSeenHelpMenu() { },
 };
 
 function _setTheme(theme: 'light' | 'dark') {
@@ -146,23 +150,6 @@ async function initConfigValue<K extends keyof Config>(key: K, value: Config[K])
 	configCache[key] = value;
 	destructors[key]?.();
 	destructors[key] = await configHandlers[key](value) ?? undefined;
-}
-
-export async function initConfig() {
-	for await (const { key, value } of uclearnDB.iterStore('userConfig')) {
-		initConfigValue(key, value);
-	}
-	if (!('theme' in configCache)) initConfigValue("theme", null);
-	const settingsButton = document.createElement('button');
-	settingsButton.innerHTML = `${SETTINGS_ICON('height: 1lh;margin-inline: -5px 5px;')}Moodle Mod Settings`;
-	settingsButton.classList.add('dropdown-item', SKIP_HYDRATION_CLASS);
-	settingsButton.addEventListener('click', () => showConfigModal());
-	const installButton = () =>
-		document
-			.querySelector('#user-action-menu a[href*="preferences"]')
-			?.before(settingsButton);
-	onPostHydrate(installButton);
-	installButton();
 }
 
 const toSet: [prop: string, value: string][] = [];
@@ -370,7 +357,7 @@ async function prepareConfigModal() {
 	cssField.append(cssFieldLabel, cssEditorContainer);
 	form.append(backgroundImages, colorTheme, cssField);
 	return new dialog({
-		headerContent: 'Moodle Mod Settings',
+		headerContent: 'MooMo Settings',
 		bodyContent: (await getYUIInstance()).one(form),
 		draggable: true,
 		center: true,
@@ -426,4 +413,60 @@ let _configModal: Awaited<ReturnType<typeof prepareConfigModal>> | null = null;
 export async function showConfigModal() {
 	_configModal ??= await prepareConfigModal();
 	_configModal?.show();
+}
+
+async function prepareHelpModal() {
+	const [Dialog, content] = await Promise.all([moodleDialog, fetch(`${EXT_URL}/learn/help.md`).then(resp => resp.text())]);
+	const marked = new Marked(baseUrl(`${EXT_URL}/learn/`));
+	const container = document.createElement("div");
+	container.id = 'uclearn-help-container';
+	const shadow = container.attachShadow({
+		mode: 'closed',
+	});
+	shadow.innerHTML = (await marked.parse(content, {
+		gfm: true,
+		breaks: false,
+	})).replaceAll(EXT_URL.split(':')[1], EXT_URL);
+	const header = shadow.querySelector('h1');
+	header?.remove();
+	return new Dialog({
+		headerContent: header?.textContent ?? 'MooMo Help',
+		bodyContent: (await getYUIInstance()).one(container),
+		draggable: true,
+		center: true,
+		modal: true,
+		width: null,
+	});
+}
+
+let _helpModal: Awaited<ReturnType<typeof prepareHelpModal>> | null = null;
+export async function showHelpModal() {
+	_helpModal ??= await prepareHelpModal();
+	_helpModal?.show();
+}
+
+export async function initConfig() {
+	for await (const { key, value } of uclearnDB.iterStore('userConfig')) {
+		initConfigValue(key, value);
+	}
+	if (!('theme' in configCache)) initConfigValue("theme", null);
+	const settingsButton = document.createElement('button');
+	settingsButton.innerHTML = `${SETTINGS_ICON}MooMo Settings`;
+	settingsButton.classList.add('dropdown-item', '__uclearn-settings-button', SKIP_HYDRATION_CLASS);
+	settingsButton.addEventListener('click', () => showConfigModal());
+	const helpButton = document.createElement('button');
+	helpButton.innerHTML = `${HELP_ICON}MooMo Help`;
+	helpButton.classList.add('dropdown-item', '__uclearn-help-button', SKIP_HYDRATION_CLASS);
+	helpButton.addEventListener('click', () => showHelpModal());
+	const installButton = () =>
+		document
+			.querySelector('#user-action-menu a[href*="preferences"]')
+			?.before(settingsButton, helpButton);
+	onPostHydrate(installButton);
+	installButton();
+	if (!configCache.hasSeenHelpMenu) {
+		await showHelpModal();
+		const store = await uclearnDB.openStore('userConfig', 'readwrite');
+		store.put({ key: 'hasSeenHelpMenu', value: true });
+	}
 }

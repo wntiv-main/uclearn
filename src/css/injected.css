@@ -97,6 +97,22 @@
 }
 
 .__uclearn-workspace-form {
+	button {
+		border: none;
+		border-radius: var(--uclearn-radius);
+		padding: calc(var(--uclearn-radius) / 2);
+		background-color: transparent;
+		transition: background-color var(--uclearn-transition-short);
+
+		&:is(:hover, :focus-visible) {
+			background-color: var(--uclearn-hover-tint);
+		}
+
+		&:active {
+			background-color: var(--uclearn-active-tint);
+		}
+	}
+
 	.__uclearn-workspace-math {
 		display: grid;
 		grid-template-rows: repeat(2, min-content);
@@ -107,6 +123,15 @@
 			height: 1em;
 			aspect-ratio: 1;
 		}
+	}
+}
+
+.__uclearn-help-button,
+.__uclearn-settings-button {
+	svg {
+		aspect-ratio: 1;
+		height: 1lh;
+		margin-inline: -0.5rem 0.5rem;
 	}
 }
 
@@ -152,6 +177,10 @@
 			aspect-ratio: 1;
 		}
 	}
+}
+
+#uclearn-help-container {
+	max-width: 60vw;
 }
 
 #uclearn-settings-form {
