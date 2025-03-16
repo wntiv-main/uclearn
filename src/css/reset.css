@@ -97,6 +97,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 
 		> * {
 			max-width: none;
+			min-width: 0;
 		}
 	}
 
@@ -731,6 +732,12 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.MathJax_MenuDisabled,
 	.text-muted {
 		color: var(--uclearn-foreground-muted) !important;
+	}
+
+	blockquote {
+		color: var(--uclearn-foreground-muted);
+		border-color: var(--uclearn-foreground-muted);
+		border-radius: 5px;
 	}
 
 	.secondary-navigation .moremenu .nav-link {
