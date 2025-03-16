@@ -10,6 +10,7 @@ import { DEBUG } from "../global/constants";
 import { moodleDialog } from "./yui-modal";
 import { Marked } from "marked";
 import { baseUrl } from "marked-base-url";
+import { isElementTag } from "./domutil";
 
 type Config = {
 	userCss: string;
@@ -116,18 +117,19 @@ let coloredNodes: (readonly [HTMLElement, { color: string | null, backgroundColo
 
 function handleColoredNode(el: HTMLElement) {
 	const { color, backgroundColor } = el.style;
-	const node = [el, { color, backgroundColor }] as const;
+	const node = [el, { color, backgroundColor: backgroundColor || el.getAttribute('bgcolor') }] as const;
 	coloredNodes.push(node);
 	if (configCache.theme === 'dark') colorNode(node);
 }
 
 function colorNode([el, colors]: ItemOf<typeof coloredNodes>) {
 	if (colors.color) el.style.color = `hsl(from ${colors.color} h s calc(100 - l))`;
-	if (colors.backgroundColor) el.style.backgroundColor = `hsl(from ${colors.backgroundColor} h s calc(100 - l * 0.8) / 0.4)`;
+	if (colors.backgroundColor)
+		el.style.backgroundColor = `hsl(from ${colors.backgroundColor} h s calc(100 - l * 0.8)${isElementTag(el, 'span') ? '' : ' / 0.4'})`;
 	if (DEBUG) el.style.border = '1px solid red';
 }
 
-onNodeInsert('.course-content', ':is([style*=color], [style*=background])', handleColoredNode);
+onNodeInsert('.course-content, .que .content', "[style*=color], [style*=background], [bgcolor]", handleColoredNode);
 onThemeChange(theme => {
 	if (theme === 'dark') {
 		coloredNodes = coloredNodes.filter(node => {

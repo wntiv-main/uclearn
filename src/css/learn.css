@@ -100,7 +100,6 @@
 		.que :is(img, canvas),
 		.resourceimage,
 		iframe[title*="JSXGraph" i],
-		img[role="presentation"],
 		.video-js .vjs-tech {
 			filter: var(--uclearn-translucent-filter) invert(1)
 				hue-rotate(180deg);

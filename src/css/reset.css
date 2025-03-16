@@ -740,6 +740,11 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		border-radius: 5px;
 	}
 
+	.course-section .section-summary-activities .icon,
+	.course-section .section_goto .icon {
+		color: var(--uclearn-color-link);
+	}
+
 	.secondary-navigation .moremenu .nav-link {
 		padding-bottom: calc(0.5rem - 3px);
 	}

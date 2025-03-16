@@ -88,14 +88,14 @@
 		}
 	}
 
-	.coderunner-test-results [style*="background"] {
-		background-color: transparent !important;
+	.coderunner-test-results span[style*="background"] {
+		padding: 0.2ch 0.2lh;
+		margin: -0.2ch -0.2lh;
+		border-radius: 0.2lh;
 	}
 
-	pre:not(:has(> *)),
-	code {
-		user-select: all;
-		text-shadow: none;
+	.coderunner-test-results > [style*="background"] {
+		background-color: transparent !important;
 	}
 
 	.coderunner-answer:has(
@@ -193,9 +193,11 @@
 
 	code:not(:empty, pre > code),
 	pre:has(> code),
-	pre:not(:has(> *)),
+	pre:not(:has(> :not(span))),
 	.filter-ace-inline-output-text,
 	.que:is(.coderunner, .description) pre:not(.ace_tooltip pre) {
+		user-select: all;
+		text-shadow: none;
 		background-color: var(--uclearn-hover-tint) !important;
 		box-shadow: 0 0 0 0.4ch var(--uclearn-hover-tint);
 		margin-inline: 0.4ch;
