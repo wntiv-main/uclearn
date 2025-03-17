@@ -69,6 +69,11 @@
 				display: contents;
 			}
 
+			#region-main,
+			#region-main > [role="main"] {
+				padding: 0;
+			}
+
 			.main-inner {
 				grid-area: page / far-left / page-end / far-right;
 				display: grid;
@@ -90,6 +95,10 @@
 					grid-column: page-left / page-right;
 					width: 100%;
 					min-width: 0;
+
+					&:not(.secondary-navigation) {
+						padding-inline: 1rem;
+					}
 				}
 
 				@media (max-width: 992px) {
@@ -114,6 +123,11 @@
 				display: subgrid;
 			} */
 		}
+	}
+
+	#page .activity-header {
+		padding: 0;
+		margin: 0;
 	}
 
 	body#page-mod-quiz-attempt #page-wrapper #page {

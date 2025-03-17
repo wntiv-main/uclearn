@@ -139,6 +139,15 @@
 		width: 100%;
 	}
 
+	#block-region-content > .card:only-of-type {
+		background-color: transparent;
+		border-radius: 0;
+
+		> .card-body {
+			padding: 0 !important;
+		}
+	}
+
 	/* Flexing */
 
 	.multiblock .row {
