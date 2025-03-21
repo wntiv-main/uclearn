@@ -71,7 +71,6 @@ class LatexParser {
 		return match;
 	}
 
-	@depthCheck
 	#consume(regex: RegExp | string) {
 		if (typeof regex === 'string') {
 			const i = this.#i.at(-1) ?? 0;
@@ -226,7 +225,7 @@ class LatexParser {
 	}
 
 	@depthCheck
-	#parseN(parser: () => string | false) {
+	private _parseN(parser: () => string | false) {
 		let collector = '';
 		let val = parser();
 		while (val) {
@@ -244,7 +243,7 @@ class LatexParser {
 			this.parseNum()
 			|| this.parseSymbol()
 			|| this.parseD()
-			|| this.parseGroup('{', '}', () => this.#parseN(
+			|| this.parseGroup('{', '}', () => this._parseN(
 				() => this.parseMacro('doubleprime') ? "''" : this.parseMacro('prime') ? "'" : false))
 			|| this.parseGroup(/[{(]/));
 		if (sup) {
