@@ -2,7 +2,7 @@ import { MathfieldElement } from "mathlive";
 import { AMTparseAMtoTeX } from "asciimath";
 
 import { EXT_URL } from "./constants";
-import { DEBUG_MATHLIVE } from "../global/constants";
+import { DEBUG, DEBUG_MATHLIVE } from "../global/constants";
 import { isElementTag } from "./domutil";
 
 MathfieldElement.soundsDirectory = null;
@@ -20,11 +20,46 @@ function latexToStack(latex: string) {
 	return (new LatexParser(latex)).parse();
 }
 
+function depthCheck<A extends unknown[], R>(target: (this: LatexParser, ...args: A) => R, context: ClassMethodDecoratorContext<LatexParser, (this: LatexParser, ...args: A) => R>) {
+	if (!DEBUG) return target;
+	return function (this: LatexParser, ...args: A) {
+		const startDepth = this._depth();
+		const result = target.call(this, ...args);
+		const depth = this._depth();
+		if (depth !== startDepth + +!!result) {
+			reportError(new Error(
+				result
+					? `${String(context.name)} consumed '${result}', left stack in unexpected state (${startDepth} -> ${depth})`
+					: `${String(context.name)} did not consume anything, but modified stack (${startDepth} -> ${depth})`,
+			));
+			const [latex, stack] = this._info();
+			console.error('Parser:', this, 'Called:', context.name, 'with', args, 'Final stack state:', stack);
+			if (depth > startDepth) {
+				let indicator = '';
+				for (let i = 0; i < stack[startDepth]; i++) indicator += ' ';
+				indicator += '>';
+				for (let i = indicator.length; i < stack[depth]; i++) indicator += stack.includes(indicator.length) ? '>' : '-';
+				indicator += '|';
+				console.error('Source:', `\n${latex}\n${indicator}`);
+			} else console.error('Source:', latex);
+		}
+		return result;
+	};
+}
+
 class LatexParser {
 	readonly #latex: string;
 	#i = [0];
 	constructor (latex: string) {
 		this.#latex = latex;
+	}
+
+	_depth() {
+		return this.#i.length;
+	}
+
+	_info() {
+		return [this.#latex, [...this.#i]] as const;
 	}
 
 	#consumeRx(regex: RegExp) {
@@ -36,6 +71,7 @@ class LatexParser {
 		return match;
 	}
 
+	@depthCheck
 	#consume(regex: RegExp | string) {
 		if (typeof regex === 'string') {
 			const i = this.#i.at(-1) ?? 0;
@@ -73,6 +109,7 @@ class LatexParser {
 		return result;
 	}
 
+	@depthCheck
 	parseNum() {
 		return this.#consume(/[+-]?\d+(?:\.\d+)?/);
 	}
@@ -80,6 +117,7 @@ class LatexParser {
 	// TODO: pdiff, binom
 	// https://cortexjs.io/mathfield/reference/commands
 
+	@depthCheck
 	parseObject(acceptLeadingSign = true): string | false {
 		const obj = this.parseNum() || this.parseFunction() || this.parseSymbol() || this.parseD() || this.parseGroup() || this.parsePDiff()
 			|| this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, 2)
@@ -101,6 +139,7 @@ class LatexParser {
 		return obj ?? false;
 	}
 
+	@depthCheck
 	parseObjects(acceptLeadingSign = true) {
 		let collector = this.parseObject(acceptLeadingSign);
 		if (!collector) return false;
@@ -113,6 +152,7 @@ class LatexParser {
 		return collector;
 	}
 
+	@depthCheck
 	parseExpression() {
 		this.#push();
 		let sums = '';
@@ -162,6 +202,7 @@ class LatexParser {
 		return sums + products;
 	}
 
+	@depthCheck
 	parseMacro(name: string | RegExp, args = 0) {
 		const bs = this.#consume('\\');
 		const n = bs && this.#consume(name);
@@ -184,6 +225,7 @@ class LatexParser {
 		};
 	}
 
+	@depthCheck
 	#parseN(parser: () => string | false) {
 		let collector = '';
 		let val = parser();
@@ -195,6 +237,7 @@ class LatexParser {
 		return collector;
 	}
 
+	@depthCheck
 	parseExp() {
 		const exp = this.#consume('^');
 		const sup = exp && (
@@ -212,6 +255,7 @@ class LatexParser {
 		return false;
 	}
 
+	@depthCheck
 	parseSub() {
 		const score = this.#consume('_');
 		const sub = score && (
@@ -230,6 +274,7 @@ class LatexParser {
 		return false;
 	}
 
+	@depthCheck
 	parsePDiff() {
 		const frac = this.#consume(/\\(?:[dt]?frac|cfrac\[[lr]\])\s*\{\s*/);
 		const p1 = frac && this.parseMacro(/partial\s*/);
@@ -251,6 +296,7 @@ class LatexParser {
 		return `pd(${s1}, ${s2})`;
 	}
 
+	@depthCheck
 	parseFunction() {
 		const fnSym = this.parseSymbol(true);
 		const fn = fnSym || this.parseMacro(
@@ -275,6 +321,7 @@ class LatexParser {
 		return `(${fn}${args})^${LatexParser.#closeExponent(sup)}`;
 	}
 
+	@depthCheck
 	parseGroup(open?: string | RegExp, close?: string | RegExp, internals = () => this.parseExpression()) {
 		const openFound = this.#consume(open ?? /(?:\\(?:left)?)?[{([]/);
 		const expr = openFound && internals();
@@ -289,6 +336,7 @@ class LatexParser {
 		return false;
 	}
 
+	@depthCheck
 	parseD() {
 		const d = this.parseMacro('differentialD');
 		const space = d && this.#consume(/\s+/);
@@ -301,6 +349,7 @@ class LatexParser {
 		return `d${sym}`;
 	}
 
+	@depthCheck
 	parseSymbol(fn = false) {
 		let sym = this.#consume(fn ? /(?![abeijkwxyz])[a-zA-Z]/ : /[a-zA-Z]/) || this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI|omega/)?.name;
 		if (!sym) return false;
