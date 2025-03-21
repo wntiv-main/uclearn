@@ -172,6 +172,11 @@
 				linear-gradient(currentColor, currentColor),
 				linear-gradient(currentColor, currentColor);
 		}
+
+		table {
+			display: block;
+			overflow-x: auto;
+		}
 	}
 
 	.que .content {
@@ -209,6 +214,7 @@
 			padding: 0 !important;
 			object-fit: contain;
 			object-position: center;
+			max-width: none !important;
 		}
 	}
 

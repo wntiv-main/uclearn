@@ -74,13 +74,13 @@ class LatexParser {
 	}
 
 	parseNum() {
-		return this.#consume(/-?\d+(?:\.\d+)?/);
+		return this.#consume(/[+-]?\d+(?:\.\d+)?/);
 	}
 
 	// TODO: pdiff, binom
 	// https://cortexjs.io/mathfield/reference/commands
 
-	parseObject(): string | false {
+	parseObject(acceptLeadingSign = true): string | false {
 		const obj = this.parseNum() || this.parseFunction() || this.parseSymbol() || this.parseD() || this.parseGroup() || this.parsePDiff()
 			|| this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, 2)
 				?.map((_, [num, denom]) => `${LatexParser.#closeFactor(num)}/${LatexParser.#closeFactor(denom)}`)
@@ -88,6 +88,10 @@ class LatexParser {
 				const [n, d] = [...name.slice(-2)].map(n => Number.parseInt(n));
 				return `${n}/${d}`;
 			});
+		if (!acceptLeadingSign && obj && /^[+-]/.test(obj)) {
+			this.#pop();
+			return false;
+		}
 		const sup = obj && this.parseExp();
 		if (sup) {
 			this.#commit();
@@ -97,6 +101,18 @@ class LatexParser {
 		return obj ?? false;
 	}
 
+	parseObjects(acceptLeadingSign = true) {
+		let collector = this.parseObject(acceptLeadingSign);
+		if (!collector) return false;
+		/* eslint-disable-next-line no-cond-assign
+		*/// biome-ignore lint/suspicious/noAssignInExpressions: i want it tho
+		for (let obj: string | false; obj = this.parseObject(false);) {
+			collector += `*${obj}`;
+			this.#commit();
+		}
+		return collector;
+	}
+
 	parseExpression() {
 		this.#push();
 		let sums = '';
@@ -104,20 +120,21 @@ class LatexParser {
 		let end = false;
 		do {
 			if (this.#consume(/\s+/)) this.#commit();
+			if (this.parseMacro(/[,.:;]/)) this.#commit();
+
+			const obj = this.parseObjects(!products);
+			if (obj) {
+				this.#commit();
+				if (products) products += '*';
+				products += obj;
+				continue;
+			}
 
 			const sum = this.#consume(/[+=-]/) || this.parseMacro('pm')?.map(() => '#pm#');
 			if (sum) {
 				this.#commit();
 				sums += `${products} ${sum} `;
 				products = '';
-				continue;
-			}
-
-			const obj = this.parseObject();
-			if (obj) {
-				this.#commit();
-				if (products) products += '*';
-				products += obj;
 				continue;
 			}
 
@@ -235,11 +252,12 @@ class LatexParser {
 	}
 
 	parseFunction() {
-		const fn = this.parseSymbol(true) || this.parseMacro(
+		const fnSym = this.parseSymbol(true);
+		const fn = fnSym || this.parseMacro(
 			/arc(?:cos|sin|tan)|csc|cosec|sec|(?:cos|sin|tan|cot)h?|exp|ln|sqrt|ker|det|arg|dim|gcd|argmin|argmax|plim/)
 			?.map(name => ({ cosec: 'csc' }[name] ?? name));
 		const sup = fn && this.parseExp();
-		const args = fn && LatexParser.#close(this.parseGroup(/(?:\\(?:left)?)?\(|{/));
+		const args = fn && LatexParser.#close(this.parseGroup(/(?:\\(?:left)?)?\(|{/) || (!fnSym && this.parseObjects()));
 		if (!args) {
 			this.#pop(+!!fn + +!!sup);
 			return false;
@@ -284,7 +302,7 @@ class LatexParser {
 	}
 
 	parseSymbol(fn = false) {
-		let sym = this.#consume(fn ? /(?![abeijkwxyz])[a-zA-Z]/ : /[a-zA-Z]/) || this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI/)?.name;
+		let sym = this.#consume(fn ? /(?![abeijkwxyz])[a-zA-Z]/ : /[a-zA-Z]/) || this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI|omega/)?.name;
 		if (!sym) return false;
 		const sub = this.parseSub();
 		if (sub) {
