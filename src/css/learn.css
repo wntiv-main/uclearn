@@ -12,6 +12,7 @@
 @import "code.css";
 @import "quiz.css";
 @import "quiz-nav.css";
+@import "echo.css";
 @import "injected.css";
 @import "../../node_modules/monaco-editor/min/vs/editor/editor.main.css";
 

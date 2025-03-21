@@ -1,0 +1,7 @@
+:root:root:root:root:root:root:root:root {
+	.echo360-iframe iframe {
+		width: 100%;
+		height: auto;
+		aspect-ratio: 640 / 420;
+	}
+}
