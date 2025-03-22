@@ -191,9 +191,9 @@
 		}
 	}
 
-	code:not(:empty, pre > code),
+	code:not(:empty, :has(> :not(span:empty)), pre > code),
 	pre:has(> code),
-	pre:not(:has(> :not(span))),
+	pre:not(:has(> :not(span:empty))),
 	.filter-ace-inline-output-text,
 	.que:is(.coderunner, .description) pre:not(.ace_tooltip pre) {
 		user-select: all;

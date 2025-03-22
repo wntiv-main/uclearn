@@ -65,7 +65,7 @@
 			margin: 0;
 		}
 
-		.content img {
+		.content img:not([width], [height]) {
 			max-width: 100%;
 			width: auto;
 			height: auto;
@@ -100,6 +100,7 @@
 
 			table {
 				height: 1px;
+				display: table;
 			}
 
 			tr {
@@ -192,7 +193,7 @@
 		padding: var(--uclearn-radius);
 		float: inline-end;
 		text-align: end;
-		z-index: 1;
+		z-index: 10;
 		width: max-content;
 		position: sticky;
 		top: var(--uclearn-nav-height);

@@ -679,8 +679,27 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.unread,
 	.unread .row.header,
 	.filter-ace-inline-output-error,
+	:is(.path-grade-report-user, .grade-report-user) .user-report-container,
+	:is(.path-grade-report-user, .grade-report-user)
+		.user-report-container
+		:is(th, td),
 	.drawer {
 		background-color: transparent;
+	}
+
+	.notifyproblem {
+		background-color: color-mix(
+			in srgb,
+			currentColor 20%,
+			var(--uclearn-translucent-bg) 80%
+		);
+
+		border-radius: var(--uclearn-radius);
+		padding: var(--uclearn-radius);
+
+		> * {
+			color: var(--uclearn-foreground);
+		}
 	}
 
 	.coderunner-test-results tr:has(> td:not(:empty)):nth-of-type(odd) {
@@ -730,6 +749,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.dimmed_text,
 	pre,
 	.MathJax_MenuDisabled,
+	.text-body,
 	.text-muted {
 		color: var(--uclearn-foreground-muted) !important;
 	}
@@ -738,6 +758,14 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		color: var(--uclearn-foreground-muted);
 		border-color: var(--uclearn-foreground-muted);
 		border-radius: 5px;
+	}
+
+	pre,
+	code {
+		padding: 0;
+		border-radius: 0;
+		background-color: transparent;
+		overflow: visible;
 	}
 
 	.course-section .section-summary-activities .icon,
