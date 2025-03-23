@@ -18,8 +18,31 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		background-color: transparent;
 	} */
 
-	.formulation [style*="background"] {
+	/* .formulation [style*="background"] {
 		background-color: transparent !important;
+	} */
+
+	#crui-survey-form {
+		background-clip: text;
+
+		textarea {
+			background-clip: text;
+			box-shadow: inset 0 0 0 100vmax var(--uclearn-translucent-bg);
+			border: 1px solid currentColor;
+			border-radius: var(--uclearn-radius);
+			padding: calc(var(--uclearn-radius) / 2);
+			outline: none;
+			transition: box-shadow var(--uclearn-transition-short);
+
+			&:focus-visible {
+				box-shadow: inset 0 0 0 100vmax var(--uclearn-translucent-bg),
+					var(--uclearn-focus-shadow);
+			}
+
+			.ui_wrapper:has(&) {
+				overflow: visible !important;
+			}
+		}
 	}
 
 	p:has(+ .stackprtfeedback, + .stackinputfeedback ~ .stackprtfeedback) {
@@ -557,6 +580,13 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		&:is(:focus-visible, .focus) {
 			box-shadow: var(--uclearn-focus-shadow);
 		}
+	}
+
+	.sr-only-focusable {
+		background-color: var(--uclearn-translucent-bg);
+		backdrop-filter: var(--uclearn-bg-effect);
+		border-radius: var(--uclearn-radius);
+		inset: 0.5rem auto auto 0.5rem;
 	}
 
 	body {

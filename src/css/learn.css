@@ -95,7 +95,7 @@
 		img[src^="https://learn.canterbury.ac.nz/pix/"]
 		{
 			filter: var(--uclearn-translucent-filter) invert(1)
-				hue-rotate(180deg);
+				hue-rotate(180deg) saturate(7);
 		}
 
 		.que :is(img, canvas),
@@ -103,7 +103,7 @@
 		iframe[title*="JSXGraph" i],
 		.video-js .vjs-tech {
 			filter: var(--uclearn-translucent-filter) invert(1)
-				hue-rotate(180deg);
+				hue-rotate(180deg) saturate(7);
 		}
 
 		.navbar .logo,
@@ -111,10 +111,10 @@
 		img.icon,
 		#logoimage,
 		.questionflagimage {
-			filter: invert(1) hue-rotate(180deg);
+			filter: invert(1) hue-rotate(180deg) saturate(7);
 		}
 		.activityicon {
-			filter: invert(1) hue-rotate(180deg) !important;
+			filter: invert(1) hue-rotate(180deg) saturate(7) !important;
 		}
 
 		img[src$="/u/f1"] {

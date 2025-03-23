@@ -11,6 +11,7 @@
 	.message-app :is(.view-overview-body, [data-region="view-contacts"]) .overview-section-toggle,
 	.block-add.btn,
 	.custom-select,
+	.que select,
 	/* .activity, */
 	.closewidget .btn-link,
 	.message-app [data-route="view-contacts"],
@@ -44,6 +45,7 @@
 	:is(
 			.block-add.btn,
 			.custom-select,
+			.que select,
 			.closewidget .btn-link,
 			.message-app [data-route="view-contacts"],
 			.moodle-dialogue-base .closebutton,
@@ -51,7 +53,8 @@
 			#__uclearn-jax-options button,
 			.btn-icon
 		):focus-visible {
-		box-shadow: inset 0 0 0 100vmax var(--uclearn-background-tint),
+		box-shadow: var(--uclearn-pre-shadow, /**/) inset 0 0 0 100vmax
+				var(--uclearn-background-tint),
 			var(--uclearn-focus-shadow) !important;
 	}
 

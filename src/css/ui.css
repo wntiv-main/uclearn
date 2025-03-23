@@ -219,9 +219,28 @@
 		}
 	}
 
-	.custom-select {
+	.que input:is(:not([type]), [type="text"], [type="number"]) {
+		background-color: var(--uclearn-translucent-bg);
+		border: 1px solid currentColor;
+		border-radius: var(--uclearn-radius);
+		padding: calc(var(--uclearn-radius) / 2);
+		outline: none;
+		transition: box-shadow var(--uclearn-transition-short);
+
+		&:focus-visible {
+			box-shadow: var(--uclearn-focus-shadow);
+		}
+	}
+
+	.custom-select,
+	.que select {
+		--uclearn-pre-shadow: inset 0 0 0 100vmax var(--uclearn-translucent-bg),
+			/**/;
 		background-color: var(--uclearn-background) !important;
 		background-clip: text;
+		border: 1px solid currentColor;
+		border-radius: var(--uclearn-radius);
+		padding: calc(var(--uclearn-radius) / 2);
 	}
 
 	/* Dropdowns */

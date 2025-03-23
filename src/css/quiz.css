@@ -177,6 +177,7 @@
 		table {
 			display: block;
 			overflow-x: auto;
+			max-width: fit-content;
 		}
 	}
 
