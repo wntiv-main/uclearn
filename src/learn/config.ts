@@ -467,6 +467,7 @@ export async function initConfig() {
 	onPostHydrate(installButton);
 	installButton();
 	if (!configCache.hasSeenHelpMenu) {
+		await getRequire(); // Or else modal errors
 		await showHelpModal();
 		const store = await uclearnDB.openStore('userConfig', 'readwrite');
 		store.put({ key: 'hasSeenHelpMenu', value: true });
