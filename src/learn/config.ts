@@ -465,7 +465,6 @@ export async function initConfig() {
 			.querySelector('#user-action-menu a[href*="preferences"]')
 			?.before(settingsButton, helpButton);
 	onPostHydrate(installButton);
-	installButton();
 	if (!configCache.hasSeenHelpMenu) {
 		await getRequire(); // Or else modal errors
 		await showHelpModal();

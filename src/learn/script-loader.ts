@@ -45,6 +45,7 @@ export async function execScript(script: HTMLScriptElement | null, content: stri
 		} else {
 			return new Promise<void>(res => {
 				newScript.addEventListener('load', () => res());
+				newScript.addEventListener('error', () => res());
 				if (script) script.replaceWith(newScript);
 				else document.head.append(newScript);
 			}).then(() =>
@@ -58,6 +59,7 @@ export async function execScript(script: HTMLScriptElement | null, content: stri
 		} else {
 			return new Promise<void>(res => {
 				newScript.addEventListener('load', () => res());
+				newScript.addEventListener('error', () => res());
 				if (script) script.replaceWith(newScript);
 				else document.head.append(newScript);
 			});

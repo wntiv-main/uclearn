@@ -91,7 +91,8 @@ function onSetLanguage(mode: string | Ace.Ace.SyntaxMode, editor: Ace.Ace.Editor
 
 export async function patchAceEditor() {
 	const ace = await getAce();
-	onPostHydrate(async () => {
+	onPostHydrate(async (first) => {
+		if (first) return;
 		// TODO: only do if known ace editors on page
 		window.aceInlineCodeHighlightingDone &&= false;
 		window.aceInlineCodeInteractiveDone &&= false;

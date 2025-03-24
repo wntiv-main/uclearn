@@ -13,7 +13,7 @@ import { contentTransformer } from './html-patcher';
 let hydrationController: AbortController | null = null;
 
 const preHydrateHooks: (() => void)[] = [];
-const postHydrateHooks: (() => void)[] = [
+const postHydrateHooks: ((first: boolean) => void)[] = [
 	// Quiz timer needs restart
 	() => { try { window.M?.mod_quiz?.timer?.update(); } catch {/* ignore */ } },
 	() => {
@@ -21,10 +21,11 @@ const postHydrateHooks: (() => void)[] = [
 			btn.removeAttribute('disabled');
 		}
 	},
+	() => window.dispatchEvent(new Event("load")),
 ];
 
-export const onPreHydrate = Array.prototype.push.bind(preHydrateHooks);
-export const onPostHydrate = Array.prototype.push.bind(postHydrateHooks);
+export const onPreHydrate = Array.prototype.push.bind(preHydrateHooks) as (...items: typeof preHydrateHooks) => void;
+export const onPostHydrate = Array.prototype.push.bind(postHydrateHooks) as (...items: typeof postHydrateHooks) => void;
 
 type HydrationHint = [
 	| string
@@ -144,7 +145,7 @@ async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hy
 			...config,
 		});
 	}
-	for (const hook of postHydrateHooks) try { hook(); } catch (e) { console.error('Error in post-hydrate hook', e); }
+	for (const hook of postHydrateHooks) try { hook(false); } catch (e) { console.error('Error in post-hydrate hook', e); }
 	// document.querySelector("#mod_quiz_navblock .thispage")?.scrollIntoView({
 	// 	behavior: 'smooth',
 	// 	block: 'center',
@@ -372,4 +373,5 @@ export async function initNavigator() {
 
 export async function initialPageLoad() {
 	await initDocumentParts();
+	for (const hook of postHydrateHooks) try { hook(true); } catch (e) { console.error('Error in post-hydrate hook', e); }
 }
