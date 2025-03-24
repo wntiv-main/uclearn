@@ -94,7 +94,7 @@
 
 	/* Tabstrip */
 
-	.multiblock-tabbed-list .nav-link {
+	.multiblock-tabbed-list .nav-link, .ui-tabs .ui-tabs-nav li {
 		--uclearn-bg-color: transparent;
 		position: relative;
 		border-radius: var(--uclearn-radius) var(--uclearn-radius) 0 0;
@@ -134,7 +134,7 @@
 				border-radius var(--uclearn-transition-short);
 		}
 
-		&:is(:hover, :focus-visible, .focus):not(:active, .active) {
+		&:is(:hover, :focus-visible, .focus):not(:active, .active, .ui-state-active) {
 			--uclearn-bg-color: var(--uclearn-hover-tint);
 			z-index: 1;
 
@@ -169,8 +169,8 @@
 			}
 		}
 
-		&:is(:active, .active) + &:is(:hover, :focus-visible, .focus),
-		.nav-item:has(> &:is(:active, .active))
+		&:is(:active, .active, .ui-state-active) + &:is(:hover, :focus-visible, .focus),
+		.nav-item:has(> &:is(:active, .active, .ui-state-active))
 			+ .nav-item
 			> &:is(:hover, :focus-visible, .focus) {
 			border-top-left-radius: 0;
@@ -182,8 +182,8 @@
 			}
 		}
 
-		&:is(:hover, :focus-visible, .focus):has(+ &:is(:active, .active)),
-		.nav-item:has(+ .nav-item > &:is(:active, .active))
+		&:is(:hover, :focus-visible, .focus):has(+ &:is(:active, .active, .ui-state-active)),
+		.nav-item:has(+ .nav-item > &:is(:active, .active, .ui-state-active))
 			> &:is(:hover, :focus-visible, .focus) {
 			border-top-right-radius: 0;
 			border-bottom-right-radius: var(--uclearn-radius);
@@ -194,7 +194,7 @@
 			}
 		}
 
-		&:is(:active, .active) {
+		&:is(:active, .active, .ui-state-active) {
 			--uclearn-bg-color: var(--uclearn-active-tint);
 			z-index: 2;
 			color: var(--uclearn-foreground);

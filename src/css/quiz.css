@@ -244,4 +244,8 @@
 			--uclearn-accent-color: var(--uclearn-color-error);
 		}
 	}
+
+	.path-mod-assign .submissionnotgraded {
+		color: color-mix(in srgb, var(--uclearn-color-warning) 30%, var(--uclearn-foreground) 70%);
+	}
 }

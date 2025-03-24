@@ -393,4 +393,36 @@
 			border: none;
 		}
 	}
+
+	.ui-widget-content {
+		border: none;
+		background-color: transparent;
+		color: inherit;
+	}
+
+	.ui-widget.ui-widget-content {
+		border: 1px solid currentColor;
+		border-radius: var(--uclearn-radius);
+		padding: 0;
+		overflow: hidden;
+
+		.ui-widget-content {
+			padding: calc(var(--uclearn-radius) / 2);
+		}
+	}
+
+	.ui-tabs .ui-tabs-nav {
+		color: inherit;
+		background-color: transparent;
+		border-bottom: 1px solid currentColor;
+		display: flex;
+		overflow: auto hidden;
+		padding-inline: var(--uclearn-radius);
+		scrollbar-width: thin;
+
+		li {
+			margin: 0;
+			border: none;
+		}
+	}
 }
