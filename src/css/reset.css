@@ -772,8 +772,24 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	:is(#page-question-type-coderunner, .que.coderunner)
 		:is(.coderunner-test-results, .coderunnerexamples)
 		:is(td, th),
+	.generaltable :is(td, th),
+	.path-mod .activity-information .completion-info,
 	.popover-header {
 		border-color: currentColor;
+	}
+
+	.quizattempt:empty {
+		display: none;
+	}
+
+	.list-unstyled {
+		margin: 0;
+		gap: 0.5rem;
+
+		> li {
+			padding: 0 !important;
+			margin: 0 !important;
+		}
 	}
 
 	#page .main-inner {

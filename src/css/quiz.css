@@ -37,13 +37,31 @@
 		color: inherit;
 		background-color: color-mix(
 			in srgb,
-			var(--uclearn-accent-color) 30%,
-			var(--uclearn-translucent-bg)
+			var(--uclearn-accent-color) 20%,
+			var(--uclearn-translucent-bg) 80%
 		);
 		mix-blend-mode: normal;
+		padding: 0.4rem 1ch;
+		line-height: 1.2em;
 
 		&.alert-success {
 			--uclearn-accent-color: var(--uclearn-color-success);
+		}
+	}
+
+	.activity-dates {
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: max-content;
+		column-gap: 1ch;
+
+		> div {
+			display: contents;
+		}
+
+		strong {
+			grid-column: 1;
+			justify-self: end;
 		}
 	}
 
@@ -246,6 +264,10 @@
 	}
 
 	.path-mod-assign .submissionnotgraded {
-		color: color-mix(in srgb, var(--uclearn-color-warning) 30%, var(--uclearn-foreground) 70%);
+		color: color-mix(
+			in srgb,
+			var(--uclearn-color-warning) 30%,
+			var(--uclearn-foreground) 70%
+		);
 	}
 }
