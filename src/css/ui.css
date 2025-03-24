@@ -114,6 +114,24 @@
 		}
 	}
 
+	#ek-modal {
+		background-color: var(--uclearn-translucent-bg);
+		backdrop-filter: var(--uclearn-bg-effect);
+
+		.ek-modal-content {
+			background-color: transparent;
+		}
+
+		.ek-modal-header {
+			text-shadow: none;
+			color: inherit;
+		}
+
+		.ek-modal-body {
+			color: inherit;
+		}
+	}
+
 	/* Popover */
 
 	.popover .arrow,

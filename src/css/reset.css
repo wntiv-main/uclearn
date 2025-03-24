@@ -22,6 +22,15 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		background-color: transparent !important;
 	} */
 
+	#ek-modal-close {
+		background: transparent;
+		color: inherit;
+
+		&::before {
+			color: inherit;
+		}
+	}
+
 	#crui-survey-form {
 		background-clip: text;
 

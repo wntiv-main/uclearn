@@ -22,6 +22,7 @@
 	.navbar-brand,
 	.pagination .page-link,
 	#__uclearn-jax-options button,
+	#ek-modal-close,
 	.drawertoggle.btn {
 		--uclearn-background-tint: transparent;
 		background-color: transparent;
