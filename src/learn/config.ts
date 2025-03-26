@@ -190,7 +190,7 @@ const BG_IMAGES = [
 ];
 
 async function prepareConfigModal() {
-	const dialog = await moodleDialog;
+	const Dialog = await moodleDialog;
 	const form = document.createElement("form");
 	form.id = 'uclearn-settings-form';
 	const backgroundImages = document.createElement('fieldset');
@@ -358,14 +358,16 @@ async function prepareConfigModal() {
 	cssFieldLabel.textContent = 'User CSS';
 	cssField.append(cssFieldLabel, cssEditorContainer);
 	form.append(backgroundImages, colorTheme, cssField);
-	return new dialog({
+	const dialog = new Dialog({
 		headerContent: 'MooMo Settings',
 		bodyContent: (await getYUIInstance()).one(form),
 		draggable: true,
 		center: true,
-		modal: true,
 		width: null,
 	});
+	dialog.applyAndTrapFocus = () => { };
+	dialog.trapFocus = () => { };
+	return dialog;
 }
 
 type MonacoConfig = NonNullable<Parameters<typeof monaco.editor.create>[1]>;
