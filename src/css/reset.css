@@ -861,4 +861,21 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.pagelayout-login #page {
 		background: none;
 	}
+
+	.icon {
+		margin: 0;
+	}
+
+	.courseindex .courseindex-item .completioninfo {
+		min-width: 0;
+		padding-inline: 0.2rem;
+	}
+
+	.dropdown-item {
+		column-gap: 0.5rem;
+
+		.icon {
+			margin-inline: -0.3rem;
+		}
+	}
 }

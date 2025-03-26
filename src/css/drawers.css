@@ -222,7 +222,7 @@
 			border: none;
 			border-radius: 0;
 			align-items: center;
-			padding-block: 0;
+			padding: 0 0.6rem;
 
 			a,
 			[tabindex] {
@@ -250,8 +250,7 @@
 				padding-left: calc(3px + 0.5rem);
 			}
 
-			> :has(+ .courseindex-item-content),
-			> :last-child:not(.courseindex-item-content) {
+			> :not(.courseindex-chevron) {
 				padding-right: calc(3px + 0.5rem);
 			}
 		}
