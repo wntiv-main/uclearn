@@ -170,6 +170,7 @@
 			position: fixed;
 			inset: auto;
 			pointer-events: all;
+			z-index: 15;
 
 			&.drawer-right-toggle {
 				justify-self: end;
