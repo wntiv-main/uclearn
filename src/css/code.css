@@ -207,6 +207,8 @@
 			currentColor 50%,
 			var(--uclearn-color-code) 50%
 		) !important;
+		overflow: auto;
+		scrollbar-color: var(--uclearn-foreground-muted) transparent;
 	}
 
 	.ace_tooltip {
