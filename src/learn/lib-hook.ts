@@ -171,6 +171,11 @@ function patchDefine(define: RequireDefine) {
 								const cursor = e.editor.selection.getCursor();
 								const gap: Gap = that.findCursorGap(cursor);
 								console.log(e);
+								if (e.command.name === 'startAutocomplete'
+									|| e.command.name === 'Down'
+									|| e.command.name === 'Up'
+									|| e.command.name === 'Tab'
+									|| e.command.name === 'Return') return;
 								if (e.command.name?.startsWith('select')
 									&& e.command.name !== 'selectall') {
 									const range = e.editor.getSelectionRange();
@@ -192,7 +197,10 @@ function patchDefine(define: RequireDefine) {
 										if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
 									}
 								}
-								if (e.editor.curOp && (e.editor.curOp as { command?: { name?: string; }; }).command?.name === 'insertMatch') {
+								const operation = e.editor.curOp && (e.editor.curOp as { command?: { name?: string; }; }).command;
+								if (operation?.name === 'insertMatch'
+									|| operation?.name === 'Tab'
+									|| operation?.name === 'Return') {
 									const start = (e.editor.curOp as { selectionBefore: Ace.Range; }).selectionBefore.start;
 									const end = e.editor.selection.getCursor();
 									for (let i = start.column; i > end.column; i--) cb({
