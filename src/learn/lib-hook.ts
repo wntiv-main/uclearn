@@ -5,7 +5,7 @@ import type UCModalRegistry from './ucinterfaces/ModalRegistry';
 import type UCModalEvents from './ucinterfaces/ModalEvents';
 import type UCToast from './ucinterfaces/Toast';
 import { maybeUnwrap, type MapType, type MaybeUnwrap } from "../global/util";
-import { getRemappedName, tailHook } from "./patch";
+import { getRemappedName, patch, patchT, tailHook, tailHookLocals } from "./patch";
 import { onPreHydrate } from "./navigation";
 import type monaco from "monaco-editor";
 
@@ -39,6 +39,57 @@ declare global {
 	}
 }
 
+type AceGapfillerUi = object;
+type AceGapfillerUiCtor = { new(): AceGapfillerUi, prototype: AceGapfillerUi; };
+type GapPos = {
+	row: number;
+	column: number;
+};
+type Gap = {
+	textSize: number;
+	range: Ace.Range;
+	// 	Gap.prototype.cursorInGap = function (cursor) {
+	// 	return cursor.row >= this.range.start.row && cursor.column >= this.range.start.column && cursor.row <= this.range.end.row && cursor.column <= this.range.end.column;
+	// }
+	// 	,
+	// 	Gap.prototype.getWidth = function () {
+	// 		return this.range.end.column - this.range.start.column;
+	// 	}
+	// 	,
+	// 	Gap.prototype.changeWidth = function (gaps, delta) {
+	// 		this.range.end.column += delta;
+	// 		for (let i = 0; i < gaps.length; i++) {
+	// 			let other = gaps[i];
+	// 			other.range.start.row === this.range.start.row && other.range.start.column > this.range.start.column && (other.range.start.column += delta,
+	// 				other.range.end.column += delta);
+	// 		}
+	// 		this.editor.$onChangeBackMarker(),
+	// 			this.editor.$onChangeFrontMarker();
+	// 	}
+	// 	,
+	insertChar(gaps: Gap[], pos: GapPos, char: string): void;
+	// 	,
+	// 	Gap.prototype.deleteChar = function (gaps, pos) {
+	// 		this.textSize -= 1,
+	// 			this.editor.session.remove(new Range(pos.row, pos.column, pos.row, pos.column + 1)),
+	// 			this.textSize >= this.minWidth ? this.changeWidth(gaps, -1) : this.editor.session.insert({
+	// 				row: pos.row,
+	// 				column: this.range.end.column - 1
+	// 			}, " ");
+	// 	}
+	// 	,
+	// 	Gap.prototype.deleteRange = function (gaps, start, end) {
+	// 		for (let i = start; i < end; i++)
+	// 			start < this.range.start.column + this.textSize && this.deleteChar(gaps, {
+	// 				row: this.range.start.row,
+	// 				column: start
+	// 			});
+	// 	}
+	insertText(gaps: Gap[], start: number, text: string): void;
+	getText(): string;
+};
+type GapCtor = { new(editor: Ace.Editor, row: number, column: number, minWidth: number, maxWidth?: number): Gap, prototype: Gap; };
+
 type ModuleTypesMap = {
 	"media_videojs/video-lazy": typeof VideoJS;
 	"core/modal_registry": UCModalRegistry;
@@ -52,6 +103,9 @@ type ModuleTypesMap = {
 		init(userid: number, root: Element): void;
 	};
 	'vs/editor/editor.main': null;
+	'qtype_coderunner/ui_ace_gapfiller': {
+		Constructor: AceGapfillerUiCtor;
+	};
 };
 
 export async function requireModule<T extends (keyof ModuleTypesMap)[]>(...deps: T) {
@@ -95,6 +149,95 @@ function patchDefine(define: RequireDefine) {
 						() => { onPreHydrate(() => { visibleCoursesId = null; }); },
 						{ [getRemappedName(() => onPreHydrate)]: onPreHydrate },
 						`<module init: ${name}>`,
+					);
+					break;
+				}
+				case 'qtype_coderunner/ui_ace_gapfiller': {
+					ready = tailHookLocals(
+						ready,
+						['Gap'],
+						(Gap: GapCtor) => {
+							const _insert = Gap.prototype.insertChar;
+							Gap.prototype.insertChar = function (gaps, pos, char) {
+								if (char.length !== 1) return this.insertText(gaps, pos.column, char);
+								return _insert.call(this, gaps, pos, char);
+							};
+						},
+						{ patch },
+						undefined,
+						src => src.replace(/editor\.commands\.on\(['"]exec['"],\s*/,
+							`$&(${(cb: Ace.Ace.execEventHandler): Ace.Ace.execEventHandler => e => {
+								const that = eval('t');
+								const cursor = e.editor.selection.getCursor();
+								const gap: Gap = that.findCursorGap(cursor);
+								console.log(e);
+								if (e.command.name?.startsWith('select')
+									&& e.command.name !== 'selectall') {
+									const range = e.editor.getSelectionRange();
+									const target: Ace.Ace.Point | null = e.command.name === 'selectleft' ? { row: cursor.row, column: cursor.column - 1 }
+										: e.command.name === 'selectright' ? { row: cursor.row, column: cursor.column + 1 }
+											: e.command.name === 'selectup' ? { row: cursor.row - 1, column: cursor.column }
+												: e.command.name === 'selectdown' ? { row: cursor.row + 1, column: cursor.column } : null;
+
+									if (!gap || !gap.range.containsRange(range) || (target && gap.range.containsRange(range) && gap.range.contains(target.row, target.column)))
+										return;
+									if (e.command.name === 'selectwordleft') {
+										e.editor.selection.selectWordLeft();
+										const c2 = e.editor.selection.getCursor();
+										if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
+									}
+									if (e.command.name === 'selectwordright') {
+										e.editor.selection.selectWordRight();
+										const c2 = e.editor.selection.getCursor();
+										if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
+									}
+								}
+								if (e.editor.curOp && (e.editor.curOp as { command?: { name?: string; }; }).command?.name === 'insertMatch') {
+									const start = (e.editor.curOp as { selectionBefore: Ace.Range; }).selectionBefore.start;
+									const end = e.editor.selection.getCursor();
+									for (let i = start.column; i > end.column; i--) cb({
+										editor: e.editor,
+										command: {
+											name: "del",
+										},
+										args: [],
+										preventDefault() { },
+										stopPropagation() { },
+									} as Parameters<typeof cb>[0]);
+								}
+								if (e.command.name === 'removewordleft') {
+									e.editor.selection.selectWordLeft();
+									const c2 = e.editor.selection.getCursor();
+									if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
+									if (!e.editor.selection.isEmpty()) {
+										cb({
+											editor: e.editor,
+											command: {
+												name: "del",
+											},
+											args: [],
+											preventDefault() { },
+											stopPropagation() { },
+										} as Parameters<typeof cb>[0]);
+									}
+								} if (e.command.name === 'removewordright') {
+									e.editor.selection.selectWordRight();
+									const c2 = e.editor.selection.getCursor();
+									if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
+									if (!e.editor.selection.isEmpty()) {
+										cb({
+											editor: e.editor,
+											command: {
+												name: "del",
+											},
+											args: [],
+											preventDefault() { },
+											stopPropagation() { },
+										} as Parameters<typeof cb>[0]);
+									}
+								}
+								cb(e);
+							}})`),
 					);
 					break;
 				}
@@ -188,4 +331,4 @@ export async function getAce() {
 		});
 	});
 	return _acePromise;
-}
+};;;;;;

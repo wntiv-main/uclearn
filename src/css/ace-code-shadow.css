@@ -35,7 +35,9 @@
 	}
 
 	.ace_editor:not(:has(.ace_gutter)) > .ace_scroller,
-	.ace_editor > .ace_gutter[style*="display"][style*="none"] + .ace_scroller {
+	.ace_editor:not(.ace_autocomplete)
+		> .ace_gutter[style*="display"][style*="none"]
+		+ .ace_scroller {
 		margin-inline: 0.5rem;
 
 		.ace_editor:has(> &) {

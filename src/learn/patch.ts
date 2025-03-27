@@ -12,13 +12,13 @@ declare global {
 
 window.__uclearn_debug_values = [];
 // const remapped_DEBUG_name = getRemappedName(() => DEBUG);
-export const patch: <A extends unknown[], R>(
+export const patchT: <T>() => <A extends unknown[], R>(
 	method: (...args: A) => R,
 	transformer: (code: string) => string,
 	locals?: { [key: string]: unknown; },
 	name?: string,
-	skipLog?: boolean) => (...args: A) => unknown
-	= DEBUG ? (method, transformer, locals = {}, name?, skipLog = false) => {
+	skipLog?: boolean) => (...args: A) => T
+	= () => DEBUG ? (method, transformer, locals = {}, name?, skipLog = false) => {
 		const oldContent = method.toString();
 		let newContent = transformer(oldContent);
 		if (newContent === oldContent) {
@@ -34,17 +34,21 @@ export const patch: <A extends unknown[], R>(
 		}
 		if (!/^[^{]*=>/.test(newContent)) newContent = newContent.replace(/^(\s*(?:async\s+)?)(?=\w+)(?!function)/, "$1function ");
 		const localNames = Object.keys(locals);
-		// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: needed to match nothing
+		/* eslint-disable-next-line no-empty-character-class
+		*/// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: needed to match nothing
 		const localRx = localNames.length ? new RegExp(String.raw`(?<![(=!]\s*/.*?/)\b(${localNames.join('|')})\b(?=(?:['"]|[^'"][^'"]*['"])*)`, 'g') : /[]/g;
 		return new Function(...localNames.map(local => `$uc_${local}`), `return ${newContent.replaceAll(localRx, '$$uc_$1')};`)(...Object.values(locals));
 	} : (method, transformer, locals = {}) => {
 		let newContent = transformer(method.toString());
 		if (!/^[^{]*=>/.test(newContent)) newContent = newContent.replace(/^(\s*(?:async\s+)?)(?=\w+)(?!function)/, "$1function ");
 		const localNames = Object.keys(locals);
-		// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: needed to match nothing
+		/* eslint-disable-next-line no-empty-character-class
+		*/// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: needed to match nothing
 		const localRx = localNames.length ? new RegExp(String.raw`(?<![(=!]\s*/.*?/)\b(${localNames.join('|')})\b(?=(?:['"]|[^'"][^'"]*['"])*)`, 'g') : /[]/g;
 		return new Function(...localNames.map(local => `$uc_${local}`), `return ${newContent.replaceAll(localRx, '$$uc_$1')};`)(...Object.values(locals));
 	};
+
+export const patch = patchT<unknown>();
 
 export const patchObj = <A extends unknown[], R, T extends { [key in S]: (...args: A) => R }, S extends keyof T>(
 	obj: T,
@@ -83,4 +87,22 @@ export const tailHook = <T, R, A extends unknown[]>(func: (...args: A) => T, hoo
 		locals,
 		label
 	) as (...args: A) => R extends void ? T : R;
+};
+
+export const tailHookLocals = <T, R, A extends unknown[], B extends unknown[]>(
+	func: (...args: A) => T,
+	captureLocals: { [K in keyof B]: string },
+	hook: (...args: B) => R,
+	locals: { [key: string]: unknown; } = {},
+	label?: string,
+	transformer: (src: string) => string = x => x,
+) => {
+	const args = func.toString().match(ARGS_RX)?.groups?.args ?? '';
+	const content = `(${hook.toString()})(${captureLocals}, ${args});`;
+	return patch(
+		func,
+		src => transformer(src).replace(/\{([^]*)\}/, `{try{\n$1\n}finally{${content}}}`),
+		locals,
+		label
+	) as (...args: A) => R extends void | false | '' | 0 | null | undefined ? T : R;
 };
