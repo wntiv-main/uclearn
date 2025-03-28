@@ -722,8 +722,19 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	:is(.path-grade-report-user, .grade-report-user)
 		.user-report-container
 		:is(th, td),
+	.file-picker .fp-content,
+	.fp-iconview .fp-filename-field .fp-filename,
 	.drawer {
 		background-color: transparent;
+	}
+
+	.userinitials {
+		margin: 0;
+	}
+
+	.aabtn:has(> .userinitials:only-child) {
+		padding: calc(var(--uclearn-radius) / 2);
+		border-radius: 50%;
 	}
 
 	.notifyproblem {

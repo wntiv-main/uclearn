@@ -11,6 +11,7 @@
 	.message-app :is(.view-overview-body, [data-region="view-contacts"]) .overview-section-toggle,
 	.block-add.btn,
 	.custom-select,
+	select.form-control,
 	.que select,
 	/* .activity, */
 	.closewidget .btn-link,
@@ -46,6 +47,7 @@
 	:is(
 			.block-add.btn,
 			.custom-select,
+			select.form-control,
 			.que select,
 			.closewidget .btn-link,
 			.message-app [data-route="view-contacts"],
@@ -94,7 +96,8 @@
 
 	/* Tabstrip */
 
-	.multiblock-tabbed-list .nav-link, .ui-tabs .ui-tabs-nav li {
+	.multiblock-tabbed-list .nav-link,
+	.ui-tabs .ui-tabs-nav li {
 		--uclearn-bg-color: transparent;
 		position: relative;
 		border-radius: var(--uclearn-radius) var(--uclearn-radius) 0 0;
@@ -134,7 +137,11 @@
 				border-radius var(--uclearn-transition-short);
 		}
 
-		&:is(:hover, :focus-visible, .focus):not(:active, .active, .ui-state-active) {
+		&:is(:hover, :focus-visible, .focus):not(
+				:active,
+				.active,
+				.ui-state-active
+			) {
 			--uclearn-bg-color: var(--uclearn-hover-tint);
 			z-index: 1;
 
@@ -169,7 +176,8 @@
 			}
 		}
 
-		&:is(:active, .active, .ui-state-active) + &:is(:hover, :focus-visible, .focus),
+		&:is(:active, .active, .ui-state-active)
+			+ &:is(:hover, :focus-visible, .focus),
 		.nav-item:has(> &:is(:active, .active, .ui-state-active))
 			+ .nav-item
 			> &:is(:hover, :focus-visible, .focus) {
@@ -182,7 +190,9 @@
 			}
 		}
 
-		&:is(:hover, :focus-visible, .focus):has(+ &:is(:active, .active, .ui-state-active)),
+		&:is(:hover, :focus-visible, .focus):has(
+				+ &:is(:active, .active, .ui-state-active)
+			),
 		.nav-item:has(+ .nav-item > &:is(:active, .active, .ui-state-active))
 			> &:is(:hover, :focus-visible, .focus) {
 			border-top-right-radius: 0;
