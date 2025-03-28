@@ -68,23 +68,8 @@ type Gap = {
 	// 	}
 	// 	,
 	insertChar(gaps: Gap[], pos: GapPos, char: string): void;
-	// 	,
-	// 	Gap.prototype.deleteChar = function (gaps, pos) {
-	// 		this.textSize -= 1,
-	// 			this.editor.session.remove(new Range(pos.row, pos.column, pos.row, pos.column + 1)),
-	// 			this.textSize >= this.minWidth ? this.changeWidth(gaps, -1) : this.editor.session.insert({
-	// 				row: pos.row,
-	// 				column: this.range.end.column - 1
-	// 			}, " ");
-	// 	}
-	// 	,
-	// 	Gap.prototype.deleteRange = function (gaps, start, end) {
-	// 		for (let i = start; i < end; i++)
-	// 			start < this.range.start.column + this.textSize && this.deleteChar(gaps, {
-	// 				row: this.range.start.row,
-	// 				column: start
-	// 			});
-	// 	}
+	deleteChar(gaps: Gap[], pos: GapPos): void;
+	deleteRange(gaps: Gap[], start: number, end: number): void;
 	insertText(gaps: Gap[], start: number, text: string): void;
 	getText(): string;
 };
@@ -169,51 +154,79 @@ function patchDefine(define: RequireDefine) {
 							`$&(${(cb: Ace.Ace.execEventHandler): Ace.Ace.execEventHandler => e => {
 								const that = eval('t');
 								const cursor = e.editor.selection.getCursor();
+								const range = e.editor.getSelectionRange();
 								const gap: Gap = that.findCursorGap(cursor);
 								console.log(e);
-								if (e.command.name === 'startAutocomplete'
+								// Revert these to default behavior
+								if (gap && gap.range.containsRange(range) && (e.command.name === 'startAutocomplete'
 									|| e.command.name === 'Down'
 									|| e.command.name === 'Up'
 									|| e.command.name === 'Tab'
-									|| e.command.name === 'Return') return;
+									|| e.command.name === 'Return'
+									// || e.command.name === 'undo'
+									// || e.command.name === 'redo'
+								)) return;
+								// if (e.command.name === 'undo') {
+								// 	const manager = e.editor.session.getUndoManager();
+								// 	const deltas = manager.lastDeltas;
+								// 	// for (const delta of deltas ?? []) {
+								// 	// 	delta.
+								// 	// }
+								// 	e.editor.undo();
+								// }
+								if (gap && e.command.name === 'gotoright' && cursor.column >= gap.range.start.column + gap.textSize) {
+									if (gap.range.end.column + 1 >= e.editor.session.getLine(cursor.row).length) {
+										e.editor.moveCursorTo(cursor.row + 1, 0);
+										(e as Partial<Event>).preventDefault?.();
+										(e as Partial<Event>).stopPropagation?.();
+										return;
+									}
+								}
 								if (e.command.name?.startsWith('select')
 									&& e.command.name !== 'selectall') {
-									const range = e.editor.getSelectionRange();
 									const target: Ace.Ace.Point | null = e.command.name === 'selectleft' ? { row: cursor.row, column: cursor.column - 1 }
 										: e.command.name === 'selectright' ? { row: cursor.row, column: cursor.column + 1 }
 											: e.command.name === 'selectup' ? { row: cursor.row - 1, column: cursor.column }
 												: e.command.name === 'selectdown' ? { row: cursor.row + 1, column: cursor.column } : null;
-
-									if (!gap || !gap.range.containsRange(range) || (target && gap.range.containsRange(range) && gap.range.contains(target.row, target.column)))
+									if (gap && target && target.column > gap.range.start.column + gap.textSize)
+										target.column = gap.range.end.column + 1;
+									// Handle crossing over gap
+									if (gap && target && !gap.range.containsRange(range) && target.column >= e.editor.session.getLine(cursor.row).length) {
+										e.editor.selection.selectTo(target.row + 1, 0);
+										(e as Partial<Event>).preventDefault?.();
+										(e as Partial<Event>).stopPropagation?.();
+										return;
+									}
+									// Revert to default behavior if selection should be allowed
+									if (!gap || !gap.range.containsRange(range))
+										return;
+									// allow within-gap selection
+									if (target && gap.range.containsRange(range) && gap.range.contains(target.row, target.column))
 										return;
 									if (e.command.name === 'selectwordleft') {
+										// Select word, constrain to gap
 										e.editor.selection.selectWordLeft();
 										const c2 = e.editor.selection.getCursor();
 										if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
 									}
 									if (e.command.name === 'selectwordright') {
+										// Select word, constrain to gap
 										e.editor.selection.selectWordRight();
 										const c2 = e.editor.selection.getCursor();
 										if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
 									}
 								}
 								const operation = e.editor.curOp && (e.editor.curOp as { command?: { name?: string; }; }).command;
-								if (operation?.name === 'insertMatch'
-									|| operation?.name === 'Tab'
-									|| operation?.name === 'Return') {
+								if (gap && gap.range.containsRange(range)
+									&& (operation?.name === 'insertMatch'
+										|| operation?.name === 'Tab'
+										|| operation?.name === 'Return')) {
+									// Ensure gap stays up-to-date
 									const start = (e.editor.curOp as { selectionBefore: Ace.Range; }).selectionBefore.start;
-									const end = e.editor.selection.getCursor();
-									for (let i = start.column; i > end.column; i--) cb({
-										editor: e.editor,
-										command: {
-											name: "del",
-										},
-										args: [],
-										preventDefault() { },
-										stopPropagation() { },
-									} as Parameters<typeof cb>[0]);
+									gap.textSize -= start.column - cursor.column;
 								}
-								if (e.command.name === 'removewordleft') {
+								if (gap && gap.range.containsRange(range) && e.command.name === 'removewordleft') {
+									// Select word and trigger remove
 									e.editor.selection.selectWordLeft();
 									const c2 = e.editor.selection.getCursor();
 									if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
@@ -228,7 +241,9 @@ function patchDefine(define: RequireDefine) {
 											stopPropagation() { },
 										} as Parameters<typeof cb>[0]);
 									}
-								} if (e.command.name === 'removewordright') {
+								}
+								if (gap && gap.range.containsRange(range) && e.command.name === 'removewordright') {
+									// Select word and trigger remove
 									e.editor.selection.selectWordRight();
 									const c2 = e.editor.selection.getCursor();
 									if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
@@ -244,6 +259,7 @@ function patchDefine(define: RequireDefine) {
 										} as Parameters<typeof cb>[0]);
 									}
 								}
+								// Default behaviour
 								cb(e);
 							}})`),
 					);
