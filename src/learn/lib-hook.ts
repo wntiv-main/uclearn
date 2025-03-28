@@ -5,7 +5,7 @@ import type UCModalRegistry from './ucinterfaces/ModalRegistry';
 import type UCModalEvents from './ucinterfaces/ModalEvents';
 import type UCToast from './ucinterfaces/Toast';
 import { maybeUnwrap, type MapType, type MaybeUnwrap } from "../global/util";
-import { getRemappedName, patch, patchT, tailHook, tailHookLocals } from "./patch";
+import { getRemappedName, patch, tailHook, tailHookLocals } from "./patch";
 import { onPreHydrate } from "./navigation";
 import type monaco from "monaco-editor";
 
