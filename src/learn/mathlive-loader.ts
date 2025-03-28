@@ -357,7 +357,7 @@ class LatexParser {
 			sym += `_${sub}`;
 			this.#commit();
 		}
-		if (sym.startsWith('\\')) sym = { '\\exponentialE': 'e', 'imaginaryI': 'i' }[sym] ?? sym.slice(1);
+		if (sym.startsWith('\\')) sym = { 'exponentialE': 'e', 'imaginaryI': 'i' }[sym] ?? sym.slice(1);
 		return sym;
 	}
 }
