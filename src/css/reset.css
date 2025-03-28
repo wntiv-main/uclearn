@@ -90,6 +90,10 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		background-color: transparent;
 	}
 
+	.formulation a {
+		color: var(--uclearn-color-link) !important;
+	}
+
 	hr {
 		border-color: rgba(from currentColor r g b / 0.1);
 	}
@@ -875,6 +879,10 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 
 	.icon {
 		margin: 0;
+	}
+
+	.courseindex-item {
+		color: inherit;
 	}
 
 	.courseindex .courseindex-item .completioninfo {
