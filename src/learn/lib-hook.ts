@@ -176,7 +176,7 @@ function patchDefine(define: RequireDefine) {
 								// }
 								if (gap && e.command.name === 'gotoright' && cursor.column >= gap.range.start.column + gap.textSize) {
 									if (gap.range.end.column + 1 >= e.editor.session.getLine(cursor.row).length) {
-										e.editor.moveCursorTo(cursor.row + 1, 0);
+										e.editor.selection.moveTo(cursor.row + 1, 0);
 										(e as Partial<Event>).preventDefault?.();
 										(e as Partial<Event>).stopPropagation?.();
 										return;
