@@ -824,6 +824,10 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		color: var(--uclearn-foreground-muted) !important;
 	}
 
+	caption {
+		color: var(--uclearn-foreground-muted);
+	}
+
 	blockquote {
 		color: var(--uclearn-foreground-muted);
 		border-color: var(--uclearn-foreground-muted);
