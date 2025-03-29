@@ -75,8 +75,17 @@
 		}
 	}
 
+	.scratchpad-contols {
+		border: none !important;
+	}
+
 	[id*="_answer_run-output-text"] {
 		background-color: transparent !important;
+		border: none !important;
+		width: auto !important;
+		max-width: none !important;
+		padding: 0 !important;
+		margin-block: 0.4ch !important;
 	}
 
 	.coderunner-test-results td {
