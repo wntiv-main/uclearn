@@ -5,9 +5,10 @@ import type UCModalRegistry from './ucinterfaces/ModalRegistry';
 import type UCModalEvents from './ucinterfaces/ModalEvents';
 import type UCToast from './ucinterfaces/Toast';
 import { maybeUnwrap, type MapType, type MaybeUnwrap } from "../global/util";
-import { getRemappedName, patch, tailHook, tailHookLocals } from "./patch";
+import { getRemappedName, tailHook } from "./patch";
 import { onPreHydrate } from "./navigation";
 import type monaco from "monaco-editor";
+import { AceGapfillerUiCtor } from "./ucinterfaces/ace-gapfiller-ui";
 
 let _require_promise: Promise<Require>;
 export async function getRequire() {
@@ -38,42 +39,6 @@ declare global {
 		monaco?: typeof monaco;
 	}
 }
-
-type AceGapfillerUi = object;
-type AceGapfillerUiCtor = { new(): AceGapfillerUi, prototype: AceGapfillerUi; };
-type GapPos = {
-	row: number;
-	column: number;
-};
-type Gap = {
-	textSize: number;
-	range: Ace.Range;
-	// 	Gap.prototype.cursorInGap = function (cursor) {
-	// 	return cursor.row >= this.range.start.row && cursor.column >= this.range.start.column && cursor.row <= this.range.end.row && cursor.column <= this.range.end.column;
-	// }
-	// 	,
-	// 	Gap.prototype.getWidth = function () {
-	// 		return this.range.end.column - this.range.start.column;
-	// 	}
-	// 	,
-	// 	Gap.prototype.changeWidth = function (gaps, delta) {
-	// 		this.range.end.column += delta;
-	// 		for (let i = 0; i < gaps.length; i++) {
-	// 			let other = gaps[i];
-	// 			other.range.start.row === this.range.start.row && other.range.start.column > this.range.start.column && (other.range.start.column += delta,
-	// 				other.range.end.column += delta);
-	// 		}
-	// 		this.editor.$onChangeBackMarker(),
-	// 			this.editor.$onChangeFrontMarker();
-	// 	}
-	// 	,
-	insertChar(gaps: Gap[], pos: GapPos, char: string): void;
-	deleteChar(gaps: Gap[], pos: GapPos): void;
-	deleteRange(gaps: Gap[], start: number, end: number): void;
-	insertText(gaps: Gap[], start: number, text: string): void;
-	getText(): string;
-};
-type GapCtor = { new(editor: Ace.Editor, row: number, column: number, minWidth: number, maxWidth?: number): Gap, prototype: Gap; };
 
 type ModuleTypesMap = {
 	"media_videojs/video-lazy": typeof VideoJS;
@@ -113,6 +78,27 @@ type DefineArgs<K extends keyof ModuleTypesMap = keyof ModuleTypesMap, D extends
 	| [name: K, deps: D, (...deps: RequireFunctionDeps<D>) => ModuleTypesMap[K]]
 	| [name: K, () => ModuleTypesMap[K]];
 
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- typing stub
+declare let visibleCoursesId: string | null;
+
+export const REQUIREJS_PATCHES: {
+	[K in keyof ModuleTypesMap]?: <Deps extends (keyof ModuleTypesMap)[]>(
+		ready: (...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K],
+		deps: Deps,
+		name: K,
+	) => void | undefined | ((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])
+} = {
+	"block_recentlyaccessedcourses/main"(ready, _, name) {
+		return tailHook(
+			ready,
+			() => { onPreHydrate(() => { visibleCoursesId = null; }); },
+			{ [getRemappedName(() => onPreHydrate)]: onPreHydrate },
+			`<module init: ${name}>`,
+		);
+	}
+};
+
 function patchDefine(define: RequireDefine) {
 	return new Proxy(define, {
 		apply(target, thisArg, argArray) {
@@ -125,147 +111,7 @@ function patchDefine(define: RequireDefine) {
 				[name, ready] = argArray;
 				deps = [];
 			} else[name, deps, ready] = argArray;
-			switch (name) {
-				case "block_recentlyaccessedcourses/main": {
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars -- typing stub
-					let visibleCoursesId: string | null;
-					ready = tailHook(
-						ready,
-						() => { onPreHydrate(() => { visibleCoursesId = null; }); },
-						{ [getRemappedName(() => onPreHydrate)]: onPreHydrate },
-						`<module init: ${name}>`,
-					);
-					break;
-				}
-				case 'qtype_coderunner/ui_ace_gapfiller': {
-					ready = tailHookLocals(
-						ready,
-						['Gap'],
-						(Gap: GapCtor) => {
-							const _insert = Gap.prototype.insertChar;
-							Gap.prototype.insertChar = function (gaps, pos, char) {
-								if (char.length !== 1) return this.insertText(gaps, pos.column, char);
-								return _insert.call(this, gaps, pos, char);
-							};
-						},
-						{ patch },
-						undefined,
-						src => src.replace(/editor\.commands\.on\(['"]exec['"],\s*/,
-							`$&(${(cb: Ace.Ace.execEventHandler): Ace.Ace.execEventHandler => e => {
-								const that = eval('t');
-								const cursor = e.editor.selection.getCursor();
-								const range = e.editor.getSelectionRange();
-								const gap: Gap = that.findCursorGap(cursor);
-								console.log(e);
-								// Revert these to default behavior
-								if (gap && gap.range.containsRange(range) && (e.command.name === 'startAutocomplete'
-									|| e.command.name === 'Down'
-									|| e.command.name === 'Up'
-									|| e.command.name === 'Tab'
-									|| e.command.name === 'Return'
-									// || e.command.name === 'undo'
-									// || e.command.name === 'redo'
-								)) return;
-								// if (e.command.name === 'undo') {
-								// 	const manager = e.editor.session.getUndoManager();
-								// 	const deltas = manager.lastDeltas;
-								// 	// for (const delta of deltas ?? []) {
-								// 	// 	delta.
-								// 	// }
-								// 	e.editor.undo();
-								// }
-								if (gap && e.command.name === 'gotoright' && cursor.column >= gap.range.start.column + gap.textSize) {
-									if (gap.range.end.column + 1 >= e.editor.session.getLine(cursor.row).length) {
-										e.editor.selection.moveTo(cursor.row + 1, 0);
-										(e as Partial<Event>).preventDefault?.();
-										(e as Partial<Event>).stopPropagation?.();
-										return;
-									}
-								}
-								if (e.command.name?.startsWith('select')
-									&& e.command.name !== 'selectall') {
-									const target: Ace.Ace.Point | null = e.command.name === 'selectleft' ? { row: cursor.row, column: cursor.column - 1 }
-										: e.command.name === 'selectright' ? { row: cursor.row, column: cursor.column + 1 }
-											: e.command.name === 'selectup' ? { row: cursor.row - 1, column: cursor.column }
-												: e.command.name === 'selectdown' ? { row: cursor.row + 1, column: cursor.column } : null;
-									if (gap && target && target.column > gap.range.start.column + gap.textSize)
-										target.column = gap.range.end.column + 1;
-									// Handle crossing over gap
-									if (gap && target && !gap.range.containsRange(range) && target.column >= e.editor.session.getLine(cursor.row).length) {
-										e.editor.selection.selectTo(target.row + 1, 0);
-										(e as Partial<Event>).preventDefault?.();
-										(e as Partial<Event>).stopPropagation?.();
-										return;
-									}
-									// Revert to default behavior if selection should be allowed
-									if (!gap || !gap.range.containsRange(range))
-										return;
-									// allow within-gap selection
-									if (target && gap.range.containsRange(range) && gap.range.contains(target.row, target.column))
-										return;
-									if (e.command.name === 'selectwordleft') {
-										// Select word, constrain to gap
-										e.editor.selection.selectWordLeft();
-										const c2 = e.editor.selection.getCursor();
-										if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
-									}
-									if (e.command.name === 'selectwordright') {
-										// Select word, constrain to gap
-										e.editor.selection.selectWordRight();
-										const c2 = e.editor.selection.getCursor();
-										if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
-									}
-								}
-								const operation = e.editor.curOp && (e.editor.curOp as { command?: { name?: string; }; }).command;
-								if (gap && gap.range.containsRange(range)
-									&& (operation?.name === 'insertMatch'
-										|| operation?.name === 'Tab'
-										|| operation?.name === 'Return')) {
-									// Ensure gap stays up-to-date
-									const start = (e.editor.curOp as { selectionBefore: Ace.Range; }).selectionBefore.start;
-									gap.textSize -= start.column - cursor.column;
-								}
-								if (gap && gap.range.containsRange(range) && e.command.name === 'removewordleft') {
-									// Select word and trigger remove
-									e.editor.selection.selectWordLeft();
-									const c2 = e.editor.selection.getCursor();
-									if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
-									if (!e.editor.selection.isEmpty()) {
-										cb({
-											editor: e.editor,
-											command: {
-												name: "del",
-											},
-											args: [],
-											preventDefault() { },
-											stopPropagation() { },
-										} as Parameters<typeof cb>[0]);
-									}
-								}
-								if (gap && gap.range.containsRange(range) && e.command.name === 'removewordright') {
-									// Select word and trigger remove
-									e.editor.selection.selectWordRight();
-									const c2 = e.editor.selection.getCursor();
-									if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
-									if (!e.editor.selection.isEmpty()) {
-										cb({
-											editor: e.editor,
-											command: {
-												name: "del",
-											},
-											args: [],
-											preventDefault() { },
-											stopPropagation() { },
-										} as Parameters<typeof cb>[0]);
-									}
-								}
-								// Default behaviour
-								cb(e);
-							}})`),
-					);
-					break;
-				}
-			}
+			ready = REQUIREJS_PATCHES[name]?.(ready as never, deps, name as never) ?? ready;
 			return Reflect.apply(target, thisArg, [name, deps, ready]);
 		}
 	});
@@ -355,4 +201,4 @@ export async function getAce() {
 		});
 	});
 	return _acePromise;
-};;;;;;
+}

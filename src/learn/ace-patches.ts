@@ -4,8 +4,10 @@ import type { LanguageProvider } from "ace-linters";
 import { AceLanguageClient } from "ace-linters/build/ace-language-client";
 import { EXT_URL } from "./constants";
 import JSZip from "jszip";
-import { getAce, initAce } from "./lib-hook";
+import { getAce, initAce, REQUIREJS_PATCHES } from "./lib-hook";
 import { onPostHydrate } from "./navigation";
+import { tailHookLocals } from "./patch";
+import { Gap, GapCtor } from "./ucinterfaces/ace-gapfiller-ui";
 
 // declare module 'ace-code' {
 // 	const require: Require;
@@ -147,3 +149,131 @@ export async function patchAceEditor() {
 		}
 	});
 }
+
+REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLocals(
+	ready,
+	['Gap'],
+	(Gap: GapCtor) => {
+		// Tail hook to patch Gap prototype
+		const _insert = Gap.prototype.insertChar;
+		Gap.prototype.insertChar = function (gaps, pos, char) {
+			if (char.length !== 1) return this.insertText(gaps, pos.column, char);
+			return _insert.call(this, gaps, pos, char);
+		};
+	},
+	{},
+	undefined,
+	src => src.replace(/editor\.commands\.on\(['"]exec['"],\s*/,
+		`$&(${(cb: Ace.Ace.execEventHandler): Ace.Ace.execEventHandler => e => {
+			// Patch exec handler
+			const that = eval('t');
+			const cursor = e.editor.selection.getCursor();
+			const range = e.editor.getSelectionRange();
+			const gap: Gap = that.findCursorGap(cursor);
+			console.log(e);
+			// Revert these to default behavior
+			if (gap && gap.range.containsRange(range) && (e.command.name === 'startAutocomplete'
+				|| e.command.name === 'Down'
+				|| e.command.name === 'Up'
+				|| e.command.name === 'Tab'
+				|| e.command.name === 'Return'
+				// || e.command.name === 'undo'
+				// || e.command.name === 'redo'
+			)) return;
+			// if (e.command.name === 'undo') {
+			// 	const manager = e.editor.session.getUndoManager();
+			// 	const deltas = manager.lastDeltas;
+			// 	// for (const delta of deltas ?? []) {
+			// 	// 	delta.
+			// 	// }
+			// 	e.editor.undo();
+			// }
+			if (gap && e.command.name === 'gotoright' && cursor.column >= gap.range.start.column + gap.textSize) {
+				if (gap.range.end.column + 1 >= e.editor.session.getLine(cursor.row).length) {
+					e.editor.selection.moveTo(cursor.row + 1, 0);
+					(e as Partial<Event>).preventDefault?.();
+					(e as Partial<Event>).stopPropagation?.();
+					return;
+				}
+			}
+			if (e.command.name?.startsWith('select')
+				&& e.command.name !== 'selectall') {
+				const target: Ace.Ace.Point | null = e.command.name === 'selectleft' ? { row: cursor.row, column: cursor.column - 1 }
+					: e.command.name === 'selectright' ? { row: cursor.row, column: cursor.column + 1 }
+						: e.command.name === 'selectup' ? { row: cursor.row - 1, column: cursor.column }
+							: e.command.name === 'selectdown' ? { row: cursor.row + 1, column: cursor.column } : null;
+				if (gap && target && target.column > gap.range.start.column + gap.textSize)
+					target.column = gap.range.end.column + 1;
+				// Handle crossing over gap
+				if (gap && target && !gap.range.containsRange(range) && target.column >= e.editor.session.getLine(cursor.row).length) {
+					e.editor.selection.selectTo(target.row + 1, 0);
+					(e as Partial<Event>).preventDefault?.();
+					(e as Partial<Event>).stopPropagation?.();
+					return;
+				}
+				// Revert to default behavior if selection should be allowed
+				if (!gap || !gap.range.containsRange(range))
+					return;
+				// allow within-gap selection
+				if (target && gap.range.containsRange(range) && gap.range.contains(target.row, target.column))
+					return;
+				if (e.command.name === 'selectwordleft') {
+					// Select word, constrain to gap
+					e.editor.selection.selectWordLeft();
+					const c2 = e.editor.selection.getCursor();
+					if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
+				}
+				if (e.command.name === 'selectwordright') {
+					// Select word, constrain to gap
+					e.editor.selection.selectWordRight();
+					const c2 = e.editor.selection.getCursor();
+					if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
+				}
+			}
+			const operation = e.editor.curOp && (e.editor.curOp as { command?: { name?: string; }; }).command;
+			if (gap && gap.range.containsRange(range)
+				&& (operation?.name === 'insertMatch'
+					|| operation?.name === 'Tab'
+					|| operation?.name === 'Return')) {
+				// Ensure gap stays up-to-date
+				const start = (e.editor.curOp as { selectionBefore: Ace.Range; }).selectionBefore.start;
+				gap.textSize -= start.column - cursor.column;
+			}
+			if (gap && gap.range.containsRange(range) && e.command.name === 'removewordleft') {
+				// Select word and trigger remove
+				e.editor.selection.selectWordLeft();
+				const c2 = e.editor.selection.getCursor();
+				if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
+				if (!e.editor.selection.isEmpty()) {
+					cb({
+						editor: e.editor,
+						command: {
+							name: "del",
+						},
+						args: [],
+						preventDefault() { },
+						stopPropagation() { },
+					} as Parameters<typeof cb>[0]);
+				}
+			}
+			if (gap && gap.range.containsRange(range) && e.command.name === 'removewordright') {
+				// Select word and trigger remove
+				e.editor.selection.selectWordRight();
+				const c2 = e.editor.selection.getCursor();
+				if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
+				if (!e.editor.selection.isEmpty()) {
+					cb({
+						editor: e.editor,
+						command: {
+							name: "del",
+						},
+						args: [],
+						preventDefault() { },
+						stopPropagation() { },
+					} as Parameters<typeof cb>[0]);
+				}
+			}
+			// Default behaviour
+			cb(e);
+		}})`),
+);
