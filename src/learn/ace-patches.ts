@@ -180,15 +180,22 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 				// || e.command.name === 'undo'
 				// || e.command.name === 'redo'
 			)) return;
-			// if (e.command.name === 'undo') {
-			// 	const manager = e.editor.session.getUndoManager();
-			// 	const deltas = manager.lastDeltas;
-			// 	// for (const delta of deltas ?? []) {
-			// 	// 	delta.
-			// 	// }
-			// 	e.editor.undo();
-			// }
-			if (gap && e.command.name === 'gotoright' && cursor.column >= gap.range.start.column + gap.textSize) {
+			if (gap && e.command.name === 'undo') {
+				const manager = e.editor.session.getUndoManager();
+				const revision = manager.getRevision();
+				const oldSel = manager.getSelection(revision).value as unknown as Ace.Range;
+				const sel = manager.getSelection(revision + 1).value as unknown as Ace.Range;
+				if (/*deltas?.length*/manager.canUndo()) {
+					const delta = oldSel.end.column - sel.end.column;
+					console.log([...manager.selections], oldSel, '<=', sel, delta, gap.textSize, gap.minWidth);
+					e.editor.undo();
+					const oldSize = gap.textSize;
+					gap.textSize += delta;
+					if (Math.max(oldSize, gap.minWidth) !== Math.max(gap.textSize, gap.minWidth))
+						gap.changeWidth(that.gaps, Math.max(gap.textSize, gap.minWidth) - Math.max(oldSize, gap.minWidth));
+				}
+			}
+			if (gap && (e.command.name === 'gotoright' || e.command.name === 'gowordright') && cursor.column >= gap.range.start.column + gap.textSize) {
 				if (gap.range.end.column + 1 >= e.editor.session.getLine(cursor.row).length) {
 					e.editor.selection.moveTo(cursor.row + 1, 0);
 					(e as Partial<Event>).preventDefault?.();

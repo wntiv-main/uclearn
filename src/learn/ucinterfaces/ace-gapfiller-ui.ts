@@ -8,6 +8,7 @@ type GapPos = {
 	column: number;
 };
 export type Gap = {
+	readonly minWidth: number;
 	textSize: number;
 	range: Ace.Range;
 	cursorInGap(cursor: GapPos): boolean;
