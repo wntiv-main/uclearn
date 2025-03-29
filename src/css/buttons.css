@@ -315,6 +315,22 @@
 		}
 	}
 
+	[id$="scratchpad-btn"] {
+		column-gap: 0.5ch;
+		align-items: baseline;
+
+		:is(.collapsed-icon, .expanded-icon) {
+			/* margin-left: -0.25em; */
+			height: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			aspect-ratio: 1;
+			transform-origin: center;
+			padding: 0 !important;
+		}
+	}
+
 	/* List */
 
 	.list-group-item {
