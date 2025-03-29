@@ -177,23 +177,31 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 				|| e.command.name === 'Up'
 				|| e.command.name === 'Tab'
 				|| e.command.name === 'Return'
-				// || e.command.name === 'undo'
-				// || e.command.name === 'redo'
+				|| e.command.name === 'Esc'
 			)) return;
-			if (gap && e.command.name === 'undo') {
-				const manager = e.editor.session.getUndoManager();
+			const manager = e.editor.session.getUndoManager();
+			if ((e.command.name === 'undo' && manager.canUndo()) || (e.command.name === 'redo' && manager.canRedo())) {
+				const isFake = (gap: Gap, delta: Ace.Ace.Delta) => delta.lines.length === 1 && delta.lines[0] === ' ' && gap.range.start.column + gap.minWidth === delta.end.column;
+				if (e.command.name === 'redo') e.editor.redo();
 				const revision = manager.getRevision();
-				const oldSel = manager.getSelection(revision).value as unknown as Ace.Range;
-				const sel = manager.getSelection(revision + 1).value as unknown as Ace.Range;
-				if (/*deltas?.length*/manager.canUndo()) {
-					const delta = oldSel.end.column - sel.end.column;
-					console.log([...manager.selections], oldSel, '<=', sel, delta, gap.textSize, gap.minWidth);
-					e.editor.undo();
-					const oldSize = gap.textSize;
-					gap.textSize += delta;
-					if (Math.max(oldSize, gap.minWidth) !== Math.max(gap.textSize, gap.minWidth))
-						gap.changeWidth(that.gaps, Math.max(gap.textSize, gap.minWidth) - Math.max(oldSize, gap.minWidth));
-				}
+				const deltas = manager.getDeltas(revision - 1).flat(1);
+				const sel = e.command.name === 'undo' ? deltas.at(-1) : deltas[0];
+				const delGap: Gap = sel && that.findCursorGap(sel.start);
+				const delta = (e.command.name === 'undo' ? -1 : 1) * deltas.reduce((d, delta) => d
+					+ (isFake(delGap, delta) ? 0
+						: (delta.action === 'insert' ? 1 : -1) * (delta.end.column - delta.start.column)), 0);
+				console.log(e.command.name, deltas, delta, delGap);
+				if (e.command.name === 'undo') e.editor.undo();
+				const oldSize = delGap.textSize;
+				delGap.textSize += delta;
+				if (Math.max(oldSize, delGap.minWidth) !== Math.max(delGap.textSize, delGap.minWidth))
+					delGap.changeWidth(that.gaps, Math.max(delGap.textSize, delGap.minWidth) - Math.max(oldSize, delGap.minWidth));
+				const cursor = e.editor.getCursorPosition();
+				if (cursor.row === delGap.range.start.row && cursor.column > delGap.range.start.column + delGap.textSize)
+					e.editor.selection.moveCursorTo(cursor.row, delGap.range.start.column + delGap.textSize);
+				(e as Partial<Event>).preventDefault?.();
+				(e as Partial<Event>).stopPropagation?.();
+				return;
 			}
 			if (gap && (e.command.name === 'gotoright' || e.command.name === 'gowordright') && cursor.column >= gap.range.start.column + gap.textSize) {
 				if (gap.range.end.column + 1 >= e.editor.session.getLine(cursor.row).length) {
@@ -246,28 +254,15 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 				const start = (e.editor.curOp as { selectionBefore: Ace.Range; }).selectionBefore.start;
 				gap.textSize -= start.column - cursor.column;
 			}
-			if (gap && gap.range.containsRange(range) && e.command.name === 'removewordleft') {
-				// Select word and trigger remove
-				e.editor.selection.selectWordLeft();
-				const c2 = e.editor.selection.getCursor();
-				if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
-				if (!e.editor.selection.isEmpty()) {
-					cb({
-						editor: e.editor,
-						command: {
-							name: "del",
-						},
-						args: [],
-						preventDefault() { },
-						stopPropagation() { },
-					} as Parameters<typeof cb>[0]);
+			if (gap && gap.range.containsRange(range) && (e.command.name === 'removewordleft' || e.command.name === 'removewordright')) {
+				// Select word
+				if (e.editor.selection.isEmpty()) {
+					if (e.command.name === 'removewordleft') e.editor.selection.selectWordLeft();
+					else e.editor.selection.selectWordRight();
+					const c2 = e.editor.selection.getCursor();
+					if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.start);
 				}
-			}
-			if (gap && gap.range.containsRange(range) && e.command.name === 'removewordright') {
-				// Select word and trigger remove
-				e.editor.selection.selectWordRight();
-				const c2 = e.editor.selection.getCursor();
-				if (!gap.range.contains(c2.row, c2.column)) e.editor.selection.selectToPosition(gap.range.end);
+				// Trigger remove
 				if (!e.editor.selection.isEmpty()) {
 					cb({
 						editor: e.editor,
