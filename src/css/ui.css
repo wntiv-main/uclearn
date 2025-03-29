@@ -245,7 +245,13 @@
 		outline: none;
 		transition: box-shadow var(--uclearn-transition-short);
 
+		td & {
+			border: none;
+			border-radius: 0;
+		}
+
 		&:focus-visible {
+			z-index: 1;
 			box-shadow: var(--uclearn-focus-shadow);
 		}
 	}
