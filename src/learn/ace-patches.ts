@@ -170,7 +170,6 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 			const cursor = e.editor.selection.getCursor();
 			const range = e.editor.getSelectionRange();
 			const gap: Gap = that.findCursorGap(cursor);
-			console.log(e);
 			// Revert these to default behavior
 			if (gap && gap.range.containsRange(range) && (e.command.name === 'startAutocomplete'
 				|| e.command.name === 'Down'
