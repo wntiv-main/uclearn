@@ -1,5 +1,4 @@
-import Bun from 'bun';
-import Watcher from 'watcher';
+const Watcher: typeof import('watcher').default = require('watcher').default;
 
 const WATCHER_GROUP = 'file-watcher';
 
