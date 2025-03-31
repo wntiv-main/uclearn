@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 :root:root:root:root:root:root:root:root {
 	.drawer:has(> .message-app),
 	.message-app {
@@ -285,14 +287,117 @@
 
 				.card-header {
 					padding: 0 !important;
+					border-color: var(--uclearn-active-tint);
 
 					.category-button {
-						border-top: 2px solid transparent;
+						border: none;
+						background-color: transparent;
+						transition: background-color
+								var(--uclearn-transition-short),
+							box-shadow var(--uclearn-transition-short);
+
+						&:is(:hover, :focus-visible) {
+							background-color: var(--uclearn-hover-tint);
+							box-shadow: inset 0 -3px 0 0 var(--uclearn-active-tint);
+						}
+
+						&:is(:active, .selected) {
+							background-color: var(--uclearn-active-tint);
+							box-shadow: inset 0 -3px 0 0 var(--uclearn-color-complete);
+						}
+
+						.fa-clock {
+							font: inherit;
+							&::before {
+								content: "\1F554";
+							}
+						}
+
+						.fa-face-smile {
+							font: inherit;
+							&::before {
+								content: "\01F603";
+							}
+						}
+
+						.fa-person {
+							font: inherit;
+							&::before {
+								content: "\01F9CD";
+							}
+						}
+
+						.fa-leaf {
+							font: inherit;
+							&::before {
+								content: "\1F342";
+							}
+						}
+
+						.fa-pizza-slice {
+							font: inherit;
+							&::before {
+								content: "\1F355";
+							}
+						}
+
+						.fa-plane {
+							font: inherit;
+							&::before {
+								content: "\2708 \FE0F";
+							}
+						}
+
+						.fa-futbol {
+							font: inherit;
+							&::before {
+								content: "\26BD";
+							}
+						}
+
+						.fa-hammer {
+							font: inherit;
+							&::before {
+								content: "\1F528";
+							}
+						}
+
+						.fa-peace {
+							font: inherit;
+							&::before {
+								content: "\262E \FE0F";
+							}
+						}
+
+						.fa-flag {
+							font: inherit;
+							&::before {
+								content: "\01F3F3 \FE0F";
+							}
+						}
 					}
 				}
 
 				.card-footer:has(.emoji-preview:empty) {
 					display: none !important;
+				}
+			}
+
+			.btn-icon[data-action="toggle-emoji-picker"] {
+				border-radius: 0 var(--uclearn-radius) var(--uclearn-radius) 0;
+				border: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
+				.fa-face-smile {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					font: inherit;
+					&::before {
+						content: "\01F603";
+					}
 				}
 			}
 		}
@@ -303,7 +408,7 @@
 		}
 	}
 
-	.emoji-button {
+	.emoji-button:not(:empty) {
 		transition: background-color var(--uclearn-transition-short);
 
 		&:is(:hover, :focus) {
