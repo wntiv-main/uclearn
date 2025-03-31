@@ -19,7 +19,6 @@
 	"web_accessible_resources": [
 		{
 			"resources": [
-				"fonts/**/*.woff",
 				"learn/help.md",
 				"learn/assets/*",
 				"learn/highlight.js/*.css",

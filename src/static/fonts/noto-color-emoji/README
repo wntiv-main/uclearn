@@ -1,1 +1,0 @@
-We use a modified subset of the original Noto Color Emoji font (found at <https://fonts.google.com/noto/specimen/Noto+Color+Emoji>), excluding some unwanted glyphs (namely those in ASCII range). This can be replicated with ```pyftsubset NotoColorEmoji-Regular.ttf --unicodes="0100-FFFFF" --output-file=noto-color-emoji-only.woff```.
