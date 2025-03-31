@@ -48,8 +48,9 @@ a line. This is on mathlive's side and is not easily fixable by me.
 
 For COSC courses, you will see the coderunner question editors replaced with custom editors. Changes here include thematic
 changes (temporary, working on getting proper synchronised theme support). We also attach a python LSP to the editors, which
-provides autocompletion support. You should see suggestions appear as you type, or you can press `Ctrl`+`Space`. Again, this is
-EXPERIMENTAL and is known to not work properly in fill-in-the-blank questions.
+provides autocompletion support. You should see suggestions appear as you type, or you can press `Ctrl`+`Space`. Some minor
+changes are made to the gapfiller question's keybinding handling, please [log an issue](https://github.com/wntiv-main/uclearn/issues)
+if you experience anything weird while typing in these questions.
 
 ## Hydration
 
