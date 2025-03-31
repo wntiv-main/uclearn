@@ -197,6 +197,7 @@
 
 	.btn.drawertoggle {
 		display: initial;
+		backdrop-filter: blur(10px);
 
 		.drawer-primary & {
 			margin-inline: 0 0.5rem;

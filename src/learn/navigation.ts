@@ -8,6 +8,8 @@ import { hydrate, initDocumentParts, SKIP_HYDRATION_CLASS } from './hydration';
 import { getYUIInstance, modals, Toast } from './lib-hook';
 import { contentTransformer } from './html-patcher';
 
+export const DO_HYDRATION: { value: boolean; } = { value: true };
+
 // let vjs: typeof VideoJS;
 
 let hydrationController: AbortController | null = null;
@@ -259,6 +261,7 @@ export async function initNavigator() {
 	window.addEventListener(
 		"submit",
 		async (e) => {
+			if (!DO_HYDRATION.value) return;
 			const form = e.target;
 			if (DEBUG_HYDRATION) console.log(e.submitter);
 			if (!(form instanceof HTMLFormElement)) return;
@@ -308,7 +311,7 @@ export async function initNavigator() {
 	);
 
 	window.addEventListener("click", async (e) => {
-		if (e.defaultPrevented || e.ctrlKey) return;
+		if (!DO_HYDRATION.value || e.defaultPrevented || e.ctrlKey) return;
 		if (e.ctrlKey) return;
 		const link = (e.target as Element).closest("a");
 		if (!link || !link.href || /^(java|live|vb)script:|^#/.test(link.href)) return;
@@ -363,7 +366,7 @@ export async function initNavigator() {
 	});
 
 	window.addEventListener("popstate", async (e) => {
-		if (!e.state) return;
+		if (!DO_HYDRATION.value || !e.state) return;
 		await hydrateFromFetch(location.href, { method: 'GET' }, []);
 		if (e.state?.scrollPos) {
 			document.getElementById("page")?.scrollTo(0, e.state.scrollPos);

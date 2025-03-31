@@ -4,7 +4,7 @@ import { onNodeInsert, SKIP_HYDRATION_CLASS } from "./hydration";
 import { HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
 import { getRequire, getYUIInstance, requireModule } from "./lib-hook";
 import type monaco from "monaco-editor";
-import { onPostHydrate } from "./navigation";
+import { DO_HYDRATION, onPostHydrate } from "./navigation";
 import { assertNever, type ItemOf } from "../global/util";
 import { DEBUG } from "../global/constants";
 import { moodleDialog } from "./yui-modal";
@@ -17,6 +17,7 @@ type Config = {
 	customBg: Blob | null;
 	theme: 'light' | 'dark' | null;
 	hasSeenHelpMenu: boolean;
+	performHydration: boolean;
 };
 
 const uclearnDB = new DatabaseHandler<{
@@ -88,6 +89,9 @@ const configHandlers: {
 		}
 	},
 	hasSeenHelpMenu() { },
+	performHydration(value) {
+		DO_HYDRATION.value = value;
+	},
 };
 
 function _setTheme(theme: 'light' | 'dark') {
@@ -154,6 +158,12 @@ async function initConfigValue<K extends keyof Config>(key: K, value: Config[K])
 	destructors[key] = await configHandlers[key](value) ?? undefined;
 }
 
+async function setConfigValue<K extends keyof Config>(key: K, value: Config[K]) {
+	initConfigValue(key, value);
+	const store = await uclearnDB.openStore('userConfig', 'readwrite');
+	store.put({ key, value } as never);
+}
+
 const toSet: [prop: string, value: string][] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -193,6 +203,49 @@ async function prepareConfigModal() {
 	const Dialog = await moodleDialog;
 	const form = document.createElement("form");
 	form.id = 'uclearn-settings-form';
+
+	const featureToggles = document.createElement('fieldset');
+	featureToggles.classList.add('uclearn-feature-toggles');
+	const featuresLegend = document.createElement('legend');
+	featuresLegend.textContent = 'Features';
+	featureToggles.append(featuresLegend);
+	const featureTable = document.createElement('table');
+	const featureTBody = document.createElement('tbody');
+	featureTBody.append(...([
+		[
+			'Hydration',
+			(value) => setConfigValue('performHydration', value),
+			() => DO_HYDRATION.value,
+		],
+	] satisfies [name: string, toggle: (value: boolean) => unknown, value: () => boolean][]).map(([name, toggle, value]) => {
+		const id = name.toLowerCase().replaceAll(/\W/g, '-');
+		const row = document.createElement('tr');
+		const labelCell = document.createElement('th');
+		const label = document.createElement('label');
+		label.textContent = name;
+		labelCell.append(label);
+		const toggleCell = document.createElement('td');
+		const toggler = document.createElement('div');
+		toggler.title = name;
+		toggler.classList.add('custom-control', 'custom-switch');
+		const toggleInput = document.createElement('input');
+		toggleInput.type = 'checkbox';
+		toggleInput.classList.add('custom-control-input');
+		toggleInput.checked = value();
+		toggleInput.addEventListener('change', function () { toggle(this.checked); });
+		toggleInput.name = toggleInput.id = `__uclearn-feature-toggle-${id}`;
+		const toggleLabel = document.createElement('label');
+		toggleLabel.classList.add('custom-control-label');
+		toggleLabel.setAttribute('for', toggleInput.name);
+		label.setAttribute('for', toggleInput.name);
+		toggler.append(toggleInput, toggleLabel);
+		toggleCell.append(toggler);
+		row.append(labelCell, toggleCell);
+		return row;
+	}));
+	featureTable.append(featureTBody);
+	featureToggles.append(featureTable);
+
 	const backgroundImages = document.createElement('fieldset');
 	backgroundImages.classList.add('uclearn-bg-select');
 	const bgLegend = document.createElement('legend');
@@ -357,7 +410,7 @@ async function prepareConfigModal() {
 	const cssFieldLabel = document.createElement('legend');
 	cssFieldLabel.textContent = 'User CSS';
 	cssField.append(cssFieldLabel, cssEditorContainer);
-	form.append(backgroundImages, colorTheme, cssField);
+	form.append(featureToggles, backgroundImages, colorTheme, cssField);
 	const dialog = new Dialog({
 		headerContent: 'MooMo Settings',
 		bodyContent: (await getYUIInstance()).one(form),
