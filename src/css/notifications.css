@@ -50,8 +50,16 @@
 		.popover-region-content-container {
 			height: auto;
 			max-height: 50vh;
+			min-height: 100px;
+			
+			.loading-icon {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				translate: -50% -50%;
+			}
 
-			.loading-icon, .empty-message {
+			.empty-message {
 				padding: 20px;
 			}
 		}

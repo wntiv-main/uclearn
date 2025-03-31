@@ -226,6 +226,27 @@
 		}
 	}
 
+	.loading-icon {
+		color: transparent;
+		background: conic-gradient(from 45deg, transparent, var(--uclearn-foreground-muted));
+		background-clip: text;
+		line-height: 0;
+
+		animation: rotate 1s linear infinite forwards normal;
+		transform-origin: top left; /* who tf knows why...? */
+		
+		.popover-region-content-container > & {
+			font-size: 1.5em;
+			transform-origin: center;
+		}
+
+		@media (prefers-reduced-motion: reduced) {
+			& {
+				animation: none;
+			}
+		}
+	}
+
 	/* Form */
 	.mform {
 		.col-form-label {
@@ -434,4 +455,9 @@
 			border: none;
 		}
 	}
+}
+
+@keyframes rotate {
+	from { rotate: 0deg; }
+	to { rotate: 360deg; }
 }
