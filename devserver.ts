@@ -1,4 +1,4 @@
-const Watcher: typeof import('watcher').default = require('watcher').default;
+import Watcher from 'watcher';
 
 const WATCHER_GROUP = 'file-watcher';
 
@@ -34,3 +34,5 @@ watcher.watch('./src/static', {
 	else
 		server.publish(WATCHER_GROUP, 'full-reload');
 });
+
+export { };
