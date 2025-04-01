@@ -199,6 +199,7 @@ const BG_IMAGES = [
 ];
 
 async function prepareConfigModal() {
+	let reloadOnExit = false;
 	const Dialog = await moodleDialog;
 	const form = document.createElement("form");
 	form.id = 'uclearn-settings-form';
@@ -412,6 +413,7 @@ async function prepareConfigModal() {
 	});
 	dialog.applyAndTrapFocus = () => { };
 	dialog.trapFocus = () => { };
+	dialog.after('visibleChange', () => reloadOnExit && location.reload());
 	return dialog;
 }
 
