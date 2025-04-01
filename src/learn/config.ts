@@ -133,7 +133,7 @@ function colorNode([el, colors]: ItemOf<typeof coloredNodes>) {
 	if (DEBUG) el.style.border = '1px solid red';
 }
 
-onNodeInsert('.course-content, .que .content', "[style*=color], [style*=background], [bgcolor]", handleColoredNode);
+onNodeInsert('.course-content, .activity-description, .que .content', "[style*=color], [style*=background], [bgcolor]", handleColoredNode);
 onThemeChange(theme => {
 	_theme = theme;
 	if (theme === 'dark') {
