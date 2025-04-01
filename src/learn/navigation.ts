@@ -374,7 +374,11 @@ export async function initNavigator() {
 	});
 }
 
+let _pageLoadCb = () => { };
+export const PAGE_LOAD = new Promise<void>(res => { _pageLoadCb = res; });
+
 export async function initialPageLoad() {
 	await initDocumentParts();
 	for (const hook of postHydrateHooks) try { hook(true); } catch (e) { console.error('Error in post-hydrate hook', e); }
+	_pageLoadCb();
 }

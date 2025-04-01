@@ -1,14 +1,14 @@
 import { MathfieldElement } from "mathlive";
 import { onNodeInsert, SKIP_HYDRATION_CLASS } from "./hydration";
 import { COPY_ICON, DIVIDE_ICON, EDIT_ICON, MINUS_ICON, PLUS_ICON, TIMES_ICON } from "./icons";
-import { moodleDialog } from "./yui-modal";
+import { getMoodleDialog } from "./yui-modal";
 import { getYUIInstance } from "./lib-hook";
 import { initMathField } from "./mathlive-loader";
 import { isElement, isElementTag } from "./domutil";
 import { copyTextToClipboard } from "./clipboard";
 
 async function createMathModal(value = '') {
-	const Dialog = await moodleDialog;
+	const Dialog = await getMoodleDialog;
 	const container = document.createElement('form');
 	const field = new MathfieldElement({});
 	initMathField(field);

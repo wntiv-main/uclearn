@@ -7,7 +7,7 @@ import type monaco from "monaco-editor";
 import { DO_HYDRATION, onPostHydrate } from "./navigation";
 import { assertNever, type ItemOf } from "../global/util";
 import { DEBUG } from "../global/constants";
-import { moodleDialog } from "./yui-modal";
+import { getMoodleDialog } from "./yui-modal";
 import { Marked } from "marked";
 import { baseUrl } from "marked-base-url";
 import { isElementTag } from "./domutil";
@@ -200,7 +200,7 @@ const BG_IMAGES = [
 
 async function prepareConfigModal() {
 	let reloadOnExit = false;
-	const Dialog = await moodleDialog;
+	const Dialog = await getMoodleDialog();
 	const form = document.createElement("form");
 	form.id = 'uclearn-settings-form';
 
@@ -460,14 +460,14 @@ function initMonaco(config?: Omit<MonacoConfig, 'model'> & { model?: (m: typeof 
 	})()] as const;
 }
 
-let _configModal: Awaited<ReturnType<typeof prepareConfigModal>> | null = null;
+let _configModal: ReturnType<typeof prepareConfigModal> | null = null;
 export async function showConfigModal() {
-	_configModal ??= await prepareConfigModal();
-	_configModal?.show();
+	_configModal ??= prepareConfigModal();
+	(await _configModal).show();
 }
 
 async function prepareHelpModal() {
-	const [Dialog, content] = await Promise.all([moodleDialog, fetch(`${EXT_URL}/learn/help.md`).then(resp => resp.text())]);
+	const [Dialog, content] = await Promise.all([getMoodleDialog(), fetch(`${EXT_URL}/learn/help.md`).then(resp => resp.text())]);
 	const marked = new Marked(baseUrl(`${EXT_URL}/learn/`));
 	const container = document.createElement("div");
 	container.id = 'uclearn-help-container';
@@ -490,10 +490,10 @@ async function prepareHelpModal() {
 	});
 }
 
-let _helpModal: Awaited<ReturnType<typeof prepareHelpModal>> | null = null;
+let _helpModal: ReturnType<typeof prepareHelpModal> | null = null;
 export async function showHelpModal() {
-	_helpModal ??= await prepareHelpModal();
-	_helpModal?.show();
+	_helpModal ??= prepareHelpModal();
+	(await _helpModal).show();
 }
 
 export async function initConfig() {

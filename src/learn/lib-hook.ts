@@ -56,6 +56,7 @@ type ModuleTypesMap = {
 	'qtype_coderunner/ui_ace_gapfiller': {
 		Constructor: AceGapfillerUiCtor;
 	};
+	'moodle-core-notification-dialogue': NonNullable<NonNullable<NonNullable<typeof window.M>['core']>['dialogue']>;
 };
 
 export async function requireModule<T extends (keyof ModuleTypesMap)[]>(...deps: T) {
@@ -117,16 +118,16 @@ function patchDefine(define: RequireDefine) {
 	});
 }
 
-getRequire().then(() => {
-	window.define = patchDefine(window.define);
-	// let _internalDefine: RequireDefine = patchDefine(window.define);
-	// Object.defineProperty(window, 'define', {
-	// 	get: () => _internalDefine,
-	// 	set(v) {
-	// 		_internalDefine = patchDefine(v);
-	// 	},
-	// });
-});
+// let _internalDefine: RequireDefine = patchDefine(window.define);
+// Object.defineProperty(window, 'define', {
+// 	get: () => _internalDefine,
+// 	set(v) {
+// 		_internalDefine = patchDefine(v);
+// 	},
+// });
+
+getRequire().then(() => { window.define = patchDefine(window.define); });
+getYUI().then(YUI => { YUI.define = patchDefine(YUI.define); });
 
 // biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
 let YUICallbacks: ((Y: YUI) => boolean | void)[] = [];

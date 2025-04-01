@@ -1,13 +1,21 @@
-import { getYUIInstance } from "./lib-hook";
+import { getYUIInstance, REQUIREJS_PATCHES } from "./lib-hook";
+import { PAGE_LOAD } from "./navigation";
 
-export const moodleDialog = new Promise<NonNullable<NonNullable<NonNullable<typeof window.M>['core']>['dialogue']>>((res, rej) => getYUIInstance().then(Y =>
-	Y.require(['moodle-core-notification-dialogue'], () => window.M?.core?.dialogue ? res(window.M.core.dialogue)
-		: rej(new Error("moodle-core-notification-dialogue failed to initialize")))));
+let _moodleDialog: Promise<NonNullable<NonNullable<NonNullable<typeof window.M>['core']>['dialogue']>> | null = null;
+export async function getMoodleDialog() {
+	await PAGE_LOAD; // Dont require too early, M.utils may not be ready yet for i18n
+	_moodleDialog ??= new Promise((res, rej) => getYUIInstance().then(Y =>
+		Y.require(['moodle-core-notification-dialogue'], () => window.M?.core?.dialogue ? res(window.M.core.dialogue)
+			: rej(new Error("moodle-core-notification-dialogue failed to initialize")))));
+	return await _moodleDialog;
+}
 
-moodleDialog.then(dialog => {
-	const center = dialog.prototype.centerDialogOnDialogSizeChange;
-	dialog.prototype.centerDialogOnDialogSizeChange = function (e: { get(key: string): unknown; }) {
+REQUIREJS_PATCHES['moodle-core-notification-dialogue'] = ready => function (this: unknown, ...args) {
+	const Dialog = ready.call(this, ...args);
+	const center = Dialog.prototype.centerDialogOnDialogSizeChange;
+	Dialog.prototype.centerDialogOnDialogSizeChange = function (e: { get(key: string): unknown; }) {
 		if (e.get('draggable')) return;
 		return center.call(this, e);
 	};
-});
+	return Dialog;
+};

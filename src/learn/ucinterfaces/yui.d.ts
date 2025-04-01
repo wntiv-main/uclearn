@@ -7,6 +7,7 @@ interface YUIExt {
 	applyConfig(config: Y.IConfig): void;
 	one(selector: string | Node): YUINode;
 	require: Require;
+	define: RequireDefine;
 }
 
 // declare namespace globalThis {
