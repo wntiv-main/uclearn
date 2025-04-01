@@ -69,6 +69,14 @@
 		padding: 0;
 		margin: 0;
 
+		> .info .state {
+			color: color-mix(
+				in srgb,
+				var(--uclearn-accent-color) 30%,
+				var(--uclearn-foreground)
+			);
+		}
+
 		.formulation,
 		.outcome,
 		.comment,
