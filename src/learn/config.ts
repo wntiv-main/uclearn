@@ -95,7 +95,6 @@ const configHandlers: {
 };
 
 function _setTheme(theme: 'light' | 'dark') {
-	configCache.theme = theme; // shhhh
 	document.documentElement.classList.remove('uclearn-light-mode', 'uclearn-dark-mode');
 	switch (theme) {
 		case 'light':
@@ -119,11 +118,12 @@ function _setTheme(theme: 'light' | 'dark') {
 
 let coloredNodes: (readonly [HTMLElement, { color: string | null, backgroundColor: string | null; }])[] = [];
 
+let _theme: 'light' | 'dark' = 'light';
 function handleColoredNode(el: HTMLElement) {
 	const { color, backgroundColor } = el.style;
 	const node = [el, { color, backgroundColor: backgroundColor || el.getAttribute('bgcolor') }] as const;
 	coloredNodes.push(node);
-	if (configCache.theme === 'dark') colorNode(node);
+	if (_theme === 'dark') colorNode(node);
 }
 
 function colorNode([el, colors]: ItemOf<typeof coloredNodes>) {
@@ -135,6 +135,7 @@ function colorNode([el, colors]: ItemOf<typeof coloredNodes>) {
 
 onNodeInsert('.course-content, .que .content', "[style*=color], [style*=background], [bgcolor]", handleColoredNode);
 onThemeChange(theme => {
+	_theme = theme;
 	if (theme === 'dark') {
 		coloredNodes = coloredNodes.filter(node => {
 			if (!document.body.contains(node[0])) return false;
@@ -185,9 +186,7 @@ function setCssProp(prop: string, value: string) {
 			}
 		}
 		toSet.length = 0;
-		const store = await uclearnDB.openStore('userConfig', 'readwrite');
-		store.put({ key: 'userCss', value: cssSrc });
-		initConfigValue('userCss', cssSrc);
+		await setConfigValue('userCss', cssSrc);
 		timer = null;
 	}, 300);
 }
@@ -277,8 +276,7 @@ async function prepareConfigModal() {
 			radio.id = `_uclearn-bg-custom-config-${img.id}`;
 			radio.name = 'uclearn-bg-select';
 			radio.addEventListener('change', () => {
-				initConfigValue('customBg', img.src);
-				uclearnDB.openStore('userConfig', 'readwrite').then(o => o.put({ key: 'customBg', value: img.src }));
+				setConfigValue('customBg', img.src);
 				setCssProp('--uclearn-background-image', `var(${CUSTOM_BACKGROUND_PROP})`);
 			});
 			const label = document.createElement('label');
@@ -304,8 +302,7 @@ async function prepareConfigModal() {
 			radio.id = `_uclearn-bg-custom-config-${id}`;
 			radio.name = 'uclearn-bg-select';
 			radio.addEventListener('change', () => {
-				initConfigValue('customBg', file);
-				uclearnDB.openStore('userConfig', 'readwrite').then(o => o.put({ key: 'customBg', value: file }));
+				setConfigValue('customBg', file);
 				setCssProp('--uclearn-background-image', `var(${CUSTOM_BACKGROUND_PROP})`);
 			});
 			const label = document.createElement('label');
@@ -361,10 +358,7 @@ async function prepareConfigModal() {
 		radio.id = `_uclearn-color-scheme-${value}`;
 		radio.name = 'uclearn-color-scheme-select';
 		radio.checked = (configCache.theme ?? null) === value;
-		radio.addEventListener('change', () => {
-			initConfigValue('theme', value);
-			uclearnDB.openStore('userConfig', 'readwrite').then(o => o.put({ key: 'theme', value }));
-		});
+		radio.addEventListener('change', () => setConfigValue('theme', value));
 		const label = document.createElement('label');
 		label.setAttribute('for', radio.id);
 		label.title = title;
@@ -398,11 +392,9 @@ async function prepareConfigModal() {
 				monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
 				monaco.KeyMod.WinCtrl | monaco.KeyCode.KeyS,
 			],
-			run: async () => {
+			run: () => {
 				const value = editor.getValue();
-				initConfigValue('userCss', value);
-				const store = await uclearnDB.openStore('userConfig', 'readwrite');
-				store.put({ key: 'userCss', value });
+				setConfigValue('userCss', value);
 			}
 		});
 	});
