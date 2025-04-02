@@ -34,6 +34,7 @@
 		interpolate-size: allow-keywords;
 		transition: height var(--uclearn-transition-short);
 		overflow: hidden;
+		box-shadow: 1px 2px 5px var(--uclearn-shadow-color);
 
 		.popover-region.collapsed & {
 			height: 0;
