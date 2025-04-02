@@ -53,6 +53,20 @@
 		flex-flow: column;
 	}
 
+	.block-cards {
+		position: relative;
+
+		[data-region="paging-control-container"] {
+			position: absolute;
+			top: 0.5rem;
+			right: 0;
+		}
+	}
+
+	:is(.course-listitem, .course-summaryitem) > .row {
+		margin-inline: 0;
+	}
+
 	:is(.card-grid .col, .course-listitem, .course-summaryitem):has(
 			[data-region="is-favourite"]:not(.hidden)
 		) {
