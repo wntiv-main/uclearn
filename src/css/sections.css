@@ -48,7 +48,14 @@
 		margin-bottom: 0.2rem !important;
 	}
 
-	.card-grid .col:has([data-region="is-favourite"]:not(.hidden)) {
+	[role="list"]:has(> .course-summaryitem) {
+		display: flex;
+		flex-flow: column;
+	}
+
+	:is(.card-grid .col, .course-listitem, .course-summaryitem):has(
+			[data-region="is-favourite"]:not(.hidden)
+		) {
 		order: -1;
 	}
 
