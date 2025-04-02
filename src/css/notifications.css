@@ -38,7 +38,8 @@
 		.popover-region.collapsed & {
 			height: 0;
 			transition: height var(--uclearn-transition-short),
-				opacity 101ms var(--uclearn-transition-short), visibility 101ms var(--uclearn-transition-short);
+				opacity 101ms var(--uclearn-transition-short),
+				visibility 101ms var(--uclearn-transition-short);
 		}
 
 		.popover-region-header-container {
@@ -51,7 +52,8 @@
 			height: auto;
 			max-height: 50vh;
 			min-height: 100px;
-			
+			position: relative;
+
 			.loading-icon {
 				position: absolute;
 				left: 50%;
@@ -99,7 +101,7 @@
 
 	.notification {
 		display: grid;
-		grid-template: "icon header header"max-content "icon time link"max-content / max-content 1fr max-content;
+		grid-template: "icon header header" max-content "icon time link" max-content / max-content 1fr max-content;
 
 		a:not(.view-more) {
 			color: inherit;
