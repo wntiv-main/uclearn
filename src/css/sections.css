@@ -48,6 +48,10 @@
 		margin-bottom: 0.2rem !important;
 	}
 
+	.card-grid .col:has([data-region="is-favourite"]:not(.hidden)) {
+		order: -1;
+	}
+
 	.block-cards [data-region^="loading-placeholder"] .card-grid {
 		.col {
 			padding: 0 !important;
