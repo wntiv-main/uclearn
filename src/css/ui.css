@@ -1,3 +1,8 @@
+.loading-icon,
+:root .popover-region-content-container.loading > .loading-icon {
+	display: flex;
+}
+
 :root:root:root:root:root:root:root:root {
 	/* Toasts */
 
@@ -236,7 +241,6 @@
 		background-clip: text;
 		/* line-height: 0; */
 		aspect-ratio: 1;
-		display: flex;
 		align-items: center;
 		justify-content: center;
 
