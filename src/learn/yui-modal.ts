@@ -11,11 +11,11 @@ export async function getMoodleDialog() {
 }
 
 REQUIREJS_PATCHES['moodle-core-notification-dialogue'] = ready => function (this: unknown, ...args) {
-	const Dialog = ready.call(this, ...args);
+	ready.call(this, ...args);
+	const Dialog = window.M?.core?.dialogue!;
 	const center = Dialog.prototype.centerDialogOnDialogSizeChange;
 	Dialog.prototype.centerDialogOnDialogSizeChange = function (e: { get(key: string): unknown; }) {
 		if (e.get('draggable')) return;
 		return center.call(this, e);
 	};
-	return Dialog;
 };

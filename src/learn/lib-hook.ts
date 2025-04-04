@@ -56,7 +56,7 @@ type ModuleTypesMap = {
 	'qtype_coderunner/ui_ace_gapfiller': {
 		Constructor: AceGapfillerUiCtor;
 	};
-	'moodle-core-notification-dialogue': NonNullable<NonNullable<NonNullable<typeof window.M>['core']>['dialogue']>;
+	'moodle-core-notification-dialogue': undefined;
 };
 
 export async function requireModule<T extends (keyof ModuleTypesMap)[]>(...deps: T) {
@@ -88,6 +88,7 @@ export const REQUIREJS_PATCHES: {
 		ready: (...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K],
 		deps: Deps,
 		name: K,
+		version?: string,
 	) => void | undefined | ((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])
 } = {
 	"block_recentlyaccessedcourses/main"(ready, _, name) {
@@ -118,6 +119,16 @@ function patchDefine(define: RequireDefine) {
 	});
 }
 
+function patchYUIDefine(define: typeof YUI.add) {
+	return new Proxy(define, {
+		apply(target, thisArg, argArray) {
+			const [name, fn, version, details = undefined] = argArray as Parameters<typeof YUI.add>;
+			let ready = REQUIREJS_PATCHES[name as keyof ModuleTypesMap]?.(fn as never, (details?.requires ?? []) as (keyof ModuleTypesMap)[], name as never, version) ?? fn;
+			return Reflect.apply(target, thisArg, [name, ready, version, details]);
+		}
+	});
+}
+
 // let _internalDefine: RequireDefine = patchDefine(window.define);
 // Object.defineProperty(window, 'define', {
 // 	get: () => _internalDefine,
@@ -127,45 +138,51 @@ function patchDefine(define: RequireDefine) {
 // });
 
 getRequire().then(() => { window.define = patchDefine(window.define); });
-getYUI().then(YUI => { YUI.define = patchDefine(YUI.define); });
+getYUI().then(YUI => { YUI.add = patchYUIDefine(YUI.add); });
 
 // biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
-let YUICallbacks: ((Y: YUI) => boolean | void)[] = [];
+// let YUICallbacks: ((Y: YUI) => boolean | void)[] = [];
 
 // biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
-export function hookYUI(callback: (Y: YUI) => boolean | void) {
-	if (!window.YUI || callback(window.YUI)) YUICallbacks.push(callback);
-}
+// export function hookYUI(callback: (Y: YUI) => boolean | void) {
+// 	if (!window.YUI || callback(window.YUI)) YUICallbacks.push(callback);
+// }
 
-if (window.YUI) {
-	// TODO: can we write a getter post-mortem?
-	// biome-ignore lint/style/noNonNullAssertion: Called immediately
-	YUICallbacks = YUICallbacks.filter((c) => !c(window.YUI!));
-} else {
-	let _YUI: YUI | undefined = undefined;
-	Object.defineProperty(window, "YUI", {
-		get() {
-			return _YUI;
-		},
-		set(value) {
-			_YUI = value;
-			// biome-ignore lint/style/noNonNullAssertion: Called immediately
-			if (_YUI) YUICallbacks = YUICallbacks.filter((c) => !c(_YUI!));
-		},
-	});
-}
+// if (window.YUI) {
+// 	// TODO: can we write a getter post-mortem?
+// 	// biome-ignore lint/style/noNonNullAssertion: Called immediately
+// 	YUICallbacks = YUICallbacks.filter((c) => !c(window.YUI!));
+// } else {
+// 	let _YUI: YUI | undefined = undefined;
+// 	Object.defineProperty(window, "YUI", {
+// 		get() {
+// 			return _YUI;
+// 		},
+// 		set(value) {
+// 			_YUI = value;
+// 			// biome-ignore lint/style/noNonNullAssertion: Called immediately
+// 			if (_YUI) YUICallbacks = YUICallbacks.filter((c) => !c(_YUI!));
+// 		},
+// 	});
+// }
 
 let _YUI_promise: Promise<YUI>;
 export async function getYUI() {
 	return (
 		window.YUI ??
 		// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-		(await (_YUI_promise ??= new Promise((res) =>
-			hookYUI((YUI) => {
-				res(YUI);
-				return true;
-			}),
-		)))
+		(await (_YUI_promise ??= new Promise((res) => {
+			let _YUI: YUI | undefined = undefined;
+			Object.defineProperty(window, "YUI", {
+				get() {
+					return _YUI;
+				},
+				set(value) {
+					_YUI = value;
+					if (_YUI) res(_YUI);
+				},
+			});
+		})))
 	);
 }
 
