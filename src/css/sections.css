@@ -158,6 +158,11 @@
 		&:focus-within {
 			z-index: 1;
 		}
+
+		.coursename {
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 	}
 
 	.block_ace .card-body {

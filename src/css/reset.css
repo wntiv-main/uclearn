@@ -812,6 +812,10 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		padding: 15px 0;
 	}
 
+	.text-primary {
+		color: color-mix(in srgb, var(--uclearn-color-complete) 60%, var(--uclearn-foreground)) !important;
+	}
+
 	.nav-tabs .nav-link.active,
 	.nav-tabs .nav-item.show .nav-link,
 	.list-group-item-action,
