@@ -53,7 +53,7 @@
 		flex-flow: column;
 	}
 
-	.block-cards {
+	.block-cards:not(.block-recentlyaccessedcourses) {
 		position: relative;
 
 		[data-region="paging-control-container"] {
