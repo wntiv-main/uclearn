@@ -8,7 +8,7 @@ import { isElement, isElementTag } from "./domutil";
 import { copyTextToClipboard } from "./clipboard";
 
 async function createMathModal(value = '') {
-	const Dialog = await getMoodleDialog;
+	const Dialog = await getMoodleDialog();
 	const container = document.createElement('form');
 	const field = new MathfieldElement({});
 	initMathField(field);
