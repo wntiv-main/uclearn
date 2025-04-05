@@ -189,7 +189,6 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 				const delta = (e.command.name === 'undo' ? -1 : 1) * deltas.reduce((d, delta) => d
 					+ (isFake(delGap, delta) ? 0
 						: (delta.action === 'insert' ? 1 : -1) * (delta.end.column - delta.start.column)), 0);
-				console.log(e.command.name, deltas, delta, delGap);
 				if (e.command.name === 'undo') e.editor.undo();
 				const oldSize = delGap.textSize;
 				delGap.textSize += delta;
@@ -203,7 +202,7 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 				return;
 			}
 			if (gap && (e.command.name === 'gotoright' || e.command.name === 'gowordright') && cursor.column >= gap.range.start.column + gap.textSize) {
-				if (gap.range.end.column + 1 >= e.editor.session.getLine(cursor.row).length) {
+				if (gap.range.end.column + 1 > e.editor.session.getLine(cursor.row).length) {
 					e.editor.selection.moveTo(cursor.row + 1, 0);
 					(e as Partial<Event>).preventDefault?.();
 					(e as Partial<Event>).stopPropagation?.();
@@ -219,8 +218,12 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 				if (gap && target && target.column > gap.range.start.column + gap.textSize)
 					target.column = gap.range.end.column + 1;
 				// Handle crossing over gap
-				if (gap && target && !gap.range.containsRange(range) && target.column >= e.editor.session.getLine(cursor.row).length) {
-					e.editor.selection.selectTo(target.row + 1, 0);
+				if (gap && target && !gap.range.containsRange(range)) {
+					if (target.column > e.editor.session.getLine(cursor.row).length) {
+						e.editor.selection.selectTo(target.row + 1, 0);
+					} else {
+						e.editor.selection.selectToPosition(target);
+					}
 					(e as Partial<Event>).preventDefault?.();
 					(e as Partial<Event>).stopPropagation?.();
 					return;
@@ -252,6 +255,11 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 				// Ensure gap stays up-to-date
 				const start = (e.editor.curOp as { selectionBefore: Ace.Range; }).selectionBefore.start;
 				gap.textSize -= start.column - cursor.column;
+				const shrink = Math.min(start.column - cursor.column, gap.minWidth - gap.textSize);
+				if (shrink > 0) e.editor.session.insert({
+					row: gap.range.end.row,
+					column: gap.range.end.column - shrink,
+				}, new Array(shrink).fill(' ').join(''));
 			}
 			if (gap && gap.range.containsRange(range) && (e.command.name === 'removewordleft' || e.command.name === 'removewordright')) {
 				// Select word
