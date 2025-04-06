@@ -386,6 +386,14 @@ export class DOMInspector {
 		this.#addTag(el, tag);
 	}
 
+	hotswapNode(old: Node, replace: Node) {
+		const reverse = this.#nodeMap.get(old);
+		if (!reverse) return;
+		this.#nodeMap.delete(old);
+		this.#nodeMap.set(replace, reverse);
+		this.#reverseMap.set(reverse, replace);
+	}
+
 	addTag(node: Node, tag: string) {
 		// biome-ignore lint/style/noNonNullAssertion: <explanation>
 		this.#addTag(this.#nodeMap.get(node)!, tag);

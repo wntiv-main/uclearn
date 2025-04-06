@@ -426,6 +426,7 @@ async function applyHydration(tasks: HydrationTasks, { config, elMap: map, root:
 	// biome-ignore lint/style/noNonNullAssertion: immediately initialized
 	let unlock: (() => void) = null!;
 	lock = new Promise<void>(res => { unlock = res; });
+	let _inspector: DOMInspector | undefined = undefined;
 	if (DEBUG_HYDRATION && !config.evadeDebugging) {
 		const toUpdate: Set<Element> = new Set();
 		const inspector =
@@ -462,6 +463,7 @@ async function applyHydration(tasks: HydrationTasks, { config, elMap: map, root:
 		for (const el of toUpdate) {
 			inspector.mutateNode(el);
 		}
+		_inspector = inspector;
 	} else {
 		// WARNING: UPDATE ABOVE TO MATCH
 		const fract = 1 / tasks.length;
@@ -475,16 +477,19 @@ async function applyHydration(tasks: HydrationTasks, { config, elMap: map, root:
 				case "setAttr": {
 					const el = map[task.element].node as Element;
 					el.setAttribute(task.attr, task.value);
+					handleNodeUpdate(task.attr, el, task.value);
 					break;
 				}
 				case "delAttr": {
 					const el = map[task.element].node as Element;
 					el.removeAttribute(task.attr);
+					handleNodeUpdate(task.attr, el);
 					break;
 				}
 				case "updateContent": {
 					const node = map[task.element].node as Text;
 					node.data = task.text;
+					handleNodeUpdate('content', node, task.text);
 					break;
 				}
 				case "remove": {
@@ -532,12 +537,12 @@ async function applyHydration(tasks: HydrationTasks, { config, elMap: map, root:
 	}
 	config.onProgress?.(PartialHydrationStage.APPLYING, 1);
 
-	await handlePostHydrateCollectors(collectors);
+	await handlePostHydrateCollectors(collectors, false, _inspector);
 	lock = null;
 	unlock();
 }
 
-async function handlePostHydrateCollectors(collectors: NodeCollectors, first?: boolean) {
+async function handlePostHydrateCollectors(collectors: NodeCollectors, first?: boolean, inspector?: DOMInspector) {
 	await loadScripts(
 		first ? collectors.scripts : collectors.scripts.filter(
 			(script) =>
@@ -546,6 +551,8 @@ async function handlePostHydrateCollectors(collectors: NodeCollectors, first?: b
 					script.src,
 				),
 		),
+		undefined,
+		inspector ? (old, replace) => inspector.hotswapNode(old, replace) : undefined,
 	);
 	if (!first) window.MathJax?.Hub?.Queue(["Typeset", window.MathJax.Hub, [...collectors.math]]);
 	for (const field of collectors.fields) initField(field as HTMLInputElement);

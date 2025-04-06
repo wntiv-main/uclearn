@@ -3,6 +3,7 @@ import { asyncTimeout } from "../global/util";
 import { Toast } from "./patches/lib-hook";
 
 type Transcriber = (script: string) => string | null;
+type ReplaceScriptHandler = (old: HTMLScriptElement, replacement: HTMLScriptElement) => unknown;
 export const SKIP_SCRIPT_CLASS = '__uclearn-skip-reload';
 
 export async function loadScript(script: HTMLScriptElement | string, transcriber?: Transcriber) {
@@ -24,7 +25,7 @@ export async function loadScript(script: HTMLScriptElement | string, transcriber
 	return transcriber?.(script.text) ?? script.text;
 }
 
-export async function execScript(script: HTMLScriptElement | null, content: string) {
+export async function execScript(script: HTMLScriptElement | null, content: string, onRefreshScript?: ReplaceScriptHandler) {
 	const newScript = document.createElement("script");
 	for (const attr of script?.attributes ?? []) {
 		if ((attr.name === 'src' && content) || attr.name === 'async' || attr.name === 'defer') continue;
@@ -38,37 +39,48 @@ export async function execScript(script: HTMLScriptElement | null, content: stri
 		const scriptStartTime = performance.now();
 		if (content) {
 			newScript.text = content;
-			if (script) script.replaceWith(newScript);
-			else document.head.append(newScript);
+			if (script) {
+				onRefreshScript?.(script, newScript);
+				script.replaceWith(newScript);
+			} else document.head.append(newScript);
 			await asyncTimeout(0);
 			console.log('Executed script', newScript, 'in', performance.now() - scriptStartTime, 'ms');
 		} else {
 			return new Promise<void>(res => {
 				newScript.addEventListener('load', () => res());
 				newScript.addEventListener('error', () => res());
-				if (script) script.replaceWith(newScript);
-				else document.head.append(newScript);
+				if (script) {
+					onRefreshScript?.(script, newScript);
+					script.replaceWith(newScript);
+				} else document.head.append(newScript);
 			}).then(() =>
 				console.log('Executed script', newScript, 'in', performance.now() - scriptStartTime, 'ms'));
 		}
 	} else {
 		if (content) {
 			newScript.text = content;
-			if (script) script.replaceWith(newScript);
-			else document.head.append(newScript);
+			if (script) {
+				onRefreshScript?.(script, newScript);
+				script.replaceWith(newScript);
+			} else document.head.append(newScript);
 		} else {
 			return new Promise<void>(res => {
 				newScript.addEventListener('load', () => res());
 				newScript.addEventListener('error', () => res());
-				if (script) script.replaceWith(newScript);
-				else document.head.append(newScript);
+				if (script) {
+					onRefreshScript?.(script, newScript);
+					script.replaceWith(newScript);
+				} else document.head.append(newScript);
 			});
 		}
 	}
 }
 
 type ScriptAndContent = readonly [HTMLScriptElement, Promise<string>];
-export async function loadScripts(scripts: Iterable<HTMLScriptElement>, transcriber?: Transcriber) {
+export async function loadScripts(
+	scripts: Iterable<HTMLScriptElement>,
+	transcriber?: Transcriber,
+	onRefreshScript?: ReplaceScriptHandler) {
 	const inlineScripts: ScriptAndContent[] = [];
 	const asyncScripts: ScriptAndContent[] = [];
 	const deferScripts: ScriptAndContent[] = [];
@@ -87,13 +99,13 @@ export async function loadScripts(scripts: Iterable<HTMLScriptElement>, transcri
 	}
 
 	for (const [script, content] of inlineScripts) {
-		await execScript(script, await content);
+		await execScript(script, await content, onRefreshScript);
 	}
 	const runningAsyncScripts = Promise.all(asyncScripts.map(async ([script, content]) => {
-		return execScript(script, await content);
+		return execScript(script, await content, onRefreshScript);
 	}));
 	for (const [script, content] of deferScripts) {
-		await execScript(script, await content);
+		await execScript(script, await content, onRefreshScript);
 	}
 	await runningAsyncScripts;
 }
