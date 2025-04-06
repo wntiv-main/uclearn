@@ -158,7 +158,7 @@ function* precomputeCompare(
 				id: id.replace(ID_RGX, "$1$2"),
 				rawId: id,
 				skipUpdate: root.classList.contains(SKIP_UPDATE_CLASS),
-				classes: [...root.classList].filter(cls => cls.startsWith(HIDDEN_CLS)),
+				classes: [...root.classList].filter(cls => !cls.startsWith(HIDDEN_CLS)),
 				attributes: new Map(
 					[...root.attributes].map(({ name, value }) => [name, value]),
 				),
