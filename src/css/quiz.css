@@ -366,4 +366,14 @@
 			border-right: 1px solid #ddd
 		} */
 	}
+
+	.ln-important-box,
+	.ln-important-box-definition {
+		border-color: currentColor;
+	}
+
+	.ln-optional {
+		background-color: var(--uclearn-hover-tint);
+		border-radius: var(--uclearn-radius);
+	}
 }
