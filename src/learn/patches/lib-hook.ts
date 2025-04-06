@@ -1,14 +1,14 @@
-import type { YUI } from "./ucinterfaces/yui";
+import type { YUI } from "../ucinterfaces/yui";
 import type Ace from 'ace-code';
 import type VideoJS from 'video.js';
-import type UCModalRegistry from './ucinterfaces/ModalRegistry';
-import type UCModalEvents from './ucinterfaces/ModalEvents';
-import type UCToast from './ucinterfaces/Toast';
-import { maybeUnwrap, type MapType, type MaybeUnwrap } from "../global/util";
+import type UCModalRegistry from '../ucinterfaces/ModalRegistry';
+import type UCModalEvents from '../ucinterfaces/ModalEvents';
+import type UCToast from '../ucinterfaces/Toast';
+import { maybeUnwrap, type MapType, type MaybeUnwrap } from "../../global/util";
 import { getRemappedName, tailHook } from "./patch";
-import { onPreHydrate } from "./navigation";
+import { onPreHydrate } from "../navigation";
 import type monaco from "monaco-editor";
-import { AceGapfillerUiCtor } from "./ucinterfaces/ace-gapfiller-ui";
+import { AceGapfillerUiCtor } from "../ucinterfaces/ace-gapfiller-ui";
 
 let _require_promise: Promise<Require>;
 export async function getRequire() {
@@ -123,7 +123,7 @@ function patchYUIDefine(define: typeof YUI.add) {
 	return new Proxy(define, {
 		apply(target, thisArg, argArray) {
 			const [name, fn, version, details = undefined] = argArray as Parameters<typeof YUI.add>;
-			let ready = REQUIREJS_PATCHES[name as keyof ModuleTypesMap]?.(fn as never, (details?.requires ?? []) as (keyof ModuleTypesMap)[], name as never, version) ?? fn;
+			const ready = REQUIREJS_PATCHES[name as keyof ModuleTypesMap]?.(fn as never, (details?.requires ?? []) as (keyof ModuleTypesMap)[], name as never, version) ?? fn;
 			return Reflect.apply(target, thisArg, [name, ready, version, details]);
 		}
 	});

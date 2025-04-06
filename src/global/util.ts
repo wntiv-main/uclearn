@@ -44,6 +44,14 @@ export function* zip<T extends Iterable<unknown>[]>(...arrays: T) {
 	}
 }
 
+export function* chainIter<T extends Iterable<unknown>[]>(...arrays: T) {
+	for (const arr of arrays) {
+		for (const el of arr) {
+			yield el as ItemOf<ItemOf<T>>;
+		}
+	}
+}
+
 export function* map<T extends Iterable<unknown> | unknown[], R>(arr: T, mapper: (item: ItemOf<T>) => R) {
 	for (const item of arr) {
 		yield mapper(item as ItemOf<T>);

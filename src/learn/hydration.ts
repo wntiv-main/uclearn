@@ -22,8 +22,8 @@ import {
 	PartialHydrationStage,
 	type W2DMessage,
 } from "../global/hydration";
-import { assertNever, type ItemOf, type Shifted } from "../global/util";
-import { Toast } from "./lib-hook";
+import { assertNever, chainIter, type ItemOf, type Shifted } from "../global/util";
+import { Toast } from "./patches/lib-hook";
 import { loadScripts, SKIP_SCRIPT_CLASS } from "./script-loader";
 import { initField, initMatrixField, MATH_FIELD_SELECTOR, MATHLIVE_FIELD_CLASS } from "./mathlive-loader";
 
@@ -71,7 +71,9 @@ function allocateEl(el: ElementRef, map: ElementMap) {
 const ID_RGX =
 	/^((?:\w+-)+)(?:[0-9a-fA-F]{28}|[0-9a-fA-F]{13})((?:-\w+)*)$|^(single_button)[0-9a-fA-F]{15}$|^yui_.*$|^(url_select_).*$/;
 
-export const SKIP_HYDRATION_CLASS = "__uclearn-hydrate-remove";
+export const HIDDEN_CLS = '__uclearn';
+export const SKIP_HYDRATION_CLASS = `${HIDDEN_CLS}-hydrate-remove`;
+export const SKIP_UPDATE_CLASS = `${HIDDEN_CLS}-hydrate-static`;
 
 const MJ_SELECTOR = ":is(.MathJax, .MathJax_Display)";
 const MJ_SCRIPT_SELECTOR = 'script[type^="math/"]';
@@ -155,7 +157,8 @@ function* precomputeCompare(
 				tag: root.tagName,
 				id: id.replace(ID_RGX, "$1$2"),
 				rawId: id,
-				classes: [...root.classList],
+				skipUpdate: root.classList.contains(SKIP_UPDATE_CLASS),
+				classes: [...root.classList].filter(cls => cls.startsWith(HIDDEN_CLS)),
 				attributes: new Map(
 					[...root.attributes].map(({ name, value }) => [name, value]),
 				),
@@ -233,11 +236,16 @@ type QuerySelect<T extends string> = T extends keyof HTMLElementTagNameMap ? HTM
 	: T extends `.${string}` ? HTMLElement : Element;
 
 const insertHandlers: [string | null, string, (node: Node) => void][] = [];
+const updateHandlers: Record<string, [string, (node: Node, value?: string) => void][]> = {};
 
 export function onNodeInsert<S extends string>(parent: string | null, selector: S, cb: (node: QuerySelect<S>) => void): void;
 export function onNodeInsert<T extends Node>(parent: string | null, selector: string, cb: (node: T) => void): void;
 export function onNodeInsert(parent: string | null, selector: string, cb: (node: Node) => void) {
 	insertHandlers.push([parent, selector, cb]);
+}
+
+export function onNodeUpdate(cb: (node: Node, value?: string) => void, selector: string, attr?: string) {
+	(updateHandlers[attr ?? '*'] ??= []).push([selector, cb]);
 }
 
 function handleNodeInsert(parent: Node, node: Node, collectors: NodeCollectors) {
@@ -283,6 +291,12 @@ function handleNodeInsert(parent: Node, node: Node, collectors: NodeCollectors) 
 	}
 }
 
+function handleNodeUpdate(attr: string, node: Node, value?: string) {
+	for (const [selector, handler] of chainIter(updateHandlers['*'] ?? [], updateHandlers[attr] ?? [])) {
+		if (!selector || (isElement(node) && node.matches(selector))) handler(node, value);
+	}
+}
+
 function debugTask(
 	task: ItemOf<HydrationTasks>,
 	map: ElementMap,
@@ -298,6 +312,7 @@ function debugTask(
 			const el = map[task.element].node as Element;
 			inspector.prepareModify(el);
 			el.setAttribute(task.attr, task.value);
+			handleNodeUpdate(task.attr, el, task.value);
 			toUpdate.add(el);
 			break;
 		}
@@ -305,6 +320,7 @@ function debugTask(
 			const el = map[task.element].node as Element;
 			inspector.prepareModify(el);
 			el.removeAttribute(task.attr);
+			handleNodeUpdate(task.attr, el);
 			toUpdate.add(el);
 			break;
 		}
@@ -312,6 +328,7 @@ function debugTask(
 			const node = map[task.element].node as Text;
 			inspector.prepareModify(node);
 			node.data = task.text;
+			handleNodeUpdate('content', node, task.text);
 			inspector.mutateNode(node);
 			break;
 		}

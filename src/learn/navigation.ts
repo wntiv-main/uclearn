@@ -5,7 +5,7 @@ import { DEBUG, DEBUG_HYDRATION } from '../global/constants';
 import { type _HydrationStages, type HydrationConfig, type HydrationStage, precomputeStages } from "../global/hydration";
 import { update } from '../global/util';
 import { hydrate, initDocumentParts, SKIP_HYDRATION_CLASS } from './hydration';
-import { getYUIInstance, modals, Toast } from './lib-hook';
+import { getYUIInstance, modals, Toast } from './patches/lib-hook';
 import { contentTransformer } from './html-patcher';
 
 export const DO_HYDRATION: { value: boolean; } = { value: true };

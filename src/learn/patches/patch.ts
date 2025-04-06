@@ -1,4 +1,4 @@
-import { DEBUG } from "../global/constants";
+import { DEBUG } from "../../global/constants";
 
 export function getRemappedName(accessor: () => unknown) {
 	return accessor.toString().replace(/^\s*(?:\([^)]*\)|\w+)\s*=>\s*(\w+)$|^\s*(?:(?:function\s+\w+|function|\w+)\s*\([^)]*\)|\([^)]*\)\s*=>)\s*{.*return\s+(\w+).*}/, '$1$2');

@@ -26,6 +26,7 @@ export type HydrationNode = { nodeId: number; } & (({
 	attributes: Map<string, string>;
 	content: string;
 	debugging?: boolean;
+	skipUpdate?: boolean;
 } & ({
 	elementType: HydrationElementType.NORMAL;
 } | {

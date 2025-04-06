@@ -1,5 +1,5 @@
 import { getYUIInstance, REQUIREJS_PATCHES } from "./lib-hook";
-import { PAGE_LOAD } from "./navigation";
+import { PAGE_LOAD } from "../navigation";
 
 let _moodleDialog: Promise<NonNullable<NonNullable<NonNullable<typeof window.M>['core']>['dialogue']>> | null = null;
 export async function getMoodleDialog() {
@@ -12,7 +12,8 @@ export async function getMoodleDialog() {
 
 REQUIREJS_PATCHES['moodle-core-notification-dialogue'] = ready => function (this: unknown, ...args) {
 	ready.call(this, ...args);
-	const Dialog = window.M?.core?.dialogue!;
+	const Dialog = window.M?.core?.dialogue;
+	if (!Dialog) throw new Error("Moodle Dialogue not ready yet!");
 	const center = Dialog.prototype.centerDialogOnDialogSizeChange;
 	Dialog.prototype.centerDialogOnDialogSizeChange = function (e: { get(key: string): unknown; }) {
 		if (e.get('draggable')) return;

@@ -1,8 +1,8 @@
 import { MathfieldElement } from "mathlive";
 import { onNodeInsert, SKIP_HYDRATION_CLASS } from "./hydration";
 import { COPY_ICON, DIVIDE_ICON, EDIT_ICON, MINUS_ICON, PLUS_ICON, TIMES_ICON } from "./icons";
-import { getMoodleDialog } from "./yui-modal";
-import { getYUIInstance } from "./lib-hook";
+import { getMoodleDialog } from "./patches/yui-modal";
+import { getYUIInstance } from "./patches/lib-hook";
 import { initMathField } from "./mathlive-loader";
 import { isElement, isElementTag } from "./domutil";
 import { copyTextToClipboard } from "./clipboard";

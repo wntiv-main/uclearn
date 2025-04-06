@@ -82,6 +82,7 @@ function updateNode(tasks: HydrationTasks, dom: HydrationElement, updated: Hydra
 }
 
 async function calculateChanges(id: HydrationId, config: WHydrationConfig, tasks: HydrationTasks, dom: HydrationElement & WHydrationNode, updated: HydrationElement & WHydrationNode) {
+	if (dom.skipUpdate) return;
 	// Update current node
 	updateNode(tasks, dom, updated);
 	self.postMessage({

@@ -1,13 +1,13 @@
 import { EXT_URL } from "./constants";
 import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } from "./db";
-import { onNodeInsert, SKIP_HYDRATION_CLASS } from "./hydration";
+import { onNodeInsert, onNodeUpdate, SKIP_HYDRATION_CLASS } from "./hydration";
 import { HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
-import { getRequire, getYUIInstance, requireModule } from "./lib-hook";
+import { getRequire, getYUIInstance, requireModule } from "./patches/lib-hook";
 import type monaco from "monaco-editor";
 import { DO_HYDRATION, onPostHydrate } from "./navigation";
 import { assertNever, type ItemOf } from "../global/util";
 import { DEBUG } from "../global/constants";
-import { getMoodleDialog } from "./yui-modal";
+import { getMoodleDialog } from "./patches/yui-modal";
 import { Marked } from "marked";
 import { baseUrl } from "marked-base-url";
 import { isElementTag } from "./domutil";
@@ -133,7 +133,12 @@ function colorNode([el, colors]: ItemOf<typeof coloredNodes>) {
 	if (DEBUG) el.style.border = '1px solid red';
 }
 
-onNodeInsert('.course-content, .activity-description, .que .content', "[style*=color], [style*=background], [bgcolor]", handleColoredNode);
+const THEME_PARENTS = '.course-content, .activity-description, .que .content';
+const THEMEABLE = '[style*=color], [style*=background], [bgcolor]';
+
+onNodeInsert(THEME_PARENTS, THEMEABLE, handleColoredNode);
+onNodeUpdate(el => handleColoredNode(el as HTMLElement), `:is(${THEME_PARENTS}) :is(${THEMEABLE})`, 'style');
+
 onThemeChange(theme => {
 	_theme = theme;
 	if (theme === 'dark') {
@@ -217,6 +222,16 @@ async function prepareConfigModal() {
 			(value) => setConfigValue('performHydration', value),
 			() => DO_HYDRATION.value,
 		],
+		[
+			'Math Fields',
+			(value) => { reloadOnExit = true; },
+			() => true,
+		],
+		[
+			'Python LSP',
+			(value) => { reloadOnExit = true; },
+			() => true,
+		]
 	] satisfies [name: string, toggle: (value: boolean) => unknown, value: () => boolean][]).map(([name, toggle, value]) => {
 		const id = name.toLowerCase().replaceAll(/\W/g, '-');
 		const row = document.createElement('tr');

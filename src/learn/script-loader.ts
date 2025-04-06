@@ -1,6 +1,6 @@
 import { DEBUG, DEBUG_SCRIPTING } from "../global/constants";
 import { asyncTimeout } from "../global/util";
-import { Toast } from "./lib-hook";
+import { Toast } from "./patches/lib-hook";
 
 type Transcriber = (script: string) => string | null;
 export const SKIP_SCRIPT_CLASS = '__uclearn-skip-reload';

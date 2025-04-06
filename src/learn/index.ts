@@ -1,12 +1,13 @@
 import { initialPageLoad, initNavigator } from "./navigation";
-import { Toast } from "./lib-hook";
+import { Toast } from "./patches/lib-hook";
 import { DEBUG } from "../global/constants";
-import { patchAceEditor } from "./ace-patches";
+import { patchAceEditor } from "./patches/ace-patches";
 import type MathJax from 'mathjax';
 import { initKeybindings } from "./keybindings";
 import { initConfig } from "./config";
 import { initMessaging } from "./messaging";
 import { initQuizWorkspace } from "./workspace-ui";
+import { initHLJS } from "./patches/highlightjs-patches";
 
 if (DEBUG) window.addEventListener("error", async (e) => {
 	(await Toast).add(e.message, { title: `ERROR in '${e.filename}':`, type: 'danger' });
@@ -47,6 +48,7 @@ patchAceEditor();
 initialPageLoad();
 initNavigator();
 initKeybindings();
+initHLJS();
 
 const nav = document.querySelector('nav.navbar');
 if (nav) {

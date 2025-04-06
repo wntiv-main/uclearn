@@ -31,6 +31,10 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		}
 	}
 
+	[id$="crui-response-div"] :is([style*="color"], [style*="background"]) {
+		background-color: transparent !important;
+	}
+
 	#crui-survey-form {
 		background-clip: text;
 
@@ -813,7 +817,11 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	}
 
 	.text-primary {
-		color: color-mix(in srgb, var(--uclearn-color-complete) 60%, var(--uclearn-foreground)) !important;
+		color: color-mix(
+			in srgb,
+			var(--uclearn-color-complete) 60%,
+			var(--uclearn-foreground)
+		) !important;
 	}
 
 	.nav-tabs .nav-link.active,

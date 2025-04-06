@@ -2,12 +2,12 @@ import type Ace from "ace-code";
 
 import type { LanguageProvider } from "ace-linters";
 import { AceLanguageClient } from "ace-linters/build/ace-language-client";
-import { EXT_URL } from "./constants";
+import { EXT_URL } from "../constants";
 import JSZip from "jszip";
 import { getAce, initAce, REQUIREJS_PATCHES } from "./lib-hook";
-import { onPostHydrate } from "./navigation";
+import { onPostHydrate } from "../navigation";
 import { tailHookLocals } from "./patch";
-import { Gap, GapCtor } from "./ucinterfaces/ace-gapfiller-ui";
+import { Gap, GapCtor } from "../ucinterfaces/ace-gapfiller-ui";
 
 // declare module 'ace-code' {
 // 	const require: Require;
