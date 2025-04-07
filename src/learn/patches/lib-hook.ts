@@ -9,6 +9,9 @@ import { getRemappedName, tailHook } from "./patch";
 import { onPreHydrate } from "../navigation";
 import type monaco from "monaco-editor";
 import { AceGapfillerUiCtor } from "../ucinterfaces/ace-gapfiller-ui";
+import { NotificationPopoverControllerType } from "../ucinterfaces/notification-popover-controller";
+import { HIDDEN_CLS } from "../hydration";
+import { PopoverControllerType } from "../ucinterfaces/popover-controller";
 
 let _require_promise: Promise<Require>;
 export async function getRequire() {
@@ -57,6 +60,14 @@ type ModuleTypesMap = {
 		Constructor: AceGapfillerUiCtor;
 	};
 	'moodle-core-notification-dialogue': undefined;
+	'core/popover_region_controller': PopoverControllerType;
+	'message_popup/notification_popover_controller': NotificationPopoverControllerType;
+	'core_message/message_popover': {
+		init(selector: Parameters<JQuery['find']>[0]): void;
+	};
+	'core_message/message_drawer': {
+		init(root: Parameters<JQuery['find']>[0], uniqueId: string, alwaysVisible?: boolean, route?: { params?: string[], path: string; }): void;
+	};
 };
 
 export async function requireModule<T extends (keyof ModuleTypesMap)[]>(...deps: T) {
@@ -98,7 +109,55 @@ export const REQUIREJS_PATCHES: {
 			{ [getRemappedName(() => onPreHydrate)]: onPreHydrate },
 			`<module init: ${name}>`,
 		);
-	}
+	},
+	// Preventing duplicate events on hydration
+	'core/popover_region_controller'(ready) {
+		return function (this: unknown, ...args) {
+			const PopoverController = ready.call(this, ...args);
+			const _readyBaseListeners = PopoverController.prototype.registerBaseEventListeners;
+			PopoverController.prototype.registerBaseEventListeners = function () {
+				if (!this.root.hasClass(`${HIDDEN_CLS}-inited`)) _readyBaseListeners.call(this);
+			};
+			const _readyNavListeners = PopoverController.prototype.registerListNavigationEventListeners;
+			PopoverController.prototype.registerListNavigationEventListeners = function () {
+				if (!this.root.hasClass(`${HIDDEN_CLS}-inited`)) _readyNavListeners.call(this);
+				this.root.addClass(`${HIDDEN_CLS}-inited`);
+			};
+			return PopoverController;
+		};
+	},
+	'message_popup/notification_popover_controller'(ready) {
+		return function (this: unknown, ...args) {
+			const NotificationPopoverController = ready.call(this, ...args);
+			const _readyListeners = NotificationPopoverController.prototype.registerEventListeners;
+			NotificationPopoverController.prototype.registerEventListeners = function () {
+				if (!this.root.hasClass(`${HIDDEN_CLS}-inited`)) _readyListeners.call(this);
+			};
+			return NotificationPopoverController;
+		};
+	},
+	'core_message/message_popover'(ready) {
+		return function (this: unknown, ...args) {
+			const Popover = ready.call(this, ...args);
+			const _init = Popover.init;
+			Popover.init = function (selector) {
+				if (!$(selector).hasClass(`${HIDDEN_CLS}-inited`)) _init(selector);
+				$(selector).addClass(`${HIDDEN_CLS}-inited`);
+			};
+			return Popover;
+		};
+	},
+	'core_message/message_drawer'(ready) {
+		return function (this: unknown, ...args) {
+			const MessageDrawer = ready.call(this, ...args);
+			const _init = MessageDrawer.init;
+			MessageDrawer.init = function (root, ...args) {
+				if (!$(root).hasClass(`${HIDDEN_CLS}-inited`)) _init(root, ...args);
+				$(root).addClass(`${HIDDEN_CLS}-inited`);
+			};
+			return MessageDrawer;
+		};
+	},
 };
 
 function patchDefine(define: RequireDefine) {
