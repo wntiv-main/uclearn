@@ -23,11 +23,12 @@
 		}
 
 		.nav-link {
-			padding-inline: 1em;
+			padding: 0.5em 1em calc(0.6em - 0.1lh);
 			background-color: transparent;
 		}
 
-		.nav-link, .dropdown {
+		.nav-link,
+		.dropdown {
 			color: var(--uclearn-foreground);
 		}
 	}
@@ -42,7 +43,8 @@
 			}
 		}
 
-		.editmode-switch-form, [id^="searchinput-navbar"] {
+		.editmode-switch-form,
+		[id^="searchinput-navbar"] {
 			order: -1;
 		}
 

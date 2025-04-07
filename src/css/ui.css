@@ -230,7 +230,8 @@
 	.filemanager-loading,
 	.fp-select-loading,
 	.filemanager-updating {
-		width: fit-content;
+		width: auto;
+		height: auto;
 		color: transparent;
 		background-image: conic-gradient(
 			from 45deg,
@@ -238,18 +239,19 @@
 			var(--uclearn-foreground-muted)
 		);
 		background-clip: text;
-		line-height: 0;
-		aspect-ratio: 1;
 
 		animation: rotate 1s linear infinite forwards normal;
-		transform-origin: top left; /* who tf knows why...? */
+		/* who tf knows why...? */
+		/* transform-origin: top left; */
+		transform-origin: center;
 
 		.popover-region-container &,
+		.notification-area &,
 		&.filemanager-loading,
 		&.fp-select-loading,
 		&.filemanager-updating {
 			font-size: 1.5em;
-			transform-origin: center;
+			/* transform-origin: center; */
 		}
 
 		&.filemanager-loading,
@@ -274,14 +276,35 @@
 
 		> .icon {
 			animation: none;
-			display: contents;
-			line-height: 0;
+			display: flex;
+			line-height: 1.2;
+			align-items: center;
+			justify-content: center;
+
+			.notification-area & {
+				align-items: start;
+			}
 		}
 
 		@media (prefers-reduced-motion: reduced) {
 			& {
 				animation: none;
 			}
+		}
+	}
+
+	.loading-icon {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		translate: -50% -50%;
+
+		.overlay-icon-container & {
+			transform-origin: top left;
+		}
+
+		:has(> &):not(.overlay-icon-container) {
+			position: relative;
 		}
 	}
 
