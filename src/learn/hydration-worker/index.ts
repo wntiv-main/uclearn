@@ -92,15 +92,15 @@ async function calculateChanges(id: HydrationId, config: WHydrationConfig, tasks
 	});
 	// Update children
 	if (dom.content === updated.content) return;
-	const diff = zip(...Hirschberg(await dom.children, await updated.children, compare));
+	const diff = Hirschberg(await dom.children, await updated.children, compare);
 	let lastElement: null | HydrationNode['nodeId'] = null;
 	if (dom.debugging) {
-		console.log([...diff]);
+		console.log([...zip(...diff)]);
 		/* eslint-disable-next-line no-debugger
 		*/// biome-ignore lint/suspicious/noDebugger: intentional
 		debugger;
 	}
-	await Promise.all(map(diff, async ([left, right]) => {
+	await Promise.all(map(zip(...diff), async ([left, right]) => {
 		const replaced = left != null
 			&& right != null
 			&& !compare(left, right);
