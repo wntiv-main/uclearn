@@ -8,10 +8,10 @@ import { maybeUnwrap, type MapType, type MaybeUnwrap } from "../../global/util";
 import { getRemappedName, tailHook } from "./patch";
 import { onPreHydrate } from "../navigation";
 import type monaco from "monaco-editor";
-import { AceGapfillerUiCtor } from "../ucinterfaces/ace-gapfiller-ui";
-import { NotificationPopoverControllerType } from "../ucinterfaces/notification-popover-controller";
+import type { AceGapfillerUiCtor } from "../ucinterfaces/ace-gapfiller-ui";
+import type { NotificationPopoverControllerType } from "../ucinterfaces/notification-popover-controller";
 import { HIDDEN_CLS } from "../hydration";
-import { PopoverControllerType } from "../ucinterfaces/popover-controller";
+import type { PopoverControllerType } from "../ucinterfaces/popover-controller";
 
 let _require_promise: Promise<Require>;
 export async function getRequire() {
@@ -100,7 +100,7 @@ export const REQUIREJS_PATCHES: {
 		deps: Deps,
 		name: K,
 		version?: string,
-	) => void | undefined | ((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])
+	) => undefined | ((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])
 } = {
 	"block_recentlyaccessedcourses/main"(ready, _, name) {
 		return tailHook(
@@ -141,7 +141,7 @@ export const REQUIREJS_PATCHES: {
 			const Popover = ready.call(this, ...args);
 			const _init = Popover.init;
 			Popover.init = function (selector) {
-				if (!$(selector).hasClass(`${HIDDEN_CLS}-inited`)) _init(selector);
+				if (!$(selector).hasClass(`${HIDDEN_CLS}-inited`)) _init.call(this, selector);
 				$(selector).addClass(`${HIDDEN_CLS}-inited`);
 			};
 			return Popover;
@@ -152,7 +152,7 @@ export const REQUIREJS_PATCHES: {
 			const MessageDrawer = ready.call(this, ...args);
 			const _init = MessageDrawer.init;
 			MessageDrawer.init = function (root, ...args) {
-				if (!$(root).hasClass(`${HIDDEN_CLS}-inited`)) _init(root, ...args);
+				if (!$(root).hasClass(`${HIDDEN_CLS}-inited`)) _init.call(this, root, ...args);
 				$(root).addClass(`${HIDDEN_CLS}-inited`);
 			};
 			return MessageDrawer;

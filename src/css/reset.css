@@ -913,4 +913,8 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 			margin-inline: -0.3rem;
 		}
 	}
+
+	#page-content #region-main-box #region-main .activity-navigation {
+		overflow: visible;
+	}
 }

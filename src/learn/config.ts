@@ -157,6 +157,10 @@ onThemeChange(theme => {
 	}
 });
 
+export function getTheme() {
+	return _theme;
+}
+
 const destructors: Partial<Record<keyof Config, () => void>> = {};
 async function initConfigValue<K extends keyof Config>(key: K, value: Config[K]) {
 	configCache[key] = value;

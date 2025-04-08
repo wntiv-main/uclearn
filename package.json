@@ -6,8 +6,8 @@
 		"dev:scripting": "export UCLEARN_DEBUG_FLAGS=SCRIPTING && bun run dev",
 		"dev:mathlive": "export UCLEARN_DEBUG_FLAGS=MATHLIVE && bun run dev",
 		"dev:all": "export UCLEARN_DEBUG_FLAGS=HYDRATION,SCRIPTING,MATHLIVE && bun run dev",
-		"dev": "export UCLEARN_DEBUG=1 && run-s clean:dev dev:static dev:watchers",
-		"dev:static": "cmd /C \"mklink /J build src\\static & mklink /J build\\learn\\highlight.js node_modules\\highlight.js\\styles & mklink /J build\\learn\\mathlive node_modules\\mathlive\\dist\\fonts & mklink /J build\\learn\\vs node_modules\\monaco-editor\\min\\vs\" && ls build/learn/python-typeshed.zip || (cd node_modules/typeshed && bestzip ../../build/learn/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 0 && cd ../..)",
+		"dev": "export IS_PREACT=1 UCLEARN_DEBUG=1 && run-s clean:dev dev:static dev:watchers",
+		"dev:static": "cmd /C \"mklink /J build src\\static & mklink /J build\\learn\\highlight.js node_modules\\highlight.js\\styles & mklink /J build\\learn\\mathlive node_modules\\mathlive\\dist\\fonts & mklink /J build\\learn\\vs node_modules\\monaco-editor\\min\\vs & mklink /J build\\excalidraw node_modules\\@excalidraw\\excalidraw\\dist\\dev\" && ls build/learn/python-typeshed.zip || (cd node_modules/typeshed && bestzip ../../build/learn/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 0 && cd ../..)",
 		"dev:watchers": "run-p -r -l dev:learn dev:hydration-worker dev:timetable dev:css-watcher dev:reload-watcher-server",
 		"dev:learn": "bun build --outfile=build/learn/index.js src/learn/index.ts --env \"UCLEARN_*\" --watch",
 		"dev:hydration-worker": "bun build --outfile=build/learn/hydration-worker.js src/learn/hydration-worker/index.ts --env \"UCLEARN_*\" --watch",
@@ -15,14 +15,14 @@
 		"dev:css-watcher": "bun onchange -i src/css/*.css -- bun run dev:css",
 		"dev:css": "lightningcss --bundle src/css/learn.css -o build/learn/index.css && lightningcss --bundle src/css/ace-code-shadow.css -o build/learn/ace-code-shadow.css && lightningcss --bundle src/css/timetable.css -o build/timetable/index.css",
 		"dev:reload-watcher-server": "bun run ./devserver.ts",
-		"build": "export UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && run-s clean:dev clean:build bundle build:learn build:hydration-worker build:timetable build:css",
+		"build": "export IS_PREACT=1 UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && run-s clean:dev clean:build bundle build:learn build:hydration-worker build:timetable build:css",
 		"build:learn": "bun build --outfile=dist/learn/index.js src/learn/index.ts --drop=DOMInspector --env \"UCLEARN_*\" --minify",
 		"build:hydration-worker": "bun build --outfile=dist/learn/hydration-worker.js src/learn/hydration-worker/index.ts --drop=console --env \"UCLEARN_*\" --minify",
 		"build:timetable": "bun build --outfile=dist/timetable/index.js src/timetable/index.ts --drop=console --env \"UCLEARN_*\" --minify --format=cjs",
 		"build:css": "lightningcss --minify --bundle src/css/learn.css -o dist/learn/index.css && lightningcss --minify --bundle src/css/ace-code-shadow.css -o dist/learn/ace-code-shadow.css && lightningcss --minify --bundle src/css/timetable.css -o dist/timetable/index.css",
-		"bundle": "mkdir dist && cp -R src/static/* dist && mkdir dist/learn/highlight.js && cp node_modules/highlight.js/styles/vs2015.min.css dist/learn/highlight.js/vs2015.min.css && cp node_modules/highlight.js/LICENSE dist/highlight.js/LICENSE && cmd /c \"xcopy /i /e node_modules\\monaco-editor\\min\\vs dist\\learn\\vs\" && rm dist/manifest.json dist/**/dev-* && mkdir dist/learn/mathlive && cmd /C \"xcopy /S node_modules\\mathlive\\dist\\fonts dist\\learn\\mathlive\" && mv dist/manifest.production.json dist/manifest.json && (cd node_modules/typeshed && bestzip ../../dist/learn/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 9 && cd ../..)",
+		"bundle": "mkdir dist && cp -R src/static/* dist && mkdir dist/learn/highlight.js && cp node_modules/highlight.js/styles/vs2015.min.css dist/learn/highlight.js/vs2015.min.css && cp node_modules/highlight.js/LICENSE dist/highlight.js/LICENSE && mkdir dist/excalidraw && cp node_modules/@excalidraw/excalidraw/dist/prod/index.css dist/excalidraw/index.css && cmd /c \"xcopy /i /e node_modules\\monaco-editor\\min\\vs dist\\learn\\vs & xcopy /i /e node_modules\\@excalidraw\\excalidraw\\dist\\prod\\fonts dist\\excalidraw\\prod\\fonts\" && rm dist/manifest.json dist/**/dev-* && mkdir dist/learn/mathlive && cmd /C \"xcopy /S node_modules\\mathlive\\dist\\fonts dist\\learn\\mathlive\" && mv dist/manifest.production.json dist/manifest.json && (cd node_modules/typeshed && bestzip ../../dist/learn/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 9 && cd ../..)",
 		"clean:build": "rm -r -f dist",
-		"clean:dev": "(rm -r -f src/static/learn/index.js src/static/learn/hydration-worker.js src/static/learn/index.css src/static/timetable/index.js src/static/timetable/index.css src/static/learn/ace-code-shadow.css || true) && cmd /C \"rd src\\static\\learn\\highlight.js & rd src\\static\\learn\\mathlive & rd src\\static\\learn\\vs & rd build\" || true"
+		"clean:dev": "(rm -r -f src/static/learn/index.js src/static/learn/hydration-worker.js src/static/learn/index.css src/static/timetable/index.js src/static/timetable/index.css src/static/learn/ace-code-shadow.css || true) && cmd /C \"rd src\\static\\learn\\highlight.js & rd src\\static\\learn\\mathlive & rd src\\static\\learn\\vs & rd src\\static\\excalidraw & rd build\" || true"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.21.0",
@@ -45,6 +45,7 @@
 		"typescript": "^5.7.3"
 	},
 	"dependencies": {
+		"@excalidraw/excalidraw": "^0.18.0",
 		"@typefox/pyright-browser": "^1.1.299",
 		"@types/jquery": "^3.5.31",
 		"@types/js-beautify": "^1.14.3",
@@ -55,6 +56,7 @@
 		"constrained-editor-plugin": "^1.3.0",
 		"dompurify": "^3.2.4",
 		"highlight.js": "^11.10.0",
+		"htm": "^3.1.1",
 		"js-beautify": "^1.15.1",
 		"jszip": "^3.10.1",
 		"marked": "^15.0.7",
@@ -62,6 +64,9 @@
 		"marked-highlight": "^2.2.1",
 		"mathlive": "^0.104.0",
 		"monaco-editor": "^0.52.2",
+		"preact": "^10.26.5",
+		"react": "npm:@preact/compat",
+		"react-dom": "npm:@preact/compat",
 		"typeshed": "https://github.com/python/typeshed",
 		"vscode-languageserver-protocol": "^3.17.5"
 	},
