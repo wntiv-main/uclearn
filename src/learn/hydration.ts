@@ -182,7 +182,7 @@ function* precomputeCompare(
 			continue;
 		}
 		if (isTextNode(el)) {
-			if (el.parentElement?.closest(".filter_mathjaxloader_equation")) {
+			if (el.ownerDocument !== document && el.parentElement?.closest(".filter_mathjaxloader_equation")) {
 				for (const fragment of el.data.split(MATH_RX)) {
 					if (!fragment) continue;
 					const nodeId = allocateEl({ node: el.ownerDocument.createTextNode(fragment) }, map);
@@ -245,6 +245,7 @@ export function onNodeInsert(parent: string | null, selector: string, cb: (node:
 }
 
 export function onNodeUpdate(cb: (node: Node, value?: string) => void, selector: string, attr?: string) {
+	// biome-ignore lint/suspicious/noAssignInExpressions: intentional gdammit
 	(updateHandlers[attr ?? '*'] ??= []).push([selector, cb]);
 }
 
