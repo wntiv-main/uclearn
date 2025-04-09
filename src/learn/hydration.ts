@@ -224,7 +224,6 @@ function* precomputeCompare(
 type NodeCollectors = {
 	scripts: HTMLScriptElement[];
 	math: Set<Element>;
-	fields: HTMLElement[];
 	matrixFields: HTMLElement[];
 };
 
@@ -235,7 +234,9 @@ type QuerySelect<T extends string> = T extends keyof HTMLElementTagNameMap ? HTM
 	: T extends keyof HTMLElementDeprecatedTagNameMap ? HTMLElementDeprecatedTagNameMap[T]
 	: T extends `.${string}` ? HTMLElement : Element;
 
-const insertHandlers: [string | null, string, (node: Node) => void][] = [];
+const insertHandlers: [string | null, string, (node: Node) => void][] = [
+	[...MATH_FIELD_SELECTOR, field => initField(field as HTMLInputElement)]
+];
 const updateHandlers: Record<string, [string, (node: Node, value?: string) => void][]> = {};
 
 export function onNodeInsert<S extends string>(parent: string | null, selector: S, cb: (node: QuerySelect<S>) => void): void;
@@ -268,8 +269,6 @@ function handleNodeInsert(parent: Node, node: Node, collectors: NodeCollectors) 
 	// 	state.videos.push(
 	// 		...newNode.querySelectorAll<HTMLVideoElement>("video.video-js"),
 	// 	);
-	if (node.matches(MATH_FIELD_SELECTOR)) collectors.fields.push(node as HTMLInputElement);
-	else collectors.fields.push(...node.querySelectorAll<HTMLInputElement>(MATH_FIELD_SELECTOR));
 	if (
 		node.classList.contains("matrixsquarebrackets") ||
 		node.classList.contains("matrixroundbrackets") ||
@@ -407,7 +406,6 @@ export async function initDocumentParts() {
 	const collectors: NodeCollectors = {
 		scripts: [],
 		math: new Set(),
-		fields: [],
 		matrixFields: [],
 	};
 	handleNodeInsert(document, document.documentElement, collectors);
@@ -420,7 +418,6 @@ async function applyHydration(tasks: HydrationTasks, { config, elMap: map, root:
 	const collectors: NodeCollectors = {
 		scripts: [],
 		math: new Set(),
-		fields: [],
 		matrixFields: [],
 	};
 	await lock;
@@ -556,7 +553,6 @@ async function handlePostHydrateCollectors(collectors: NodeCollectors, first?: b
 		inspector ? (old, replace) => inspector.hotswapNode(old, replace) : undefined,
 	);
 	if (!first) window.MathJax?.Hub?.Queue(["Typeset", window.MathJax.Hub, [...collectors.math]]);
-	for (const field of collectors.fields) initField(field as HTMLInputElement);
 	for (const field of collectors.matrixFields) initMatrixField(field);
 }
 

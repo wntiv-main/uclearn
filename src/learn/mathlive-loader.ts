@@ -10,7 +10,7 @@ MathfieldElement.fontsDirectory = `${EXT_URL}/learn/mathlive/`;
 
 export const MATHLIVE_FIELD_CLASS = '__uclearn-mathlive-field';
 
-export const MATH_FIELD_SELECTOR = '.que.stack input:is(.algebraic, .numerical)';
+export const MATH_FIELD_SELECTOR = ['.que.stack', 'input:is(.algebraic, .numerical)'] as const;
 
 if (DEBUG_MATHLIVE) {
 	document.documentElement.classList.add('__uclearn-mathlive-debug');
