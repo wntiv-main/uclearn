@@ -15,17 +15,22 @@ if (DEBUG) window.addEventListener("error", async (e) => {
 
 declare module 'mathjax' {
 	const AuthorConfig: Config;
+
+	interface Config {
+		AuthorInit?(): void;
+	}
 }
 
 let _MathJax: typeof MathJax | null = null;
 Object.defineProperty(window, 'MathJax', {
 	get: () => _MathJax,
-	set(v: Partial<typeof MathJax & MathJax.Config>) {
-		if (!_MathJax || v.AuthorConfig) {
+	set(v: typeof MathJax | MathJax.Config | null) {
+		if (!_MathJax || (v && 'AuthorConfig' in v)) {
 			_MathJax = v as typeof MathJax;
 			return;
 		}
 		_MathJax.Hub.Config(v as MathJax.Config);
+		v?.AuthorInit?.();
 	}
 });
 
