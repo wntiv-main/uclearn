@@ -295,35 +295,14 @@
 }
 
 .__uclearn-excalidraw-overlay {
-	grid-area: 1 / far-left / -1 / far-right;
-	z-index: 20;
+	grid-row: 1 / -1;
+	/* Above drawers, below nav */
+	z-index: 1018;
+	margin-block: -15px;
 }
 
-/* Excalidraw tooltip (styles from shadowroot dont apply outside) */
-.excalidraw-tooltip {
-	--ui-font: Assistant, system-ui, BlinkMacSystemFont, -apple-system, Segoe UI,
-		Roboto, Helvetica, Arial, sans-serif;
-	font-family: var(--ui-font);
-	position: fixed;
-	z-index: 10000;
-
-	padding: 8px;
-	border-radius: 6px;
-	box-sizing: border-box;
-	pointer-events: none;
-	word-wrap: break-word;
-
-	background: var(--uclearn-translucent-bg);
-	backdrop-filter: var(--uclearn-bg-effect);
-
-	line-height: 1.5;
-	text-align: center;
-	font-size: 13px;
-	font-weight: 500;
-
-	display: none;
-
-	&.excalidraw-tooltip--visible {
-		display: block;
-	}
+.excalidraw {
+	/* Above everything else, please */
+	--zIndex-modal: 2000;
+	--zIndex-popup: 2001;
 }

@@ -21,6 +21,7 @@ window.EXCALIDRAW_ASSET_PATH = `${EXT_URL}/excalidraw/`;
 import { Excalidraw } from '@excalidraw/excalidraw';
 import type { ExcalidrawProps } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
 import { getTheme } from "./config";
+import { DEBUG } from "../global/constants";
 
 async function createMathModal(value = '') {
 	const Dialog = await getMoodleDialog();
@@ -41,6 +42,7 @@ async function createMathModal(value = '') {
 	dialog.after('visibleChange', e => e.newVal || dialog.destroy(), dialog);
 }
 
+let excalidrawStyles: HTMLLinkElement | null = null;
 function createExcalidrawWorkspace() {
 	const wrapper = document.createElement('div');
 	wrapper.classList.add(SKIP_HYDRATION_CLASS, '__uclearn-excalidraw-overlay');
@@ -50,6 +52,14 @@ function createExcalidrawWorkspace() {
 	const styles = document.createElement('link');
 	styles.rel = 'stylesheet';
 	styles.href = `${EXT_URL}/excalidraw/index.css`;
+	excalidrawStyles ??= (() => {
+		const outerStyles = document.createElement("link");
+		outerStyles.classList.add(SKIP_HYDRATION_CLASS);
+		outerStyles.rel = "stylesheet";
+		outerStyles.href = `${EXT_URL}/excalidraw/index.css`;
+		document.head.append(outerStyles);
+		return outerStyles;
+	})();
 	const styleOverrides = document.createElement('style');
 	styleOverrides.textContent = `:host {
 	--zIndex-canvas: 1;
@@ -75,7 +85,6 @@ function createExcalidrawWorkspace() {
 .excalidraw .App-menu {
 	position: fixed;
 	inset-inline: var(--editor-container-padding);
-    margin-top: calc(-1 * var(--editor-container-padding));
 	width: auto;
 	padding-left: 0;
 }
@@ -86,12 +95,39 @@ function createExcalidrawWorkspace() {
 	shadowRoot.append(styles, styleOverrides, innerWrapper);
 	const html = htm.bind(h);
 	let canvasActive = false;
-	document.addEventListener('mousemove', e => {
-		wrapper.style.pointerEvents = canvasActive
-			|| e.shiftKey
-			|| !document.elementsFromPoint(e.pageX, e.pageY).find(el => el !== wrapper)
-				?.closest("a, p, [tabindex], button, input, textarea, [contenteditable]") ? 'all' : 'none';
-	}, { capture: true });
+	let canvasNeverActive = false;
+	const isRelevant = (x: number, y: number) => {
+		if (DEBUG) for (const node of document.querySelectorAll('.test')) node.remove();
+		const topEl = document.elementsFromPoint(x, y).find(el => el !== wrapper && (!DEBUG || !el.classList.contains('test')));
+		if (!topEl) return false;
+		if (topEl.closest(".MathJax, a, img, video, picture, map, [tabindex], button, input, textarea, select, embed, fencedframe, iframe, object, svg, math, canvas, dialog, [contenteditable], [draggable]")) return true;
+		for (const child of topEl.childNodes) {
+			if (child.nodeType !== Node.TEXT_NODE) continue;
+			const range = document.createRange();
+			range.selectNode(child);
+			const rects = range.getClientRects();
+			if (DEBUG) for (const rect of rects) {
+				const overlay = document.createElement("div");
+				overlay.classList.add("test");
+				overlay.style.position = "fixed";
+				overlay.style.backgroundColor = "#8080FF60";
+				overlay.style.pointerEvents = "none";
+				overlay.style.zIndex = "9999";
+				overlay.style.inset = `${rect.top}px ${window.innerWidth - rect.right}px ${window.innerHeight - rect.bottom}px ${rect.left}px`;
+				document.body.append(overlay);
+			}
+			if (([] as DOMRect[]).some.call(rects, (rect) => x > rect.left && x < rect.right && y > rect.top && y < rect.bottom))
+				return true;
+		}
+		return false;
+	};
+	const moveCb = (e: MouseEvent) => {
+		const selection = document.getSelection();
+		wrapper.style.pointerEvents = !canvasNeverActive
+			&& (canvasActive || e.shiftKey
+				|| ((!selection || selection.isCollapsed) && !isRelevant(e.pageX, e.pageY))) ? 'all' : 'none';
+	};
+	document.addEventListener('mousemove', moveCb, { capture: true });
 	wrapper.addEventListener('wheel', e => {
 		// Prevent excalidraw's default scroll handling
 		e.stopPropagation();
@@ -111,12 +147,12 @@ function createExcalidrawWorkspace() {
 		},
 		detectScroll: false,
 		onChange(_, state) {
-			canvasActive = !!(
-				(state.activeTool.type !== "selection" &&
-					state.activeTool.type !== "hand") ||
-				state.contextMenu ||
-				state.selectionElement ||
-				Object.values(state.selectedElementIds).some((x) => x)
+			canvasNeverActive = state.activeTool.type === 'hand';
+			canvasActive = !canvasNeverActive && !!(
+				state.activeTool.type !== "selection"
+				|| state.contextMenu
+				|| state.selectionElement
+				|| Object.values(state.selectedElementIds).some((x) => x)
 			);
 		},
 		excalidrawAPI(api) {
@@ -133,6 +169,7 @@ function createExcalidrawWorkspace() {
 			return html`<button class="help-icon" title="Close" onClick=${() => {
 				render(null, innerWrapper);
 				wrapper.remove();
+				document.removeEventListener('mousemove', moveCb, { capture: true });
 			}} dangerouslySetInnerHTML=${{ __html: TIMES_ICON }}></button>`;
 		},
 	} satisfies ExcalidrawProps}/>`, innerWrapper);
