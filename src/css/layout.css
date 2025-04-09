@@ -101,6 +101,11 @@
 					}
 				}
 
+				.__uclearn-excalidraw-overlay {
+					grid-column: far-left / far-right;
+					padding-inline: 0;
+				}
+
 				@media (max-width: 992px) {
 					&::before {
 						grid-column: far-left / far-right;
