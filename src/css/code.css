@@ -204,7 +204,7 @@
 	pre:has(> code),
 	pre:not(:has(> :not(span:empty))),
 	.filter-ace-inline-output-text,
-	.que:is(.coderunner, .description) pre:not(.ace_tooltip pre) {
+	.que:is(.coderunner) pre:not(.ace_tooltip pre) {
 		user-select: all;
 		text-shadow: none;
 		background-color: var(--uclearn-hover-tint) !important;

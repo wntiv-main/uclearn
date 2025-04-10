@@ -6,5 +6,5 @@
 - duplicate listeners in dominspect
 - core_message/message_popover: listener gets called twice causing immediate de-toggle (done)
 - user styling
-- wth is jsxgraph doing
-  - possible lead with order of script execution: makePmfCdfPlot called in jsxgraph init before defined in <https://apps.canterbury.ac.nz/1/math/online_resources/EMTH119/demos/emth119_probability_demos.js>
+- wth is jsxgraph doing (done?)
+  - possible lead with order of script execution: makePmfCdfPlot called in jsxgraph init before defined in <https://apps.canterbury.ac.nz/1/math/online_resources/EMTH119/demos/emth119_probability_demos.js> (done)

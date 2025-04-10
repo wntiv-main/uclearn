@@ -98,6 +98,16 @@ export async function loadScripts(
 		else inlineScripts.push(loadingScript);
 	}
 
+	// https://stackoverflow.com/a/22613028
+	inlineScripts.sort((a, b) => {
+		if (a === b) return 0;
+		return a[0].compareDocumentPosition(b[0]) & Node.DOCUMENT_POSITION_PRECEDING ? 1 : -1;
+	});
+	deferScripts.sort((a, b) => {
+		if (a === b) return 0;
+		return a[0].compareDocumentPosition(b[0]) & Node.DOCUMENT_POSITION_PRECEDING ? 1 : -1;
+	});
+
 	for (const [script, content] of inlineScripts) {
 		await execScript(script, await content, onRefreshScript);
 	}
