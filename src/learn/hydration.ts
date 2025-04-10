@@ -245,9 +245,10 @@ export function onNodeInsert(parent: string | null, selector: string, cb: (node:
 	insertHandlers.push([parent, selector, cb]);
 }
 
-export function onNodeUpdate(cb: (node: Node, value?: string) => void, selector: string, attr?: string) {
-	// biome-ignore lint/suspicious/noAssignInExpressions: intentional gdammit
-	(updateHandlers[attr ?? '*'] ??= []).push([selector, cb]);
+export function onNodeUpdate(cb: (node: Node, value?: string) => void, selector: string, attrs?: string | string[]) {
+	for (const attr of Array.isArray(attrs) ? attrs : [attrs ?? '*'])
+		// biome-ignore lint/suspicious/noAssignInExpressions: intentional gdammit
+		(updateHandlers[attr] ??= []).push([selector, cb]);
 }
 
 function handleNodeInsert(parent: Node, node: Node, collectors: NodeCollectors) {

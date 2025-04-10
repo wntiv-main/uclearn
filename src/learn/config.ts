@@ -5,12 +5,12 @@ import { HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICO
 import { getRequire, getYUIInstance, requireModule } from "./patches/lib-hook";
 import type monaco from "monaco-editor";
 import { DO_HYDRATION, onPostHydrate } from "./navigation";
-import { assertNever, type ItemOf } from "../global/util";
+import { assertNever, chainIter, type ItemOf } from "../global/util";
 import { DEBUG } from "../global/constants";
 import { getMoodleDialog } from "./patches/yui-modal";
 import { Marked } from "marked";
 import { baseUrl } from "marked-base-url";
-import { isElementTag } from "./domutil";
+import { isElement, isElementTag } from "./domutil";
 
 type Config = {
 	userCss: string;
@@ -116,44 +116,123 @@ function _setTheme(theme: 'light' | 'dark') {
 	for (const handler of themeListeners) handler(theme);
 }
 
-let coloredNodes: (readonly [HTMLElement, { color: string | null, backgroundColor: string | null; }])[] = [];
+type ColoredNode = HTMLElement | SVGElement;
+type ColoredNodeDetails = {
+	color?: string,
+	backgroundColor?: string;
+	fill?: string;
+	stroke?: string;
+	ignore: number;
+};
+const coloredNodes = new Map<ColoredNode, ColoredNodeDetails>();
 
 let _theme: 'light' | 'dark' = 'light';
-function handleColoredNode(el: HTMLElement) {
-	const { color, backgroundColor } = el.style;
-	const node = [el, { color, backgroundColor: backgroundColor || el.getAttribute('bgcolor') }] as const;
-	coloredNodes.push(node);
-	if (_theme === 'dark') colorNode(node);
+function handleColoredNode(el: ColoredNode) {
+	const old = coloredNodes.get(el);
+	const ensureNew = (value: string | null, old: string | undefined) => value?.startsWith('hsl(from') ? old ?? value : value || undefined;
+	const details = {
+		color: ensureNew(el.style.color, old?.color),
+		backgroundColor: ensureNew(el.style.backgroundColor || el.getAttribute("bgcolor"), old?.backgroundColor),
+		fill: ensureNew(el.getAttribute("fill"), old?.fill),
+		stroke: ensureNew(el.getAttribute("stroke"), old?.stroke),
+		ignore: 0,
+	} satisfies ColoredNodeDetails;
+	coloredNodes.set(el, details);
+	if (_theme === 'dark') colorNode(el, details);
 }
 
-function colorNode([el, colors]: ItemOf<typeof coloredNodes>) {
-	if (colors.color) el.style.color = `hsl(from ${colors.color} h s calc(100 - l))`;
-	if (colors.backgroundColor)
-		el.style.backgroundColor = `hsl(from ${colors.backgroundColor} h s calc(100 - l * 0.8)${isElementTag(el, 'span') ? '' : ' / 0.4'})`;
-	if (DEBUG) el.style.border = '1px solid red';
+function colorNode(el: ColoredNode, colors: ColoredNodeDetails) {
+	if (colors.color) {
+		el.style.color = `hsl(from ${colors.color} h s calc(100 - l))`;
+		colors.ignore++;
+	}
+	if (colors.backgroundColor) {
+		el.style.backgroundColor = `hsl(from ${colors.backgroundColor} h s calc(100 - l * 0.8)${isElementTag(el, "span") ? "" : " / 0.4"})`;
+		colors.ignore++;
+	}
+	if (colors.fill) {
+		el.setAttribute("fill", `hsl(from ${colors.fill} h s calc(100 - l))`);
+		colors.ignore++;
+	}
+	if (colors.stroke) {
+		el.setAttribute("stroke", `hsl(from ${colors.stroke} h s calc(100 - l))`);
+		colors.ignore++;
+	}
+	if (DEBUG && !el.closest('svg')) {
+		el.style.border = '1px solid red';
+		colors.ignore++;
+	}
 }
 
-const THEME_PARENTS = '.course-content, .activity-description, .que .content';
-const THEMEABLE = '[style*=color], [style*=background], [bgcolor]';
+const THEME_PARENTS = '.course-content, .activity-description, .que .content, [id^="JSXGraph"]';
+const THEMEABLE = '[style*="color"], [style*="background"], [bgcolor], [stroke]:not(.lucide), [fill]:not(.lucide)';
 
 onNodeInsert(THEME_PARENTS, THEMEABLE, handleColoredNode);
-onNodeUpdate(el => handleColoredNode(el as HTMLElement), `:is(${THEME_PARENTS}) :is(${THEMEABLE})`, 'style');
+onNodeUpdate(el => handleColoredNode(el as ColoredNode), `:is(${THEME_PARENTS}) :is(${THEMEABLE})`, ['style', 'bgcolor', 'stroke', 'fill']);
+
+const jsxGraphObserver = new MutationObserver(evts => {
+	for (const e of evts) {
+		if (e.type === 'childList') for (const el of chainIter(e.addedNodes)) {
+			if (!isElement(el)) continue;
+			if (el.matches(THEMEABLE)) handleColoredNode(el as ColoredNode);
+			for (const node of el.querySelectorAll<ColoredNode>(THEMEABLE))
+				handleColoredNode(node);
+		}
+		else if (isElement(e.target)) {
+			if (e.target.matches(THEMEABLE)) {
+				const details = coloredNodes.get(e.target as ColoredNode);
+				if (details?.ignore) details.ignore--;
+				else handleColoredNode(e.target as ColoredNode);
+			} else coloredNodes.delete(e.target as ColoredNode);
+		}
+	}
+});
+onNodeInsert(null, '[id^="JSXGraph"]', el => {
+	jsxGraphObserver.observe(el, {
+		childList: true,
+		subtree: true,
+		attributeFilter: ['stroke', 'fill', 'style', 'bgcolor'],
+	});
+	// TODO: memory leaks here?
+});
 
 onThemeChange(theme => {
 	_theme = theme;
 	if (theme === 'dark') {
-		coloredNodes = coloredNodes.filter(node => {
-			if (!document.body.contains(node[0])) return false;
-			colorNode(node);
-			return true;
-		});
+		const toRemove: ColoredNode[] = [];
+		for (const [el, details] of coloredNodes.entries()) {
+			if (!document.body.contains(el)) {
+				toRemove.push(el);
+				continue;
+			}
+			colorNode(el, details);
+		}
+		for (const remove of toRemove) coloredNodes.delete(remove);
 	} else {
-		coloredNodes = coloredNodes.filter(([el, colors]) => {
-			if (!document.body.contains(el)) return false;
-			if (colors.color) el.style.color = colors.color;
-			if (colors.backgroundColor) el.style.backgroundColor = colors.backgroundColor;
-			return true;
-		});
+		const toRemove: ColoredNode[] = [];
+		for (const [el, colors] of coloredNodes.entries()) {
+			if (!document.body.contains(el)) {
+				toRemove.push(el);
+				continue;
+			}
+			if (colors.color) {
+				el.style.color = colors.color;
+				colors.ignore++;
+			}
+			if (colors.backgroundColor) {
+				el.style.backgroundColor = colors.backgroundColor;
+				colors.ignore++;
+			}
+			if (colors.fill) {
+				el.setAttribute("fill", colors.fill);
+				colors.ignore++;
+			}
+			if (colors.stroke) {
+				el.setAttribute("stroke", colors.stroke);
+				colors.ignore++;
+			}
+		}
+		for (const remove of toRemove) coloredNodes.delete(remove);
 	}
 });
 
