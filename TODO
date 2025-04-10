@@ -3,7 +3,7 @@
 - autosave excalidraw (and math?) per-page
 - change hljs theme
 - change ace theme
-- duplicate listeners in dominspect
+- duplicate listeners in dominspect (done)
 - core_message/message_popover: listener gets called twice causing immediate de-toggle (done)
 - user styling
 - wth is jsxgraph doing (done?)

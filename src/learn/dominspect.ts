@@ -198,65 +198,92 @@ export class DOMInspector {
 			window.addEventListener('beforeunload', () => win.close());
 			return win;
 		})();
-		const stolenNode = DOMInspector.#window?.document.adoptNode(this.#rootNode);
-		stolenNode.addEventListener('dblclick', e => {
-			const script = (e.target as Element).closest('.scriptable');
-			if (script) {
-				script.innerHTML = hljs.highlight(
-					js_beautify((script as HTMLElement).innerText?.trim() ?? "", {
-						indent_with_tabs: true,
-						preserve_newlines: true,
-						max_preserve_newlines: 2,
-						space_before_conditional: true,
-						unescape_strings: true,
-						jslint_happy: true,
-						end_with_newline: false,
-						operator_position: "after-newline",
-					}),
-					{ language: "javascript" },
-				).value;
-				script.classList.remove("scriptable");
-				script.classList.add("scripted");
-			} else {
-				const node = (e.target as Element).closest('.item');
-				if (!node) return;
-				node.classList.toggle('debugging');
-				// biome-ignore lint/style/noNonNullAssertion: <explanation>
-				const srcNode = this.#reverseMap.get(node)!;
-				if (!DOMInspector.debugging.delete(srcNode)) {
-					DOMInspector.debugging.add(srcNode);
-				}
-			}
-		}, { capture: true });
-		stolenNode.addEventListener('click', e => {
-			const summary = (e.target as Element).closest('summary');
-			if (!summary) return;
-			const details = summary.parentElement;
-			if (!details || !details.classList.contains('expandable')) return;
-			this.#renderChildrenFor(details);
-		}, { capture: true });
-		stolenNode.addEventListener('mouseenter', e => {
-			const item = (e.target as Element).closest('.item');
-			if (!item || /removed(?:\s|$)/.test(item.className)) {
-				this.clearDocumentHighlight();
-				return;
-			}
-			const highlightEl = this.#reverseMap.get(item);
-			if (highlightEl) this.showDocumentHighlight(highlightEl);
-		}, { capture: true });
-		stolenNode.addEventListener('mouseleave', e => {
-			if (!(e.target as Element)?.classList.contains('item')) return;
-			let hovered = DOMInspector.#window?.document.elementFromPoint((e as MouseEvent).clientX, (e as MouseEvent).clientY);
-			if (hovered === e.target || hovered && (e.target as Element)?.contains(hovered)) hovered = (e.target as Element).parentElement;
-			hovered = hovered?.closest('.item');
-			if (!hovered || /removed(?:\s|$)/.test(hovered.className)) {
-				this.clearDocumentHighlight();
-				return;
-			}
-			const highlightEl = this.#reverseMap.get(hovered);
-			if (highlightEl) this.showDocumentHighlight(highlightEl);
-		}, { capture: true });
-		this.#rootNode = stolenNode;
+		if (this.#rootNode.ownerDocument !== DOMInspector.#window.document) {
+			const stolenNode = DOMInspector.#window?.document.adoptNode(
+				this.#rootNode,
+			);
+			stolenNode.addEventListener(
+				"dblclick",
+				(e) => {
+					const script = (e.target as Element).closest(".scriptable");
+					if (script) {
+						script.innerHTML = hljs.highlight(
+							js_beautify((script as HTMLElement).innerText?.trim() ?? "", {
+								indent_with_tabs: true,
+								preserve_newlines: true,
+								max_preserve_newlines: 2,
+								space_before_conditional: true,
+								unescape_strings: true,
+								jslint_happy: true,
+								end_with_newline: false,
+								operator_position: "after-newline",
+							}),
+							{ language: "javascript" },
+						).value;
+						script.classList.remove("scriptable");
+						script.classList.add("scripted");
+					} else {
+						const node = (e.target as Element).closest(".item");
+						if (!node) return;
+						node.classList.toggle("debugging");
+						// biome-ignore lint/style/noNonNullAssertion: <explanation>
+						const srcNode = this.#reverseMap.get(node)!;
+						if (!DOMInspector.debugging.delete(srcNode)) {
+							DOMInspector.debugging.add(srcNode);
+						}
+					}
+				},
+				{ capture: true },
+			);
+			stolenNode.addEventListener(
+				"click",
+				(e) => {
+					const summary = (e.target as Element).closest("summary");
+					if (!summary) return;
+					const details = summary.parentElement;
+					if (!details || !details.classList.contains("expandable")) return;
+					this.#renderChildrenFor(details);
+				},
+				{ capture: true },
+			);
+			stolenNode.addEventListener(
+				"mouseenter",
+				(e) => {
+					const item = (e.target as Element).closest(".item");
+					if (!item || /removed(?:\s|$)/.test(item.className)) {
+						this.clearDocumentHighlight();
+						return;
+					}
+					const highlightEl = this.#reverseMap.get(item);
+					if (highlightEl) this.showDocumentHighlight(highlightEl);
+				},
+				{ capture: true },
+			);
+			stolenNode.addEventListener(
+				"mouseleave",
+				(e) => {
+					if (!(e.target as Element)?.classList.contains("item")) return;
+					let hovered = DOMInspector.#window?.document.elementFromPoint(
+						(e as MouseEvent).clientX,
+						(e as MouseEvent).clientY,
+					);
+					if (
+						hovered === e.target ||
+						(hovered && (e.target as Element)?.contains(hovered))
+					)
+						hovered = (e.target as Element).parentElement;
+					hovered = hovered?.closest(".item");
+					if (!hovered || /removed(?:\s|$)/.test(hovered.className)) {
+						this.clearDocumentHighlight();
+						return;
+					}
+					const highlightEl = this.#reverseMap.get(hovered);
+					if (highlightEl) this.showDocumentHighlight(highlightEl);
+				},
+				{ capture: true },
+			);
+			this.#rootNode = stolenNode;
+		}
 		const filter = document.createElement('input');
 		filter.classList.add('filter-input');
 		filter.addEventListener('input', () => {
