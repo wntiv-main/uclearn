@@ -200,7 +200,11 @@
 		}
 	}
 
-	code:not(:empty, :has(> :not(span:empty)), pre > code),
+	.hljs {
+		user-select: all;
+	}
+
+	code:not(:empty, :has(> :not(span:empty)), pre > code, .hljs),
 	pre:has(> code),
 	pre:not(:has(> :not(span:empty))),
 	.filter-ace-inline-output-text,

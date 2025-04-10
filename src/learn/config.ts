@@ -129,7 +129,7 @@ const coloredNodes = new Map<ColoredNode, ColoredNodeDetails>();
 let _theme: 'light' | 'dark' = 'light';
 function handleColoredNode(el: ColoredNode) {
 	const old = coloredNodes.get(el);
-	const ensureNew = (value: string | null, old: string | undefined) => value?.startsWith('hsl(from') ? old ?? value : value || undefined;
+	const ensureNew = (value: string | null, old: string | undefined) => value?.startsWith('oklab(from') ? old ?? value : value || undefined;
 	const details = {
 		color: ensureNew(el.style.color, old?.color),
 		backgroundColor: ensureNew(el.style.backgroundColor || el.getAttribute("bgcolor"), old?.backgroundColor),
@@ -143,19 +143,19 @@ function handleColoredNode(el: ColoredNode) {
 
 function colorNode(el: ColoredNode, colors: ColoredNodeDetails) {
 	if (colors.color) {
-		el.style.color = `hsl(from ${colors.color} h s calc(100 - l))`;
+		el.style.color = `oklab(from ${colors.color} calc(1 - L) a b)`;
 		colors.ignore++;
 	}
 	if (colors.backgroundColor) {
-		el.style.backgroundColor = `hsl(from ${colors.backgroundColor} h s calc(100 - l * 0.8)${isElementTag(el, "span") ? "" : " / 0.4"})`;
+		el.style.backgroundColor = `oklab(from ${colors.backgroundColor} calc(1 - L) a b${isElementTag(el, "span") ? "" : " / 0.4"})`;
 		colors.ignore++;
 	}
 	if (colors.fill) {
-		el.setAttribute("fill", `hsl(from ${colors.fill} h s calc(100 - l))`);
+		el.setAttribute("fill", `oklab(from ${colors.fill} calc(1 - L * 0.5) a b)`);
 		colors.ignore++;
 	}
 	if (colors.stroke) {
-		el.setAttribute("stroke", `hsl(from ${colors.stroke} h s calc(100 - l))`);
+		el.setAttribute("stroke", `oklab(from ${colors.stroke} calc(1 - L * 0.5) a b)`);
 		colors.ignore++;
 	}
 	if (DEBUG && !el.closest('svg')) {
