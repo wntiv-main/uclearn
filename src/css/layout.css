@@ -185,11 +185,13 @@
 
 				> * {
 					grid-column: 1 / -1;
+					contain: inline-size;
 				}
 
 				> .tertiary-navigation {
 					grid-column: 1 / nav-split;
 					grid-row: 1;
+					contain: none;
 				}
 			}
 		}

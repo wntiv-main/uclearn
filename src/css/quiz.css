@@ -208,10 +208,14 @@
 				linear-gradient(currentColor, currentColor);
 		}
 
-		table {
-			display: block;
-			overflow-x: auto;
-			max-width: fit-content;
+		&:has(table) {
+			overflow: clip;
+
+			table {
+				display: block;
+				overflow-x: auto;
+				max-width: fit-content;
+			}
 		}
 	}
 
