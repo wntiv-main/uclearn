@@ -52,6 +52,38 @@
 		}
 	}
 
+	.alert {
+		--uclearn-accent-color: #808080;
+		color: inherit;
+		background-color: color-mix(
+			in srgb,
+			var(--uclearn-accent-color) 20%,
+			var(--uclearn-translucent-bg) 80%
+		);
+		border: 1px solid
+			color-mix(
+				in srgb,
+				var(--uclearn-accent-color) 50%,
+				var(--uclearn-background)
+			);
+
+		&.alert-success {
+			--uclearn-accent-color: var(--uclearn-color-success);
+		}
+
+		&.alert-info {
+			--uclearn-accent-color: var(--uclearn-color-complete);
+		}
+
+		&.alert-warning {
+			--uclearn-accent-color: var(--uclearn-color-warning);
+		}
+
+		&.alert-danger {
+			--uclearn-accent-color: var(--uclearn-color-error);
+		}
+	}
+
 	/* Modals */
 	.moodle-dialogue {
 		border-radius: 1rem;
