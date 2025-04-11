@@ -917,4 +917,8 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	#page-content #region-main-box #region-main .activity-navigation {
 		overflow: visible;
 	}
+
+	.post-message p {
+		margin: 0;
+	}
 }

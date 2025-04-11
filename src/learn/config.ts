@@ -164,7 +164,7 @@ function colorNode(el: ColoredNode, colors: ColoredNodeDetails) {
 	}
 }
 
-const THEME_PARENTS = '.course-content, .activity-description, .que .content, [id^="JSXGraph"]';
+const THEME_PARENTS = '.course-content, .activity-description, .que .content, [id^="JSXGraph"], .post-message';
 const THEMEABLE = '[style*="color"], [style*="background"], [bgcolor], [stroke]:not(.lucide), [fill]:not(.lucide)';
 
 onNodeInsert(THEME_PARENTS, THEMEABLE, handleColoredNode);
