@@ -350,7 +350,7 @@ class LatexParser {
 
 	@depthCheck
 	parseSymbol(fn = false) {
-		let sym = this.#consume(fn ? /(?![abeijkwxyz])[a-zA-Z]/ : /[a-zA-Z]/)
+		let sym = this.#consume(fn ? /(?![abeijkwxyznm])[a-zA-Z]/ : /[a-zA-Z]/)
 			|| this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI|omega/)
 				?.map(name => ({ 'exponentialE': 'e', 'imaginaryI': 'i' }[name] ?? name));
 		if (!sym) return false;
