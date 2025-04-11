@@ -156,7 +156,7 @@ class LatexParser {
 		this.#push();
 		let sums = '';
 		let products = '';
-		let end = false;
+		let isStable = true;
 		do {
 			if (this.#consume(/\s+/)) this.#commit();
 			if (this.parseMacro(/[,.:;]/)) this.#commit();
@@ -166,38 +166,38 @@ class LatexParser {
 				this.#commit();
 				if (products) products += '*';
 				products += obj;
+				isStable = true;
 				continue;
 			}
 
-			const sum = this.#consume(/[+=-]/) || this.parseMacro('pm')?.map(() => '#pm#');
+			const sum = isStable && this.#consume(/[+=-]/) || this.parseMacro('pm')?.map(() => '#pm#');
 			if (sum) {
 				this.#commit();
 				sums += `${products} ${sum} `;
 				products = '';
+				isStable = false;
 				continue;
 			}
 
-			const dot = this.parseMacro('cdot');
+			const dot = isStable && this.parseMacro('cdot');
 			if (dot) {
 				this.#commit();
 				if (products) products += ' . ';
-				const obj = this.parseObject();
-				if (obj) {
-					this.#commit();
-					products += obj;
-				}
+				isStable = false;
 				continue;
 			}
 
-			const sep = this.#consume(/[,;]/);
+			const sep = isStable && this.#consume(/[,;]/);
 			if (sep) {
 				this.#commit();
 				sums += `${products}${sep} `;
 				products = '';
+				isStable = false;
 				continue;
 			}
-			end = true;
-		} while (!end);
+			break;
+		} while ((this.#i.at(-1) ?? this.#latex.length) < this.#latex.length);
+		if (!isStable) throw new Error(`Incomplete expression: '${products + sums}'`);
 		return sums + products;
 	}
 
