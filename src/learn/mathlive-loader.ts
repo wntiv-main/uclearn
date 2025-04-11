@@ -350,14 +350,15 @@ class LatexParser {
 
 	@depthCheck
 	parseSymbol(fn = false) {
-		let sym = this.#consume(fn ? /(?![abeijkwxyz])[a-zA-Z]/ : /[a-zA-Z]/) || this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI|omega/)?.name;
+		let sym = this.#consume(fn ? /(?![abeijkwxyz])[a-zA-Z]/ : /[a-zA-Z]/)
+			|| this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI|omega/)
+				?.map(name => ({ 'exponentialE': 'e', 'imaginaryI': 'i' }[name] ?? name));
 		if (!sym) return false;
 		const sub = this.parseSub();
 		if (sub) {
 			sym += `_${sub}`;
 			this.#commit();
 		}
-		if (sym.startsWith('\\')) sym = { 'exponentialE': 'e', 'imaginaryI': 'i' }[sym] ?? sym.slice(1);
 		return sym;
 	}
 }
