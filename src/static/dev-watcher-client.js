@@ -28,7 +28,7 @@ function startSocket() {
 					: ["Change detected in js - reload to update!", { type: 'warning' }];
 		for(const tab of await chrome.tabs.query({ url: INJECT_URLS }))
 			chrome.scripting.executeScript({
-				func: (args) => window.require ? window.require(['core/toast'], toast => toast.add(...args)) : console.log(...args),
+				func: (args) => window.require?.version ? window.require(['core/toast'], toast => toast.add(...args)) : console.log(...args),
 				args: [toastMessage],
 				injectImmediately: true,
 				world: "MAIN",
@@ -44,7 +44,6 @@ function startSocket() {
 					});
 				break;
 			case 'full-reload':
-			// chrome.tabs.reload(tab.id);
 			case 'manifest-reload':
 				break;
 		}
