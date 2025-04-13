@@ -143,7 +143,7 @@ function handleColoredNode(el: ColoredNode) {
 
 function colorNode(el: ColoredNode, colors: ColoredNodeDetails) {
 	if (colors.color) {
-		el.style.color = `oklab(from ${colors.color} calc(1 - L) a b)`;
+		el.style.color = `oklab(from ${colors.color} calc(1 - L * 0.5) a b)`;
 		colors.ignore++;
 	}
 	if (colors.backgroundColor) {
