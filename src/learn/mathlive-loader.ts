@@ -96,7 +96,7 @@ class LatexParser {
 	// https://cortexjs.io/mathfield/reference/commands
 
 	parseObject(acceptLeadingSign = true): string | false {
-		const obj = this.parseNum() || this.parseFunction() || this.parseSymbol() || this.parseD() || this.parseGroup() || this.parsePDiff()
+		const obj = this.parseNum() || this.parseMacro(/sqrt\d/)?.map(name => `sqrt(${name.slice(-1)})`) || this.parseFunction() || this.parseSymbol() || this.parseD() || this.parseGroup() || this.parsePDiff()
 			|| this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])
 				?.map((_, [num, denom]) => `${LatexParser.#closeFactor(num.value)}/${LatexParser.#closeFactor(denom.value)}`)
 			|| this.parseMacro(/[dt]?frac\d{2}/)?.map(name => {
