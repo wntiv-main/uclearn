@@ -168,7 +168,7 @@ class LatexParser {
 			const obj = this.parseObjects(!products);
 			if (obj) {
 				this.#commit();
-				if (products) products += '*';
+				if (products && isStable) products += '*';
 				products += obj;
 				isStable = true;
 				continue;
@@ -183,10 +183,10 @@ class LatexParser {
 				continue;
 			}
 
-			const dot = isStable && this.parseMacro('cdot');
+			const dot = products && isStable && this.parseMacro(/cdot|cross/);
 			if (dot) {
 				this.#commit();
-				if (products) products += ' . ';
+				if (products) products += { cdot: " . ", cross: " * " }[dot.name];
 				isStable = false;
 				continue;
 			}
