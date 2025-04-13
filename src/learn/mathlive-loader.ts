@@ -159,15 +159,18 @@ class LatexParser {
 		do {
 			if (this.#consume(/\s+/)) this.#commit();
 			if (this.parseMacro(/[,.:;]|enskip|enspace|q?quad|strut|mathstrut/) || this.parseMacro(/hspace\*?/, [{ parse: this.parseText }])) {
-				if (products) products += ' ';
-				else sums += ' ';
+				if (products && !products.endsWith(' ')) products += ' ';
+				else if (sums && !sums.endsWith(' ')) sums += ' ';
 				this.#commit();
 			}
 
 			const obj = this.parseObjects(!products);
 			if (obj) {
 				this.#commit();
-				if (products && isStable) products += '*';
+				if (products && isStable) {
+					products = products.trimEnd();
+					products += '*';
+				}
 				products += obj;
 				isStable = true;
 				continue;
@@ -176,7 +179,7 @@ class LatexParser {
 			const sum = isStable && this.#consume(/[+=-]/) || this.parseMacro('pm')?.map(() => '#pm#');
 			if (sum) {
 				this.#commit();
-				sums += `${products} ${sum} `;
+				sums += `${products.trimEnd()} ${sum} `;
 				products = '';
 				isStable = false;
 				continue;
@@ -185,7 +188,10 @@ class LatexParser {
 			const dot = products && isStable && this.parseMacro(/cdot|cross/);
 			if (dot) {
 				this.#commit();
-				if (products) products += { cdot: " . ", cross: " * " }[dot.name];
+				if (products) {
+					products = products.trimEnd();
+					products += { cdot: " . ", cross: " * " }[dot.name];
+				}
 				isStable = false;
 				continue;
 			}
@@ -193,7 +199,7 @@ class LatexParser {
 			const sep = isStable && this.#consume(/[,;]/);
 			if (sep) {
 				this.#commit();
-				sums += `${products}${sep} `;
+				sums += `${products.trimEnd()}${sep} `;
 				products = '';
 				isStable = false;
 				continue;
