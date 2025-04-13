@@ -52,6 +52,13 @@ export function* chainIter<T extends Iterable<unknown>[]>(...arrays: T) {
 	}
 }
 
+export function* enumerate<T>(items: Iterable<T>) {
+	let i = 0;
+	for (const item of items) {
+		yield [i++, item] as const;
+	}
+}
+
 export function* map<T extends Iterable<unknown> | unknown[], R>(arr: T, mapper: (item: ItemOf<T>) => R) {
 	for (const item of arr) {
 		yield mapper(item as ItemOf<T>);
