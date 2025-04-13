@@ -483,6 +483,7 @@ export function initMatrixField(field: HTMLElement) {
 	mathField.addEventListener("mount", () => {
 		for (const [id, locked] of Object.entries(lockStates)) mathField.setPromptState(id, undefined, locked);
 	});
+	const oldDisabled = new WeakMap<HTMLButtonElement | HTMLInputElement, string | null>();
 	const inputCb = (e: Event) => {
 		for (const prompt of mathField.getPrompts()) {
 			const fieldLatex = mathField.getPromptValue(prompt, 'latex');
@@ -491,11 +492,23 @@ export function initMatrixField(field: HTMLElement) {
 			const [stack, err] = latexToStack(fieldLatex);
 			if (err) {
 				mathField.style.borderColor = 'red';
+				for (const button of mathField.closest('.que')?.querySelectorAll<HTMLButtonElement | HTMLInputElement>(':is(input, button)[type="submit"]') ?? []) {
+					oldDisabled.set(button, button.getAttribute("disabled"));
+					button.setAttribute("disabled", "true");
+				}
 				return;
 			}
 			field.value = `${stack};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
 			field.dispatchEvent(new InputEvent(e.type, e));
 		}
+		for (const button of mathField.closest('.que')?.querySelectorAll<HTMLButtonElement | HTMLInputElement>(':is(input, button)[type="submit"]') ?? [])
+			if (oldDisabled.has(button)) {
+				const value = oldDisabled.get(button);
+				if (value)
+					button.setAttribute('disabled', value);
+				else
+					button.removeAttribute('disabled');
+			}
 		mathField.style.borderColor = 'currentColor';
 	};
 	mathField.addEventListener('input', inputCb);
@@ -513,14 +526,27 @@ export function initField(field: HTMLInputElement & ChildNode) {
 	const fieldValue = field.value.match(/;"__uclearn-mltex-\(";(".*");"__uclearn-mltex-\)"/);
 	mathField.setValue(fieldValue ? JSON.parse(fieldValue[1]) : AMTparseAMtoTeX(field.value.split(';')[0]));
 	mathField.style.minWidth = field.style.minWidth || field.style.width;
+	const oldDisabled = new WeakMap<HTMLButtonElement | HTMLInputElement, string | null>();
 	const inputCb = (e: Event) => {
 		const fieldLatex = mathField.getValue('latex');
 		const [stack, err] = latexToStack(fieldLatex);
 		if (err) {
 			mathField.style.borderColor = 'red';
+			for (const button of mathField.closest('.que')?.querySelectorAll<HTMLButtonElement | HTMLInputElement>(':is(input, button)[type="submit"]') ?? []) {
+				oldDisabled.set(button, button.getAttribute("disabled"));
+				button.setAttribute("disabled", "true");
+			}
 			if (DEBUG) console.error(err);
 			return;
 		}
+		for (const button of mathField.closest('.que')?.querySelectorAll<HTMLButtonElement | HTMLInputElement>(':is(input, button)[type="submit"]') ?? [])
+			if (oldDisabled.has(button)) {
+				const value = oldDisabled.get(button);
+				if (value)
+					button.setAttribute('disabled', value);
+				else
+					button.removeAttribute('disabled');
+			}
 		mathField.style.borderColor = 'currentColor';
 		field.value = `${stack};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
 		field.dispatchEvent(new InputEvent(e.type, e));
