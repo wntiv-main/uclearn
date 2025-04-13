@@ -155,7 +155,7 @@ class LatexParser {
 		this.#push();
 		let sums = '';
 		let products = '';
-		let isStable = false;
+		let prodIsStable = false;
 		do {
 			if (this.#consume(/\s+/)) this.#commit();
 			if (this.parseMacro(/[,.:;]|enskip|enspace|q?quad|strut|mathstrut/) || this.parseMacro(/hspace\*?/, [{ parse: this.parseText }])) {
@@ -167,46 +167,45 @@ class LatexParser {
 			const obj = this.parseObjects(!products);
 			if (obj) {
 				this.#commit();
-				if (products && isStable) {
+				if (prodIsStable) {
 					products = products.trimEnd();
 					products += '*';
 				}
 				products += obj;
-				isStable = true;
+				prodIsStable = true;
 				continue;
 			}
 
-			const sum = isStable && this.#consume(/[+=-]/) || this.parseMacro('pm')?.map(() => '#pm#');
+			const sum = (prodIsStable || !products) && this.#consume(/[+=-]/) || this.parseMacro('pm')?.map(() => '#pm#');
 			if (sum) {
 				this.#commit();
-				sums += `${products.trimEnd()} ${sum} `;
+				sums += !products.trimEnd() ? sum : `${products.trimEnd()} ${sum} `;
 				products = '';
-				isStable = false;
+				prodIsStable = false;
 				continue;
 			}
 
-			const dot = products && isStable && this.parseMacro(/cdot|cross/);
+			const dot = prodIsStable && this.parseMacro(/cdot|cross/);
 			if (dot) {
 				this.#commit();
 				if (products) {
 					products = products.trimEnd();
 					products += { cdot: " . ", cross: " * " }[dot.name];
 				}
-				isStable = false;
+				prodIsStable = false;
 				continue;
 			}
 
-			const sep = isStable && this.#consume(/[,;]/);
+			const sep = prodIsStable && this.#consume(/[,;]/);
 			if (sep) {
 				this.#commit();
 				sums += `${products.trimEnd()}${sep} `;
 				products = '';
-				isStable = false;
 				continue;
 			}
 			break;
 		} while ((this.#i.at(-1) ?? this.#latex.length) < this.#latex.length);
-		if (!isStable) throw new Error(`Incomplete expression: '${products + sums}'`);
+		if (!prodIsStable) throw new Error(`Incomplete expression: '${products + sums}'`);
 		return sums + products;
 	}
 
