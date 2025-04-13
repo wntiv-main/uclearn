@@ -267,6 +267,7 @@ export async function initNavigator() {
 			if (!(form instanceof HTMLFormElement)) return;
 			if (form.getAttribute('method') === 'dialog') return;
 			e.preventDefault();
+			if (!form.reportValidity()) return; // bad input, cancel here
 			const scrollPos = document.getElementById("page")?.scrollTop;
 			if (!e.submitter?.classList.contains('submit'))
 				document.getElementById("page")?.scrollTo(0, 0);
