@@ -103,9 +103,13 @@ class LatexParser {
 	}
 
 	parse() {
-		const result = this.parseExpression();
-		this.#commit();
-		return result;
+		try {
+			const result = this.parseExpression();
+			this.#commit();
+			return [result, null] as const;
+		} catch (e) {
+			return [null, e as Error] as const;
+		}
 	}
 
 	@depthCheck
@@ -447,9 +451,15 @@ export function initMatrixField(field: HTMLElement) {
 			const fieldLatex = mathField.getPromptValue(prompt, 'latex');
 			const field = document.getElementById(prompt);
 			if (!field || !isElementTag(field, 'input')) continue;
-			field.value = `${latexToStack(fieldLatex)};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
+			const [stack, err] = latexToStack(fieldLatex);
+			if (err) {
+				mathField.style.borderColor = 'red';
+				return;
+			}
+			field.value = `${stack};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
 			field.dispatchEvent(new InputEvent(e.type, e));
 		}
+		mathField.style.borderColor = 'currentColor';
 	};
 	mathField.addEventListener('input', inputCb);
 	mathField.addEventListener('change', inputCb);
@@ -468,7 +478,13 @@ export function initField(field: HTMLInputElement & ChildNode) {
 	mathField.style.minWidth = field.style.minWidth || field.style.width;
 	const inputCb = (e: Event) => {
 		const fieldLatex = mathField.getValue('latex');
-		field.value = `${latexToStack(fieldLatex)};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
+		const [stack, err] = latexToStack(fieldLatex);
+		if (err) {
+			mathField.style.borderColor = 'red';
+			return;
+		}
+		mathField.style.borderColor = 'currentColor';
+		field.value = `${stack};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)};"__uclearn-mltex-)"`;
 		field.dispatchEvent(new InputEvent(e.type, e));
 	};
 	mathField.addEventListener('input', inputCb);
