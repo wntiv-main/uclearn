@@ -129,7 +129,7 @@ const coloredNodes = new Map<ColoredNode, ColoredNodeDetails>();
 let _theme: 'light' | 'dark' = 'light';
 function handleColoredNode(el: ColoredNode) {
 	const old = coloredNodes.get(el);
-	const ensureNew = (value: string | null, old: string | undefined) => value?.startsWith('oklab(from') ? old ?? value : value || undefined;
+	const ensureNew = (value: string | null, old: string | undefined) => value?.startsWith('oklab') ? old ?? value : value || undefined;
 	const details = {
 		color: ensureNew(el.style.color, old?.color),
 		backgroundColor: ensureNew(el.style.backgroundColor || el.getAttribute("bgcolor"), old?.backgroundColor),
@@ -147,7 +147,7 @@ function colorNode(el: ColoredNode, colors: ColoredNodeDetails) {
 		colors.ignore++;
 	}
 	if (colors.backgroundColor) {
-		el.style.backgroundColor = `oklab(from ${colors.backgroundColor} calc(1 - L) a b${isElementTag(el, "span") ? "" : " / 0.4"})`;
+		el.style.backgroundColor = `oklab(from ${colors.backgroundColor} calc(1 - L) a b${isElementTag(el, "span") ? "" : " / min(0.4, alpha)"})`;
 		colors.ignore++;
 	}
 	if (colors.fill) {
