@@ -388,4 +388,29 @@
 		background-color: var(--uclearn-hover-tint);
 		border-radius: var(--uclearn-radius);
 	}
+
+	.ln-prob-multi-exp-container {
+		background-color: transparent;
+		border-color: currentColor;
+		border-radius: var(--uclearn-radius);
+		padding: calc(var(--uclearn-radius) / 2);
+	}
+
+	.ln-prob-success,
+	.ln-prob-failure {
+		color: color-mix(
+			in srgb,
+			var(--uclearn-accent-color) 40%,
+			var(--uclearn-foreground)
+		);
+		border-color: currentColor;
+
+		&.ln-prob-success {
+			--uclearn-accent-color: var(--uclearn-color-success);
+		}
+
+		&.ln-prob-failure {
+			--uclearn-accent-color: var(--uclearn-color-error);
+		}
+	}
 }

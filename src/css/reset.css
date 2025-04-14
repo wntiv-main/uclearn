@@ -921,4 +921,17 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.post-message p {
 		margin: 0;
 	}
+
+	#page-wrapper .que [id^="table"] {
+		border-collapse: collapse;
+		border: none;
+
+		tr {
+			border: none;
+		}
+
+		td {
+			border: 1px solid currentColor;
+		}
+	}
 }
