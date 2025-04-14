@@ -94,7 +94,7 @@ class LatexParser {
 			const result = this.parseExpression();
 			this.#commit();
 			if (this.#i[0] < this.#latex.length)
-				throw new Error("Could not parse to end of input");
+				return [null, new Error(`Could not parse '${this.#latex.slice(this.#i[0])}'`)] as const;
 			return [result, null] as const;
 		} catch (e) {
 			return [null, e as Error] as const;
