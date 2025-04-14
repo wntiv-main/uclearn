@@ -60,9 +60,22 @@ class LatexParser {
 		return match?.[0] ?? false;
 	}
 
-	static readonly #close = (x: string | false) => !x || /^\(.*\)$/.test(x) ? x : `(${x})`;
-	static readonly #closeFactor = (x: string | false) => x && /[-+*/]/.test(x) ? LatexParser.#close(x) : x;
-	static readonly #closeExponent = (x: string | false) => x && /[-+*/^]/.test(x) ? LatexParser.#close(x) : x;
+	static readonly #close = <T extends string | false | null | undefined>(x: T) => !x ? x : `(${LatexParser.#unwrap(x)})`;
+	static readonly #closeFactor = <T extends string | false | null | undefined>(x: T) => x && /[-+*/.]/.test(x) ? LatexParser.#close(x) : x;
+	static readonly #closeExponent = <T extends string | false | null | undefined>(x: T) => x && /[-+*/.^]/.test(x) ? LatexParser.#close(x) : x;
+	static readonly #unwrap = <T extends string | false | null | undefined>(x: T) => {
+		if (!x || !x.startsWith('(') || !x.endsWith(')')) return x;
+		let depth = 0;
+		for (const ch of x.slice(1, -1)) {
+			if (ch === '(') depth++;
+			else if (ch === ')') {
+				depth--;
+				if (depth < 0)
+					return x;
+			}
+		}
+		return x.slice(1, -1);
+	};
 
 	#push() {
 		this.#i.push(this.#i.at(-1) ?? 0);
@@ -98,10 +111,10 @@ class LatexParser {
 	parseObject(acceptLeadingSign = true): string | false {
 		const obj = this.parseNum() || this.parseMacro(/sqrt\d/)?.map(name => `sqrt(${name.slice(-1)})`) || this.parseFunction() || this.parseSymbol() || this.parseD() || this.parseGroup() || this.parsePDiff()
 			|| this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])
-				?.map((_, [num, denom]) => `${LatexParser.#closeFactor(num.value)}/${LatexParser.#closeFactor(denom.value)}`)
+				?.map((_, [num, denom]) => `(${LatexParser.#closeFactor(num.value)}/${LatexParser.#closeFactor(denom.value)})`)
 			|| this.parseMacro(/[dt]?frac\d{2}/)?.map(name => {
 				const [n, d] = [...name.slice(-2)].map(n => Number.parseInt(n));
-				return `${n}/${d}`;
+				return `(${n}/${d})`;
 			})
 			|| this.parseMacro(/(?:display|text|script|scriptscript)style|math(?:punct|inner|ord|bfit|bf|it|tt|sf|frak|scr|cal|bb|rm)|boxed|boldsymbol|bold|bm|emph|tiny|small|[lL]arge|LARGE|[hH]uge|(?:script|footnote|normal)size|displaylines/,
 				[{}])?.map((_, args) => {
@@ -258,7 +271,7 @@ class LatexParser {
 
 	parseExp() {
 		const exp = this.#consume('^');
-		const sup = exp && (this.#consume(/\d/) || this.parseObject());
+		const sup = exp && (this.#consume(/\d/) || LatexParser.#closeExponent(this.parseObject()));
 		if (sup) {
 			this.#commit();
 			return sup;
