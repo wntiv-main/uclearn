@@ -258,18 +258,12 @@ class LatexParser {
 
 	parseExp() {
 		const exp = this.#consume('^');
-		const sup = exp && (
-			this.parseNum()
-			|| this.parseSymbol()
-			|| this.parseD()
-			|| this.parseGroup('{', '}', () => this._parseN(
-				() => this.parseMacro('doubleprime') ? "''" : this.parseMacro('prime') ? "'" : false))
-			|| this.parseGroup(/[{(]/));
+		const sup = exp && (this.#consume(/\d/) || this.parseObject());
 		if (sup) {
 			this.#commit();
 			return sup;
 		}
-		if (exp) throw [exp, sup, this.#latex, this.#i.at(-1)];
+		if (exp) throw new Error('Caret (^) with no exponent expression');
 		return false;
 	}
 
