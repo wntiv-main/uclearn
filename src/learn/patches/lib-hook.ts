@@ -12,6 +12,7 @@ import type { AceGapfillerUiCtor } from "../ucinterfaces/ace-gapfiller-ui";
 import type { NotificationPopoverControllerType } from "../ucinterfaces/notification-popover-controller";
 import { HIDDEN_CLS } from "../hydration";
 import type { PopoverControllerType } from "../ucinterfaces/popover-controller";
+import { LazyPromise } from "../../global/lazy-promise";
 
 let _require_promise: Promise<Require>;
 export async function getRequire() {
@@ -75,10 +76,10 @@ export async function requireModule<T extends (keyof ModuleTypesMap)[]>(...deps:
 	return new Promise<MaybeUnwrap<MapType<ModuleTypesMap, T>>>(res => require(deps, (...mods: MapType<ModuleTypesMap, T>) => res(maybeUnwrap(mods))));
 }
 
-export const videoJS = requireModule('media_videojs/video-lazy');
-export const modals = requireModule('core/modal_registry', 'core/modal_events');
-export const Toast = requireModule('core/toast');
-export const initAce = requireModule('filter_ace_inline/ace_inline_code');
+export const videoJS = LazyPromise.wrap(() => requireModule("media_videojs/video-lazy"));
+export const modals = LazyPromise.wrap(() => requireModule("core/modal_registry", "core/modal_events"));
+export const Toast = LazyPromise.wrap(() => requireModule("core/toast"));
+export const initAce = LazyPromise.wrap(() => requireModule('filter_ace_inline/ace_inline_code'));
 
 type RequireFunctionDeps<T extends (keyof ModuleTypesMap)[]> = { [K in keyof T]: ModuleTypesMap[T[K]] };
 
