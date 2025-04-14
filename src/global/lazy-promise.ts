@@ -1,9 +1,10 @@
 export class LazyPromise<T> extends Promise<T> {
 	#neededCb: (() => void) | undefined;
-	constructor (task: (needed: Promise<void>, res: (value: T) => void, rej: (err: unknown) => void) => unknown) {
+	// `needed` arg *MUST* be last: https://gist.github.com/domenic/8ed6048b187ee8f2ec75
+	constructor (task: (res: (value: T) => void, rej: (err: unknown) => void, needed: Promise<void>) => unknown) {
 		let neededCb: (() => void) | undefined = undefined;
 		const needed = new Promise<void>(res => { neededCb = res; });
-		super((res, rej) => task(needed, res, rej));
+		super((res, rej) => task(res, rej, needed));
 		this.#neededCb = neededCb;
 	}
 
@@ -24,7 +25,7 @@ export class LazyPromise<T> extends Promise<T> {
 	}
 
 	static wrap<A extends unknown[], R>(coro: (...args: A) => Promise<R>, ...args: A) {
-		return new LazyPromise<R>(async (needed, res, rej) => {
+		return new LazyPromise<R>(async (res, rej, needed) => {
 			await needed;
 			coro(...args).then(res, rej);
 		});
