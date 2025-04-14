@@ -351,7 +351,7 @@ class LatexParser {
 	}
 
 	parseD() {
-		const d = this.parseMacro('differentialD');
+		const d = this.parseMacro(/differentialD|differencedelta/);
 		const space = d && this.#consume(/\s+/);
 		const sym = d && this.parseSymbol();
 		if (!sym) {
@@ -359,13 +359,13 @@ class LatexParser {
 			return false;
 		}
 		this.#commit(+!!space + 1);
-		return `d${sym}`;
+		return `${d.name === 'differentialD' ? 'd' : 'delta'}${sym}`;
 	}
 
 	parseSymbol(fn = false) {
 		let sym = this.#consume(fn ? /(?![abeijkwxyznm])[a-zA-Z]/ : /[a-zA-Z]/)
-			|| this.parseMacro(fn ? /log/ : /nabla|theta|pi|exponentialE|imaginaryI|omega/)
-				?.map(name => ({ 'exponentialE': 'e', 'imaginaryI': 'i' }[name] ?? name));
+			|| this.parseMacro(fn ? /log/ : /nabla|exponentialE|imaginaryI|aleph|beth|gimel|daleth|[aA]lpha|[bB]eta|[gG]amma|varGamma|[dD]elta|varDelta|[eE]psilon|varepsilon|[zZ]eta|[eE]ta|[tT]heta|vartheta|[iI]ota|[kK]appa|varkappa|[lL]ambda|[mM]u|[nN]u|[xX]i|varXi|[oO]micron|[pP]i|var[pP]i|[rR]ho|varrho|[sS]igma|var[sS]igma|[tT]au|[pP]hi|var[pP]hi|[uU]psilon|varUpsilon|[cC]hi|[pP]si|varPsi|[oO]mega|varOmega|digamma/)
+				?.map(name => ({ 'exponentialE': 'e', 'imaginaryI': 'i', 'varepsilon': 'epsilon', 'vartheta': 'theta', 'varkappa': 'kappa', 'varpi': 'pi', 'varPi': 'Pi', 'varrho': 'rho', 'varsigma': 'sigma', 'varSigma': 'Sigma', 'varphi': 'phi', 'varPhi': 'Phi', 'varGamma': 'Gamma', 'varDelta': 'Delta', 'varXi': 'Xi', 'varUpsilon': 'Upsilon', 'varPsi': 'Psi', 'varOmega': 'Omega' }[name] ?? name));
 		if (!sym) return false;
 		const sub = this.parseSub();
 		if (sub) {
