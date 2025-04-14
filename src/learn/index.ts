@@ -22,15 +22,27 @@ declare module 'mathjax' {
 }
 
 let _MathJax: typeof MathJax | null = null;
+const onReady: ((mj: typeof MathJax) => unknown)[] = [];
 Object.defineProperty(window, 'MathJax', {
 	get: () => _MathJax,
 	set(v: typeof MathJax | MathJax.Config | null) {
 		if (!_MathJax || (v && 'AuthorConfig' in v)) {
 			_MathJax = v as typeof MathJax;
+			while (onReady.length) {
+				// biome-ignore lint/style/noNonNullAssertion: length check above
+				onReady.pop()!(_MathJax);
+			}
 			return;
 		}
-		_MathJax.Hub.Config(v as MathJax.Config);
-		v?.AuthorInit?.();
+		if (_MathJax?.Hub?.Config) {
+			_MathJax.Hub?.Config(v as MathJax.Config);
+			v?.AuthorInit?.();
+		} else {
+			onReady.push(mj => {
+				mj.Hub.Config(v as MathJax.Config);
+				v?.AuthorInit?.();
+			});
+		}
 	}
 });
 
