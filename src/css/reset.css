@@ -772,7 +772,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		margin-block: 0.5rem;
 	}
 
-	.activity table :is(td, th) {
+	:is(.activity, .que) table :is(tr, td, th) {
 		border-color: currentColor !important;
 	}
 
@@ -780,6 +780,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		background-color: transparent !important;
 		color: inherit !important;
 	} */
+
 	.activity [style*="outline"] {
 		outline: none !important;
 	}

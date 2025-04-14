@@ -222,6 +222,10 @@
 		) !important;
 		overflow: auto;
 		scrollbar-color: var(--uclearn-foreground-muted) transparent;
+
+		&:is(pre) {
+			margin-block: 0.5em;
+		}
 	}
 
 	.ace_tooltip {

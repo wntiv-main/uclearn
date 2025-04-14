@@ -306,3 +306,8 @@
 	--zIndex-modal: 2000;
 	--zIndex-popup: 2001;
 }
+
+.uclearn-video-wrapper {
+	border-radius: var(--uclearn-radius);
+	overflow: hidden;
+}

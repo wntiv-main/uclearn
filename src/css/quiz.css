@@ -175,7 +175,8 @@
 			}
 		}
 
-		.outcome:has(> .feedback):not(
+		/* TODO: proper fix for nested background containers */
+		.outcome:has(> .feedback > .stackprtfeedback:only-child):not(
 				:has(> :not(.accesshide, .feedback:only-of-type))
 			) {
 			padding: 0;
@@ -216,6 +217,14 @@
 				overflow-x: auto;
 				max-width: fit-content;
 			}
+		}
+
+		.qtext {
+			margin: 0;
+		}
+
+		.im-controls:not(:has(> :not(input[type="hidden"]))) {
+			margin: 0;
 		}
 	}
 
