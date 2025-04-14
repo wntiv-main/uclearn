@@ -33,7 +33,6 @@ export type HydrationNode = { nodeId: number; } & (({
 	elementType: HydrationElementType.SCRIPT;
 } | {
 	elementType: HydrationElementType.VIDEOJS;
-	sources: string[];
 })) | {
 	type: HydrationNodeType.TEXT;
 	textType: HydrationTextType;

@@ -11,6 +11,7 @@ import { getMoodleDialog } from "./patches/yui-modal";
 import { Marked } from "marked";
 import { baseUrl } from "marked-base-url";
 import { isElement, isElementTag } from "./domutil";
+import { setDefaultPlaybackRate } from "./patches/videojs-patches";
 
 type Config = {
 	userCss: string;
@@ -18,6 +19,7 @@ type Config = {
 	theme: 'light' | 'dark' | null;
 	hasSeenHelpMenu: boolean;
 	performHydration: boolean;
+	vjsDefaultPlaybackRate: number;
 };
 
 const uclearnDB = new DatabaseHandler<{
@@ -92,6 +94,9 @@ const configHandlers: {
 	performHydration(value) {
 		DO_HYDRATION.value = value;
 	},
+	vjsDefaultPlaybackRate(value) {
+		setDefaultPlaybackRate(value);
+	},
 };
 
 function _setTheme(theme: 'light' | 'dark') {
@@ -164,78 +169,6 @@ function colorNode(el: ColoredNode, colors: ColoredNodeDetails) {
 	}
 }
 
-const THEME_PARENTS = '.course-content, .activity-description, .que .content, [id^="JSXGraph"], .post-message';
-const THEMEABLE = '[style*="color"], [style*="background"], [bgcolor], [stroke]:not(.lucide), [fill]:not(.lucide)';
-
-onNodeInsert(THEME_PARENTS, THEMEABLE, handleColoredNode);
-onNodeUpdate(el => handleColoredNode(el as ColoredNode), `:is(${THEME_PARENTS}) :is(${THEMEABLE})`, ['style', 'bgcolor', 'stroke', 'fill']);
-
-const jsxGraphObserver = new MutationObserver(evts => {
-	for (const e of evts) {
-		if (e.type === 'childList') for (const el of chainIter(e.addedNodes)) {
-			if (!isElement(el)) continue;
-			if (el.matches(THEMEABLE)) handleColoredNode(el as ColoredNode);
-			for (const node of el.querySelectorAll<ColoredNode>(THEMEABLE))
-				handleColoredNode(node);
-		}
-		else if (isElement(e.target)) {
-			if (e.target.matches(THEMEABLE)) {
-				const details = coloredNodes.get(e.target as ColoredNode);
-				if (details?.ignore) details.ignore--;
-				else handleColoredNode(e.target as ColoredNode);
-			} else coloredNodes.delete(e.target as ColoredNode);
-		}
-	}
-});
-onNodeInsert(null, '[id^="JSXGraph"]', el => {
-	jsxGraphObserver.observe(el, {
-		childList: true,
-		subtree: true,
-		attributeFilter: ['stroke', 'fill', 'style', 'bgcolor'],
-	});
-	// TODO: memory leaks here?
-});
-
-onThemeChange(theme => {
-	_theme = theme;
-	if (theme === 'dark') {
-		const toRemove: ColoredNode[] = [];
-		for (const [el, details] of coloredNodes.entries()) {
-			if (!document.body.contains(el)) {
-				toRemove.push(el);
-				continue;
-			}
-			colorNode(el, details);
-		}
-		for (const remove of toRemove) coloredNodes.delete(remove);
-	} else {
-		const toRemove: ColoredNode[] = [];
-		for (const [el, colors] of coloredNodes.entries()) {
-			if (!document.body.contains(el)) {
-				toRemove.push(el);
-				continue;
-			}
-			if (colors.color) {
-				el.style.color = colors.color;
-				colors.ignore++;
-			}
-			if (colors.backgroundColor) {
-				el.style.backgroundColor = colors.backgroundColor;
-				colors.ignore++;
-			}
-			if (colors.fill) {
-				el.setAttribute("fill", colors.fill);
-				colors.ignore++;
-			}
-			if (colors.stroke) {
-				el.setAttribute("stroke", colors.stroke);
-				colors.ignore++;
-			}
-		}
-		for (const remove of toRemove) coloredNodes.delete(remove);
-	}
-});
-
 export function getTheme() {
 	return _theme;
 }
@@ -251,6 +184,10 @@ async function setConfigValue<K extends keyof Config>(key: K, value: Config[K]) 
 	initConfigValue(key, value);
 	const store = await uclearnDB.openStore('userConfig', 'readwrite');
 	store.put({ key, value } as never);
+}
+
+export async function storeDefaultPlaybackRate(rate: number) {
+	await setConfigValue('vjsDefaultPlaybackRate', rate);
 }
 
 const toSet: [prop: string, value: string][] = [];
@@ -595,6 +532,78 @@ export async function showHelpModal() {
 }
 
 export async function initConfig() {
+	const THEME_PARENTS = '.course-content, .activity-description, .que .content, [id^="JSXGraph"], .post-message';
+	const THEMEABLE = '[style*="color"], [style*="background"], [bgcolor], [stroke]:not(.lucide), [fill]:not(.lucide)';
+
+	onNodeInsert(THEME_PARENTS, THEMEABLE, handleColoredNode);
+	onNodeUpdate(el => handleColoredNode(el as ColoredNode), `:is(${THEME_PARENTS}) :is(${THEMEABLE})`, ['style', 'bgcolor', 'stroke', 'fill']);
+
+	const jsxGraphObserver = new MutationObserver(evts => {
+		for (const e of evts) {
+			if (e.type === 'childList') for (const el of chainIter(e.addedNodes)) {
+				if (!isElement(el)) continue;
+				if (el.matches(THEMEABLE)) handleColoredNode(el as ColoredNode);
+				for (const node of el.querySelectorAll<ColoredNode>(THEMEABLE))
+					handleColoredNode(node);
+			}
+			else if (isElement(e.target)) {
+				if (e.target.matches(THEMEABLE)) {
+					const details = coloredNodes.get(e.target as ColoredNode);
+					if (details?.ignore) details.ignore--;
+					else handleColoredNode(e.target as ColoredNode);
+				} else coloredNodes.delete(e.target as ColoredNode);
+			}
+		}
+	});
+	onNodeInsert(null, '[id^="JSXGraph"]', el => {
+		jsxGraphObserver.observe(el, {
+			childList: true,
+			subtree: true,
+			attributeFilter: ['stroke', 'fill', 'style', 'bgcolor'],
+		});
+		// TODO: memory leaks here?
+	});
+
+	onThemeChange(theme => {
+		_theme = theme;
+		if (theme === 'dark') {
+			const toRemove: ColoredNode[] = [];
+			for (const [el, details] of coloredNodes.entries()) {
+				if (!document.body.contains(el)) {
+					toRemove.push(el);
+					continue;
+				}
+				colorNode(el, details);
+			}
+			for (const remove of toRemove) coloredNodes.delete(remove);
+		} else {
+			const toRemove: ColoredNode[] = [];
+			for (const [el, colors] of coloredNodes.entries()) {
+				if (!document.body.contains(el)) {
+					toRemove.push(el);
+					continue;
+				}
+				if (colors.color) {
+					el.style.color = colors.color;
+					colors.ignore++;
+				}
+				if (colors.backgroundColor) {
+					el.style.backgroundColor = colors.backgroundColor;
+					colors.ignore++;
+				}
+				if (colors.fill) {
+					el.setAttribute("fill", colors.fill);
+					colors.ignore++;
+				}
+				if (colors.stroke) {
+					el.setAttribute("stroke", colors.stroke);
+					colors.ignore++;
+				}
+			}
+			for (const remove of toRemove) coloredNodes.delete(remove);
+		}
+	});
+
 	for await (const { key, value } of uclearnDB.iterStore('userConfig')) {
 		initConfigValue(key, value);
 	}
@@ -613,7 +622,6 @@ export async function initConfig() {
 			?.before(settingsButton, helpButton);
 	onPostHydrate(installButton);
 	if (!configCache.hasSeenHelpMenu) {
-		await getRequire(); // Or else modal errors
 		await showHelpModal();
 		const store = await uclearnDB.openStore('userConfig', 'readwrite');
 		store.put({ key: 'hasSeenHelpMenu', value: true });

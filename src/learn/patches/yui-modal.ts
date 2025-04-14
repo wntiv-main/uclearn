@@ -1,5 +1,6 @@
-import { getYUIInstance, REQUIREJS_PATCHES } from "./lib-hook";
+import { getYUIInstance } from "./lib-hook";
 import { PAGE_LOAD } from "../navigation";
+import { REQUIREJS_PATCHES } from "./requirejs-patches";
 
 let _moodleDialog: Promise<NonNullable<NonNullable<NonNullable<typeof window.M>['core']>['dialogue']>> | null = null;
 export async function getMoodleDialog() {

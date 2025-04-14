@@ -4,15 +4,11 @@ import type { LanguageProvider } from "ace-linters";
 import { AceLanguageClient } from "ace-linters/build/ace-language-client";
 import { EXT_URL } from "../constants";
 import JSZip from "jszip";
-import { getAce, initAce, REQUIREJS_PATCHES } from "./lib-hook";
+import { getAce, initAce } from "./lib-hook";
 import { onPostHydrate } from "../navigation";
 import { tailHookLocals } from "./patch";
-import { Gap, GapCtor } from "../ucinterfaces/ace-gapfiller-ui";
-
-// declare module 'ace-code' {
-// 	const require: Require;
-// 	const define: RequireDefine;
-// }
+import type { Gap, GapCtor } from "../ucinterfaces/ace-gapfiller-ui";
+import { REQUIREJS_PATCHES } from "./requirejs-patches";
 
 async function readZipFile(base: string, url: string) {
 	try {
@@ -166,12 +162,13 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 	src => src.replace(/editor\.commands\.on\(['"]exec['"],\s*/,
 		`$&(${(cb: Ace.Ace.execEventHandler): Ace.Ace.execEventHandler => e => {
 			// Patch exec handler
+			// biome-ignore lint/security/noGlobalEval: bypassing name "mangling"
 			const that = eval('t');
 			const cursor = e.editor.selection.getCursor();
 			const range = e.editor.getSelectionRange();
 			const gap: Gap = that.findCursorGap(cursor);
 			// Revert these to default behavior
-			if (gap && gap.range.containsRange(range) && (e.command.name === 'startAutocomplete'
+			if (gap?.range.containsRange(range) && (e.command.name === 'startAutocomplete'
 				|| e.command.name === 'Down'
 				|| e.command.name === 'Up'
 				|| e.command.name === 'Tab'
@@ -248,7 +245,7 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 				}
 			}
 			const operation = e.editor.curOp && (e.editor.curOp as { command?: { name?: string; }; }).command;
-			if (gap && gap.range.containsRange(range)
+			if (gap?.range.containsRange(range)
 				&& (operation?.name === 'insertMatch'
 					|| operation?.name === 'Tab'
 					|| operation?.name === 'Return')) {
@@ -261,7 +258,7 @@ REQUIREJS_PATCHES['qtype_coderunner/ui_ace_gapfiller'] = (ready) => tailHookLoca
 					column: gap.range.end.column - shrink,
 				}, new Array(shrink).fill(' ').join(''));
 			}
-			if (gap && gap.range.containsRange(range) && (e.command.name === 'removewordleft' || e.command.name === 'removewordright')) {
+			if (gap?.range.containsRange(range) && (e.command.name === 'removewordleft' || e.command.name === 'removewordright')) {
 				// Select word
 				if (e.editor.selection.isEmpty()) {
 					if (e.command.name === 'removewordleft') e.editor.selection.selectWordLeft();

@@ -13,16 +13,16 @@
 		"dev:hydration-worker": "bun build --outfile=build/learn/hydration-worker.js src/learn/hydration-worker/index.ts --env \"UCLEARN_*\" --watch",
 		"dev:timetable": "bun build --outfile=build/timetable/index.js src/timetable/index.ts --env \"UCLEARN_*\" --watch --format=cjs",
 		"dev:css-watcher": "bun onchange -i src/css/*.css -- bun run dev:css",
-		"dev:css": "lightningcss --bundle src/css/learn.css -o build/learn/index.css && lightningcss --bundle src/css/ace-code-shadow.css -o build/learn/ace-code-shadow.css && lightningcss --bundle src/css/timetable.css -o build/timetable/index.css",
+		"dev:css": "lightningcss --bundle src/css/learn.css -o build/learn/index.css && lightningcss --bundle src/css/ace-code-shadow.css -o build/learn/ace-code-shadow.css && lightningcss --bundle src/css/videojs-shadow.css -o build/learn/videojs-shadow.css && lightningcss --bundle src/css/timetable.css -o build/timetable/index.css",
 		"dev:reload-watcher-server": "bun run ./devserver.ts",
 		"build": "export IS_PREACT=1 UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && run-s clean:dev clean:build bundle build:learn build:hydration-worker build:timetable build:css",
 		"build:learn": "bun build --outfile=dist/learn/index.js src/learn/index.ts --drop=DOMInspector --env \"UCLEARN_*\" --minify",
 		"build:hydration-worker": "bun build --outfile=dist/learn/hydration-worker.js src/learn/hydration-worker/index.ts --drop=console --env \"UCLEARN_*\" --minify",
 		"build:timetable": "bun build --outfile=dist/timetable/index.js src/timetable/index.ts --drop=console --env \"UCLEARN_*\" --minify --format=cjs",
-		"build:css": "lightningcss --minify --bundle src/css/learn.css -o dist/learn/index.css && lightningcss --minify --bundle src/css/ace-code-shadow.css -o dist/learn/ace-code-shadow.css && lightningcss --minify --bundle src/css/timetable.css -o dist/timetable/index.css",
+		"build:css": "lightningcss --minify --bundle src/css/learn.css -o dist/learn/index.css && lightningcss --minify --bundle src/css/ace-code-shadow.css -o dist/learn/ace-code-shadow.css && lightningcss --minify --bundle src/css/videojs-shadow.css -o dist/learn/videojs-shadow.css && lightningcss --minify --bundle src/css/timetable.css -o dist/timetable/index.css",
 		"bundle": "mkdir dist && cp -R src/static/* dist && mkdir dist/learn/highlight.js && cp node_modules/highlight.js/styles/vs2015.min.css dist/learn/highlight.js/vs2015.min.css && cp node_modules/highlight.js/LICENSE dist/highlight.js/LICENSE && mkdir dist/excalidraw && cp node_modules/@excalidraw/excalidraw/dist/prod/index.css dist/excalidraw/index.css && cmd /c \"xcopy /i /e node_modules\\monaco-editor\\min\\vs dist\\learn\\vs & xcopy /i /e node_modules\\@excalidraw\\excalidraw\\dist\\prod\\fonts dist\\excalidraw\\prod\\fonts\" && rm dist/manifest.json dist/**/dev-* && mkdir dist/learn/mathlive && cmd /C \"xcopy /S node_modules\\mathlive\\dist\\fonts dist\\learn\\mathlive\" && mv dist/manifest.production.json dist/manifest.json && (cd node_modules/typeshed && bestzip ../../dist/learn/python-typeshed.zip ./stdlib/* ./stubs/* ./LICENSE --level 9 && cd ../..)",
 		"clean:build": "rm -r -f dist",
-		"clean:dev": "(rm -r -f src/static/learn/index.js src/static/learn/hydration-worker.js src/static/learn/index.css src/static/timetable/index.js src/static/timetable/index.css src/static/learn/ace-code-shadow.css || true) && cmd /C \"rd src\\static\\learn\\highlight.js & rd src\\static\\learn\\mathlive & rd src\\static\\learn\\vs & rd src\\static\\excalidraw & rd build\" || true"
+		"clean:dev": "(rm -r -f src/static/learn/index.js src/static/learn/hydration-worker.js src/static/learn/index.css src/static/timetable/index.js src/static/timetable/index.css src/static/learn/ace-code-shadow.css src/static/learn/videojs-shadow.css || true) && cmd /C \"rd src\\static\\learn\\highlight.js & rd src\\static\\learn\\mathlive & rd src\\static\\learn\\vs & rd src\\static\\excalidraw & rd build\" || true"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.21.0",
@@ -49,7 +49,6 @@
 		"@typefox/pyright-browser": "^1.1.299",
 		"@types/jquery": "^3.5.31",
 		"@types/js-beautify": "^1.14.3",
-		"@types/video.js": "^7.3.58",
 		"@types/yui": "^3.14.31",
 		"ace-linters": "^1.4.1",
 		"asciimath": "^0.0.0",
@@ -68,6 +67,7 @@
 		"react": "npm:@preact/compat",
 		"react-dom": "npm:@preact/compat",
 		"typeshed": "https://github.com/python/typeshed",
+		"video.js": "^8.22.0",
 		"vscode-languageserver-protocol": "^3.17.5"
 	},
 	"patchedDependencies": {

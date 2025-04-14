@@ -1,8 +1,10 @@
 export class LazyPromise<T> extends Promise<T> {
 	#neededCb: (() => void) | undefined;
 	constructor (task: (needed: Promise<void>, res: (value: T) => void, rej: (err: unknown) => void) => unknown) {
-		const needed = new Promise<void>(res => { this.#neededCb = res; });
+		let neededCb: (() => void) | undefined = undefined;
+		const needed = new Promise<void>(res => { neededCb = res; });
 		super((res, rej) => task(needed, res, rej));
+		this.#neededCb = neededCb;
 	}
 
 	// biome-ignore lint/suspicious/noThenProperty: its a Promise subclass tho???

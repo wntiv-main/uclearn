@@ -26,6 +26,7 @@ import { assertNever, chainIter, type ItemOf, type Shifted } from "../global/uti
 import { Toast } from "./patches/lib-hook";
 import { loadScripts, SKIP_SCRIPT_CLASS } from "./script-loader";
 import { initField, initMatrixField, MATH_FIELD_SELECTOR, MATHLIVE_FIELD_CLASS } from "./mathlive-loader";
+import { VJS_WRAPPER_CLASS } from "./patches/videojs-patches";
 
 type TypedMessageWorker<T> = Omit<Worker, "postMessage"> & {
 	postMessage(
@@ -164,13 +165,9 @@ function* precomputeCompare(
 				),
 				content: root.innerHTML,
 				debugging: DOMInspector.debugging.has(el),
-				...(root.classList.contains("video-js")
+				...(root.classList.contains("video-js") || root.classList.contains(VJS_WRAPPER_CLASS)
 					? {
 						elementType: HydrationElementType.VIDEOJS,
-						sources: [],
-						// "player" in el
-						// 	? (el as VideoJSElement).player.currentSources()
-						// 	: vjs.getComponent("Player").getTagSettings(el).sources,
 					}
 					: {
 						elementType:

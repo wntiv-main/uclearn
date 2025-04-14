@@ -34,6 +34,7 @@
 				"excalidraw/*",
 				"learn/python-typeshed.zip",
 				"learn/ace-code-shadow.css",
+				"learn/videojs-shadow.css",
 				"learn/index.js",
 				"learn/index.css"
 			],

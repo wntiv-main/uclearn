@@ -64,6 +64,8 @@
 
 	--uclearn-nav-height: calc(1lh + 1rem + 6px);
 
+	--uclearn-dark-filter: /**/ ;
+
 	@media (prefers-color-scheme: dark) {
 		& {
 			color-scheme: dark;
@@ -78,6 +80,7 @@
 				var(--uclearn-translucent-bg)
 			),
 			var(--uclearn-background-image);
+		--uclearn-dark-filter: invert(1) hue-rotate(180deg) saturate(2);
 	}
 
 	&.uclearn-light-mode {

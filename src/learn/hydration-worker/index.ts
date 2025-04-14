@@ -18,9 +18,11 @@ function compare(a: HydrationNode, b: HydrationNode) {
 	switch (a.type) {
 		case HydrationNodeType.ELEMENT: {
 			if (a.elementType === HydrationElementType.VIDEOJS && (b as typeof a).elementType === HydrationElementType.VIDEOJS) {
-				for (const aSrc of a.sources) {
-					if ((b as typeof a).sources.includes(aSrc)) return true;
-				}
+				return true;
+				// TODO: compare sources??
+				// for (const aSrc of a.sources) {
+				// 	if ((b as typeof a).sources.includes(aSrc)) return true;
+				// }
 			}
 			if (a.tag !== (b as typeof a).tag
 				|| a.id !== (b as typeof a).id) return false;

@@ -1,0 +1,26 @@
+@import "../../node_modules/video.js/dist/video-js.css";
+
+:host .video-js {
+	width: 100%;
+	height: auto !important;
+	background-color: var(--uclearn-translucent-bg);
+	border-radius: var(--uclearn-radius);
+	overflow: hidden;
+
+	.vjs-tech {
+		position: static;
+		width: 100%;
+		height: auto;
+		filter: var(--uclearn-translucent-filter) var(--uclearn-dark-filter);
+		outline: none;
+	}
+
+	.vjs-menu-button-popup .vjs-menu .vjs-menu-content {
+		width: auto;
+		min-width: 100%;
+
+		.vjs-menu-item {
+			padding-inline: 0.5ch;
+		}
+	}
+}

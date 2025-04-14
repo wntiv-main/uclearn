@@ -30,15 +30,14 @@
 
 	img[src^="https://learn.canterbury.ac.nz/pix/"]
 	{
-		filter: var(--uclearn-translucent-filter);
+		filter: var(--uclearn-translucent-filter) var(--uclearn-dark-filter);
 	}
 
 	.que img,
 	.resourceimage,
 	iframe[title*="JSXGraph" i],
-	img[role="presentation"],
-	.video-js .vjs-tech {
-		filter: var(--uclearn-translucent-filter);
+	img[role="presentation"] {
+		filter: var(--uclearn-translucent-filter) var(--uclearn-dark-filter);
 	}
 
 	a:has(img[src^="https://learn.canterbury.ac.nz/pix/"])
@@ -86,36 +85,17 @@
 		}
 	}
 
-	.video-js {
-		border-radius: var(--uclearn-radius);
-		background-color: var(--uclearn-translucent-bg);
-		contain: content;
-	}
-
 	&.uclearn-dark-mode {
-		img[src^="https://learn.canterbury.ac.nz/pix/"]
-		{
-			filter: var(--uclearn-translucent-filter) invert(1)
-				hue-rotate(180deg) saturate(2);
-		}
-
-		.que :is(img, canvas),
-		.resourceimage,
-		iframe[title*="JSXGraph" i],
-		.video-js .vjs-tech {
-			filter: var(--uclearn-translucent-filter) invert(1)
-				hue-rotate(180deg) saturate(2);
-		}
-
 		.navbar .logo,
 		.drawer-primary .logo,
 		img.icon,
 		#logoimage,
 		.questionflagimage {
-			filter: invert(1) hue-rotate(180deg) saturate(2);
+			filter: var(--uclearn-dark-filter);
 		}
+
 		.activityicon {
-			filter: invert(1) hue-rotate(180deg) saturate(2) !important;
+			filter: var(--uclearn-dark-filter) !important;
 		}
 
 		img[src$="/u/f1"] {
