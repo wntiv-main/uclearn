@@ -8,6 +8,6 @@
 - user styling
 - wth is jsxgraph doing (done?)
   - possible lead with order of script execution: makePmfCdfPlot called in jsxgraph init before defined in <https://apps.canterbury.ac.nz/1/math/online_resources/EMTH119/demos/emth119_probability_demos.js> (done)
-- put videojs videos into shadowroots for better perf
+- put videojs videos into shadowroots for better perf (done)
 - use stackinputfeedback info to give more robust latex->stack checking, prompt user to switch to default inputs
 - use shared CSSStyleSheets for shadowroot styles
