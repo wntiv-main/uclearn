@@ -20,7 +20,7 @@ window.EXCALIDRAW_ASSET_PATH = `${EXT_URL}/excalidraw/`;
 
 import { Excalidraw } from '@excalidraw/excalidraw';
 import type { ExcalidrawProps } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
-import { getTheme } from "./config";
+import { getTheme } from "./theme";
 import { DEBUG } from "../global/constants";
 
 async function createMathModal(value = '') {

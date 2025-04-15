@@ -57,6 +57,7 @@
 		"highlight.js": "^11.10.0",
 		"htm": "^3.1.1",
 		"js-beautify": "^1.15.1",
+		"jsxgraph": "^1.11.1",
 		"jszip": "^3.10.1",
 		"marked": "^15.0.7",
 		"marked-base-url": "^1.1.6",

@@ -1,17 +1,15 @@
 import { EXT_URL } from "./constants";
 import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } from "./db";
-import { onNodeInsert, onNodeUpdate, SKIP_HYDRATION_CLASS } from "./hydration";
+import { SKIP_HYDRATION_CLASS } from "./hydration";
 import { HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
 import { getRequire, getYUIInstance, requireModule } from "./patches/lib-hook";
 import type monaco from "monaco-editor";
 import { DO_HYDRATION, onPostHydrate } from "./navigation";
-import { assertNever, chainIter, type ItemOf } from "../global/util";
-import { DEBUG } from "../global/constants";
 import { getMoodleDialog } from "./patches/yui-modal";
 import { Marked } from "marked";
 import { baseUrl } from "marked-base-url";
-import { isElement, isElementTag } from "./domutil";
 import { setDefaultPlaybackRate } from "./patches/videojs-patches";
+import { _setTheme } from "./theme";
 
 type Config = {
 	userCss: string;
@@ -39,16 +37,6 @@ const uclearnDB = new DatabaseHandler<{
 const CUSTOM_BACKGROUND_PROP = '--uclearn-custom-bg-blob';
 
 const configCache: Partial<Config> = {};
-
-const themeListeners: ((theme: NonNullable<Config['theme']>) => void)[] = [];
-export function onThemeChange(cb: ItemOf<typeof themeListeners>) {
-	themeListeners.push(cb);
-	return () => {
-		const idx = themeListeners.indexOf(cb);
-		if (idx < 0) return;
-		themeListeners.splice(idx, 1);
-	};
-}
 
 let userCssEditorModel: monaco.editor.ITextModel | null = null;
 const configHandlers: {
@@ -98,80 +86,6 @@ const configHandlers: {
 		setDefaultPlaybackRate(value);
 	},
 };
-
-function _setTheme(theme: 'light' | 'dark') {
-	document.documentElement.classList.remove('uclearn-light-mode', 'uclearn-dark-mode');
-	switch (theme) {
-		case 'light':
-			document.documentElement.classList.add('uclearn-light-mode');
-			for (const el of document.getElementsByClassName('navbar-dark')) {
-				el.classList.add('navbar-light');
-				el.classList.remove('navbar-dark');
-			}
-			break;
-		case 'dark':
-			document.documentElement.classList.add('uclearn-dark-mode');
-			for (const el of document.getElementsByClassName('navbar-light')) {
-				el.classList.add('navbar-dark');
-				el.classList.remove('navbar-light');
-			}
-			break;
-		default: assertNever(theme);
-	}
-	for (const handler of themeListeners) handler(theme);
-}
-
-type ColoredNode = HTMLElement | SVGElement;
-type ColoredNodeDetails = {
-	color?: string,
-	backgroundColor?: string;
-	fill?: string;
-	stroke?: string;
-	ignore: number;
-};
-const coloredNodes = new Map<ColoredNode, ColoredNodeDetails>();
-
-let _theme: 'light' | 'dark' = 'light';
-function handleColoredNode(el: ColoredNode) {
-	const old = coloredNodes.get(el);
-	const ensureNew = (value: string | null, old: string | undefined) => value?.startsWith('oklab') ? old ?? value : value || undefined;
-	const details = {
-		color: ensureNew(el.style.color, old?.color),
-		backgroundColor: ensureNew(el.style.backgroundColor || el.getAttribute("bgcolor"), old?.backgroundColor),
-		fill: ensureNew(el.getAttribute("fill"), old?.fill),
-		stroke: ensureNew(el.getAttribute("stroke"), old?.stroke),
-		ignore: 0,
-	} satisfies ColoredNodeDetails;
-	coloredNodes.set(el, details);
-	if (_theme === 'dark') colorNode(el, details);
-}
-
-function colorNode(el: ColoredNode, colors: ColoredNodeDetails) {
-	if (colors.color) {
-		el.style.color = `oklab(from ${colors.color} calc(1 - L * 0.5) a b)`;
-		colors.ignore++;
-	}
-	if (colors.backgroundColor) {
-		el.style.backgroundColor = `oklab(from ${colors.backgroundColor} calc(1 - L) a b${isElementTag(el, "span") ? "" : " / min(0.4, alpha)"})`;
-		colors.ignore++;
-	}
-	if (colors.fill) {
-		el.setAttribute("fill", `oklab(from ${colors.fill} calc(1 - L * 0.5) a b)`);
-		colors.ignore++;
-	}
-	if (colors.stroke) {
-		el.setAttribute("stroke", `oklab(from ${colors.stroke} calc(1 - L * 0.5) a b)`);
-		colors.ignore++;
-	}
-	if (DEBUG && !el.closest('svg')) {
-		el.style.border = '1px solid red';
-		colors.ignore++;
-	}
-}
-
-export function getTheme() {
-	return _theme;
-}
 
 const destructors: Partial<Record<keyof Config, () => void>> = {};
 async function initConfigValue<K extends keyof Config>(key: K, value: Config[K]) {
@@ -532,78 +446,6 @@ export async function showHelpModal() {
 }
 
 export async function initConfig() {
-	const THEME_PARENTS = '.course-content, .activity-description, .que .content, [id^="JSXGraph"], .post-message';
-	const THEMEABLE = '[style*="color"], [style*="background"], [bgcolor], [stroke]:not(.lucide), [fill]:not(.lucide)';
-
-	onNodeInsert(THEME_PARENTS, THEMEABLE, handleColoredNode);
-	onNodeUpdate(el => handleColoredNode(el as ColoredNode), `:is(${THEME_PARENTS}) :is(${THEMEABLE})`, ['style', 'bgcolor', 'stroke', 'fill']);
-
-	const jsxGraphObserver = new MutationObserver(evts => {
-		for (const e of evts) {
-			if (e.type === 'childList') for (const el of chainIter(e.addedNodes)) {
-				if (!isElement(el)) continue;
-				if (el.matches(THEMEABLE)) handleColoredNode(el as ColoredNode);
-				for (const node of el.querySelectorAll<ColoredNode>(THEMEABLE))
-					handleColoredNode(node);
-			}
-			else if (isElement(e.target)) {
-				if (e.target.matches(THEMEABLE)) {
-					const details = coloredNodes.get(e.target as ColoredNode);
-					if (details?.ignore) details.ignore--;
-					else handleColoredNode(e.target as ColoredNode);
-				} else coloredNodes.delete(e.target as ColoredNode);
-			}
-		}
-	});
-	onNodeInsert(null, '[id^="JSXGraph"]', el => {
-		jsxGraphObserver.observe(el, {
-			childList: true,
-			subtree: true,
-			attributeFilter: ['stroke', 'fill', 'style', 'bgcolor'],
-		});
-		// TODO: memory leaks here?
-	});
-
-	onThemeChange(theme => {
-		_theme = theme;
-		if (theme === 'dark') {
-			const toRemove: ColoredNode[] = [];
-			for (const [el, details] of coloredNodes.entries()) {
-				if (!document.body.contains(el)) {
-					toRemove.push(el);
-					continue;
-				}
-				colorNode(el, details);
-			}
-			for (const remove of toRemove) coloredNodes.delete(remove);
-		} else {
-			const toRemove: ColoredNode[] = [];
-			for (const [el, colors] of coloredNodes.entries()) {
-				if (!document.body.contains(el)) {
-					toRemove.push(el);
-					continue;
-				}
-				if (colors.color) {
-					el.style.color = colors.color;
-					colors.ignore++;
-				}
-				if (colors.backgroundColor) {
-					el.style.backgroundColor = colors.backgroundColor;
-					colors.ignore++;
-				}
-				if (colors.fill) {
-					el.setAttribute("fill", colors.fill);
-					colors.ignore++;
-				}
-				if (colors.stroke) {
-					el.setAttribute("stroke", colors.stroke);
-					colors.ignore++;
-				}
-			}
-			for (const remove of toRemove) coloredNodes.delete(remove);
-		}
-	});
-
 	for await (const { key, value } of uclearnDB.iterStore('userConfig')) {
 		initConfigValue(key, value);
 	}

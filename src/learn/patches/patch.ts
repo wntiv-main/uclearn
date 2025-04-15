@@ -101,8 +101,9 @@ export const tailHookLocals = <T, R, A extends unknown[], B extends unknown[]>(
 	const content = `(${hook.toString()})(${captureLocals}, ${args});`;
 	return patch(
 		func,
+		// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: intentional, match all
 		src => transformer(src).replace(/\{([^]*)\}/, `{try{\n$1\n}finally{${content}}}`),
 		locals,
 		label
-	) as (...args: A) => R extends void | false | '' | 0 | null | undefined ? T : R;
+	) as (...args: A) => (R extends void ? T : R extends false | '' | 0 | null | undefined ? T : R);
 };

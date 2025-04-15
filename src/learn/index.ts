@@ -8,6 +8,8 @@ import { initConfig } from "./config";
 import { initMessaging } from "./messaging";
 import { initQuizWorkspace } from "./workspace-ui";
 import { initHLJS } from "./patches/highlightjs-patches";
+import { initTheme } from "./theme";
+import { patchJSXGraph } from "./patches/jsxgraph-patches";
 
 if (DEBUG) window.addEventListener("error", async (e) => {
 	(await Toast).add(e.message, { title: `ERROR in '${e.filename}':`, type: 'danger' });
@@ -60,8 +62,10 @@ Object.defineProperty(window, "$", {
 
 initQuizWorkspace();
 initMessaging();
+initTheme();
 initConfig();
 patchAceEditor();
+patchJSXGraph();
 initialPageLoad();
 initNavigator();
 initKeybindings();
