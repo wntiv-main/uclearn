@@ -23,7 +23,7 @@ const postHydrateHooks: ((first: boolean) => void)[] = [
 			btn.removeAttribute('disabled');
 		}
 	},
-	() => window.dispatchEvent(new Event("load")),
+	() => window.dispatchEvent(new Event("load"))
 ];
 
 export const onPreHydrate = Array.prototype.push.bind(preHydrateHooks) as (...items: typeof preHydrateHooks) => void;
