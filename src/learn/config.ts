@@ -373,9 +373,9 @@ async function prepareConfigModal() {
 					moomo: {
 						version: 1.1,
 						pseudoElements: Object.entries(SELECTORS).map(([id, [selector,]]) =>
-							({ name: `::-moomo-${id}`, description: selector, status: 'standard', relevance: 100 } satisfies NonNullable<IDataProvider['pseudoElements']>[number] & { relevance?: number; })),
+							({ name: `::-moomo-${id}`, description: selector, status: 'standard' } satisfies NonNullable<IDataProvider['pseudoElements']>[number])),
 						pseudoClasses: Object.entries(CLASSES).map(([id, [selector,]]) =>
-							({ name: `:-moomo-${id}`, description: selector, status: 'standard', relevance: 100 } satisfies NonNullable<IDataProvider['pseudoClasses']>[number] & { relevance?: number; })),
+							({ name: `:-moomo-${id}`, description: selector, status: 'standard' } satisfies NonNullable<IDataProvider['pseudoClasses']>[number])),
 					}
 				},
 				useDefaultDataProvider: true,
@@ -516,7 +516,15 @@ function initMonaco(config?: Omit<MonacoConfig, 'model'> & { model?: (m: typeof 
 		const monaco = window.monaco!;
 		const cfg = config as MonacoConfig | undefined;
 		if (cfg) cfg.model = await config?.model?.(monaco);
-		return [monaco, monaco.editor.create(innerContainer, cfg)] as const;
+		const editor = monaco.editor.create(innerContainer, cfg);
+
+		// janky fix for https://github.com/microsoft/vscode/pull/195608
+		const view = editor.getDomNode();
+		if (!view) throw new Error('Monaco not ready yet');
+		const _contains = view.contains.bind(view);
+		view.contains = other => other === container || _contains(other);
+
+		return [monaco, editor] as const;
 	})()] as const;
 }
 
