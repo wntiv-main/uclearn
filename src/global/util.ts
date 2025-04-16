@@ -26,7 +26,7 @@ export function update<T extends object, U>(obj: T, addons: U): T & U {
 	return obj as U & T;
 }
 
-export type Shifted<T extends unknown[]> = T extends [unknown, ...infer U extends unknown[]] ? U : never;
+export type Shifted<T extends unknown[]> = T extends [unknown, ...infer U extends unknown[]] ? U : T extends [] ? [] : never;
 export type ExtendIf<T, P, U> = T extends P ? T & U : T;
 
 export type ItemOf<T extends unknown[] | Iterable<unknown>> =

@@ -161,12 +161,4 @@
 			}
 		}
 	}
-
-	#user-action-menu {
-		color: var(--uclearn-foreground);
-
-		.loggedinas {
-			margin-bottom: -0.5rem;
-		}
-	}
 }

@@ -3,16 +3,18 @@ import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } f
 import { SKIP_HYDRATION_CLASS } from "./hydration";
 import { HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
 import { getRequire, getYUIInstance, requireModule } from "./patches/lib-hook";
-import type monaco from "monaco-editor";
+import type Monaco from "monaco-editor";
 import { DO_HYDRATION, onPostHydrate } from "./navigation";
 import { getMoodleDialog } from "./patches/yui-modal";
 import { Marked } from "marked";
 import { baseUrl } from "marked-base-url";
 import { setDefaultPlaybackRate } from "./patches/videojs-patches";
 import { _setTheme } from "./theme";
+import { DEBUG } from "../global/constants";
 
 type Config = {
 	userCss: string;
+	_userCss: string;
 	customBg: Blob | null;
 	theme: 'light' | 'dark' | null;
 	hasSeenHelpMenu: boolean;
@@ -38,21 +40,48 @@ const CUSTOM_BACKGROUND_PROP = '--uclearn-custom-bg-blob';
 
 const configCache: Partial<Config> = {};
 
-let userCssEditorModel: monaco.editor.ITextModel | null = null;
-const configHandlers: {
-	[K in keyof Config]: ((value: Config[K]) => void) | ((value: Config[K]) => (() => void) | Promise<() => void>)
-} = {
-	userCss(src) {
+const SELECTORS: Record<string, [selector: string]> = {
+	vars: ['&:root, &:host'],
+	'dropdown-container': ['.dropdown-menu, #nav-popover-favourites-container .popover-region-container, .MathJax_Menu'],
+	dropdown: ['#user-action-menu [role="menu"]:has(>.dropdown-item), #nav-popover-favourites-container .popover-region-content, .MathJax_Menu'],
+	'dropdown-item': ['.dropdown-item, .MathJax_MenuItem'],
+	'dropdown-divider': ['.dropdown-divider'],
+};
+const CLASSES: Record<string, [selector: string]> = {
+	hover: [':is(:hover, :focus-visible, :active)'],
+	active: [':is(:active)'],
+};
+let userCssEditorModel: Monaco.editor.ITextModel | null = null;
+let _stylesheet: CSSStyleSheet | null = null;
+const configHandlers = {
+	userCss(src, modified, initOnly?: boolean) {
 		userCssEditorModel?.setValue(src);
-		const css = document.getElementById('uclearn-usercss') as HTMLStyleElement | null ?? (() => {
-			const css = document.createElement("style");
-			css.id = 'uclearn-usercss';
-			css.classList.add(SKIP_HYDRATION_CLASS);
-			document.documentElement.prepend(css);
-			return css;
+		if (modified) {
+			const css = src.replaceAll(/::-moomo-([a-zA-Z0-9_-]+)/g, (match, el) => {
+				return SELECTORS[el]?.[0] ?? match;
+			}).replaceAll(/(?<!:):-moomo-([a-zA-Z0-9_-]+)/g, (match, el) => {
+				return CLASSES[el]?.[0] ?? match;
+			}).replaceAll(/\/\*.*?\*\//g, '').replaceAll(/\s+/g, ' ');
+			if (initOnly) initConfigValue('_userCss', css);
+			else setConfigValue('_userCss', css);
+		}
+	},
+	async _userCss(src) {
+		_stylesheet ??= (() => {
+			const sheet = new CSSStyleSheet();
+			document.adoptedStyleSheets.push(sheet);
+			return sheet;
 		})();
-		css.textContent = `:root:root:root:root:root:root:root:root:root:root{${src}}`;
-		return () => { css.textContent = ''; };
+		_stylesheet = await _stylesheet.replace(`:root:root:root:root:root:root:root:root:root:root{${src}}`);
+		// const css = document.getElementById('uclearn-usercss') as HTMLStyleElement | null ?? (() => {
+		// 	const css = document.createElement("style");
+		// 	css.id = 'uclearn-usercss';
+		// 	css.classList.add(SKIP_HYDRATION_CLASS);
+		// 	document.documentElement.prepend(css);
+		// 	return css;
+		// })();
+		// css.textContent = `:root:root:root:root:root:root:root:root:root:root{${src}}`;
+		// return () => { css.textContent = ''; };
 	},
 	customBg(value) {
 		if (!value) return;
@@ -85,17 +114,19 @@ const configHandlers: {
 	vjsDefaultPlaybackRate(value) {
 		setDefaultPlaybackRate(value);
 	},
+} satisfies {
+	[K in keyof Config]: ((value: Config[K], modified: boolean) => void) | ((value: Config[K], modified: boolean) => (() => void) | Promise<() => void>)
 };
 
 const destructors: Partial<Record<keyof Config, () => void>> = {};
-async function initConfigValue<K extends keyof Config>(key: K, value: Config[K]) {
+async function initConfigValue<K extends keyof Config>(key: K, value: Config[K], modified = false) {
 	configCache[key] = value;
 	destructors[key]?.();
-	destructors[key] = await configHandlers[key](value) ?? undefined;
+	destructors[key] = await configHandlers[key](value as never, modified) ?? undefined;
 }
 
 async function setConfigValue<K extends keyof Config>(key: K, value: Config[K]) {
-	initConfigValue(key, value);
+	initConfigValue(key, value, true);
 	const store = await uclearnDB.openStore('userConfig', 'readwrite');
 	store.put({ key, value } as never);
 }
@@ -111,17 +142,23 @@ function setCssProp(prop: string, value: string) {
 	document.documentElement.style.setProperty(prop, value);
 	toSet.push([prop, value]);
 	if (!timer) timer = setTimeout(async () => {
-		const css = configCache.userCss ?? (await DatabaseHandler.prepare((await uclearnDB.openStore('userConfig', 'readonly')).get('userCss')))?.value;
+		const css = configCache.userCss ?? await (await fetch(`${EXT_URL}/learn/default-user.css`)).text();
 		let cssSrc = css ?? '';
 		for (const [prop, value] of toSet) {
 			document.documentElement.style.removeProperty(prop);
-			const rx = new RegExp(`(${prop}:.*?;)`);
+			const rx = new RegExp(`(${prop}:[^]*?;)`);
 			const match = cssSrc.split(rx);
 			if (match.length > 1) {
 				match[1] = `${prop}: ${value};`;
 				cssSrc = match.join('');
 			} else {
-				cssSrc = `${prop}: ${value};\n${cssSrc}`;
+				const match = cssSrc.split(/(::-moomo-vars\s*{\s*?\n?)(\s*)/);
+				if (match.length > 1) {
+					match[1] += `$&${prop}: ${value};\n${match[2]}`;
+					cssSrc = match.join('');
+				} else {
+					cssSrc = `::-moomo-vars {\n\t${prop}: ${value};\n}\n${cssSrc}`;
+				}
 			}
 		}
 		toSet.length = 0;
@@ -328,9 +365,83 @@ async function prepareConfigModal() {
 		},
 	});
 	monacoPromise.then(([monaco, editor]) => {
+		type IDataProvider = NonNullable<NonNullable<(typeof Monaco)['languages']['css']['cssDefaults']['options']['data']>['dataProviders']>[string];
+		window.monaco = monaco;
+		monaco.languages.css.cssDefaults.setOptions({
+			data: {
+				dataProviders: {
+					moomo: {
+						version: 1.1,
+						pseudoElements: Object.entries(SELECTORS).map(([id, [selector,]]) =>
+							({ name: `::-moomo-${id}`, description: selector, status: 'standard', relevance: 100 } satisfies NonNullable<IDataProvider['pseudoElements']>[number] & { relevance?: number; })),
+						pseudoClasses: Object.entries(CLASSES).map(([id, [selector,]]) =>
+							({ name: `:-moomo-${id}`, description: selector, status: 'standard', relevance: 100 } satisfies NonNullable<IDataProvider['pseudoClasses']>[number] & { relevance?: number; })),
+					}
+				},
+				useDefaultDataProvider: true,
+			},
+		});
 		userCssEditorModel = editor.getModel();
+
+		// Patch suggestions to show MooMo's custom selectors first
+		function patchCompletionAdapter(CompletionAdapter: {
+			prototype: {
+				provideCompletionItems(...args: unknown[]): Promise<{
+					suggestions: {
+						label: string | { label: string; };
+						insertText: string;
+						sortText?: string;
+						filterText?: string;
+						documentation?: string;
+						detail: unknown;
+						command: unknown;
+						range: unknown;
+						kind: unknown;
+					}[];
+				}>;
+			};
+		}) {
+			const _provideCompletionItems = CompletionAdapter.prototype.provideCompletionItems;
+			CompletionAdapter.prototype.provideCompletionItems = async function (...args) {
+				const { suggestions, ...rest } = await _provideCompletionItems.call(this, ...args);
+				return {
+					...rest,
+					suggestions: suggestions ? suggestions.map((suggestion) => {
+						const label =
+							typeof suggestion.label === "string"
+								? suggestion.label
+								: suggestion.label.label;
+						if (label.includes("-moomo-"))
+							return {
+								...suggestion,
+								sortText: `0${suggestion.sortText ?? label}`,
+							};
+						return suggestion;
+					}) : suggestions,
+				};
+			};
+		}
+		// node_modules/monaco-editor/dev/vs/language/css/cssMode.js:1431
+		/* eslint-disable-next-line @typescript-eslint/no-explicit-any
+		*/// biome-ignore lint/suspicious/noExplicitAny: complex type
+		const CompletionProvider = (userCssEditorModel as any).instantiationService._services._entries.find((x: { completionProvider?: unknown; }) => x.completionProvider)
+			.completionProvider;
+		const completionAdapter = CompletionProvider._entries.find(
+			(x: { selector: string; }) => x.selector === "css");
+		if (completionAdapter) patchCompletionAdapter(completionAdapter.provider.constructor);
+		else {
+			const { dispose } = CompletionProvider.onDidChange(() => {
+				const CompletionAdapter = CompletionProvider._entries.find(
+					(x: { selector: string; }) => x.selector === "css",
+				)?.provider.constructor;
+				if (!CompletionAdapter) return;
+				dispose();
+				patchCompletionAdapter(CompletionAdapter);
+			});
+		}
+
 		function handleResize(height: number) {
-			innerEditor.style.height = `${Math.min(height, window.innerHeight)}px`;
+			innerEditor.style.height = `${Math.min(height, window.innerHeight / 2)}px`;
 			editor.layout();
 		}
 		editor.onDidContentSizeChange((e) => handleResize(e.contentHeight));
@@ -366,10 +477,10 @@ async function prepareConfigModal() {
 	return dialog;
 }
 
-type MonacoConfig = NonNullable<Parameters<typeof monaco.editor.create>[1]>;
+type MonacoConfig = NonNullable<Parameters<typeof Monaco.editor.create>[1]>;
 
 let _codiconFont: Promise<FontFace> | null = null;
-function initMonaco(config?: Omit<MonacoConfig, 'model'> & { model?: (m: typeof monaco) => PromiseLike<MonacoConfig['model']>; }) {
+function initMonaco(config?: Omit<MonacoConfig, 'model'> & { model?: (m: typeof Monaco) => PromiseLike<MonacoConfig['model']>; }) {
 	const path = `${EXT_URL}/learn/vs`;
 
 	const container = document.createElement('div');
@@ -450,6 +561,13 @@ export async function initConfig() {
 		initConfigValue(key, value);
 	}
 	if (!('theme' in configCache)) initConfigValue("theme", null);
+	if (!('_userCss' in configCache)) {
+		const css = await (await fetch(`${EXT_URL}/learn/default-user.css`)).text();
+		if (DEBUG) {
+			configCache.userCss = css;
+			configHandlers.userCss(css, true, true);
+		} else setConfigValue('userCss', css);
+	}
 	const settingsButton = document.createElement('button');
 	settingsButton.innerHTML = `${SETTINGS_ICON}MooMo Settings`;
 	settingsButton.classList.add('dropdown-item', '__uclearn-settings-button', SKIP_HYDRATION_CLASS);

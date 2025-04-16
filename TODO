@@ -12,3 +12,5 @@
   - same for jsxgraph (done)
 - use stackinputfeedback info to give more robust latex->stack checking, prompt user to switch to default inputs
 - use shared CSSStyleSheets for shadowroot styles
+- rebrand (css vars especially) to moomo
+- document custom css selectors (can provide reference links to monaco)

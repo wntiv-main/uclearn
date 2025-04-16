@@ -33,6 +33,7 @@
 				"learn/vs/*",
 				"excalidraw/*",
 				"learn/python-typeshed.zip",
+				"learn/default-user.css",
 				"learn/ace-code-shadow.css",
 				"learn/videojs-shadow.css",
 				"learn/index.js",

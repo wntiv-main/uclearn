@@ -1,0 +1,47 @@
+::-moomo-vars {
+	--uclearn-background-image: var(--uclearn-custom-bg-blob);
+	--uclearn-radius: 10px;
+	--uclearn-gap: 5px;
+}
+
+::-moomo-dropdown-container {
+	&::before {
+		content: "";
+		background-color: var(--uclearn-translucent-bg);
+		backdrop-filter: var(--uclearn-bg-effect);
+	}
+}
+
+::-moomo-dropdown-container {
+	box-shadow: 1px 2px 5px var(--uclearn-shadow-color);
+	border-radius: var(--uclearn-radius);
+}
+
+::-moomo-dropdown {
+	display: flex;
+	flex-flow: column;
+	overflow-y: auto;
+	gap: var(--uclearn-gap);
+	padding-block: var(--uclearn-gap);
+
+	::-moomo-dropdown-item {
+		transition: background-color var(--uclearn-transition-short),
+			box-shadow var(--uclearn-transition-short);
+		margin-inline: var(--uclearn-gap);
+		padding: 0.3rem 1ch;
+		border-radius: calc(var(--uclearn-radius) - var(--uclearn-gap));
+
+		&:-moomo-hover {
+			background-color: var(--uclearn-hover-tint);
+			box-shadow: 1px 2px 7px -2px var(--uclearn-shadow-color);
+		}
+
+		&:-moomo-active {
+			background-color: var(--uclearn-active-tint);
+		}
+	}
+
+	::-moomo-dropdown-divider {
+		border-color: var(--uclearn-active-tint);
+	}
+}
