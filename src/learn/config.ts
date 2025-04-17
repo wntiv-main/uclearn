@@ -43,14 +43,17 @@ const configCache: Partial<Config> = {};
 const SELECTORS: Record<string, [selector: string]> = {
 	vars: ['&:root, &:host'],
 	'dropdown-container': ['.dropdown-menu, #nav-popover-favourites-container .popover-region-container, .MathJax_Menu'],
-	dropdown: ['#user-action-menu [role="menu"]:has(>.dropdown-item), #nav-popover-favourites-container .popover-region-content, .MathJax_Menu'],
+	dropdown: ['.dropdown-menu.show:not(#user-action-menu), #user-action-menu [role="menu"]:has(>.dropdown-item), #nav-popover-favourites-container .popover-region-content, .MathJax_Menu'],
 	'dropdown-item': ['.dropdown-item, .MathJax_MenuItem'],
 	'dropdown-divider': ['.dropdown-divider'],
 };
 const CLASSES: Record<string, [selector: string]> = {
 	hover: [':is(:hover, :focus-visible, :active)'],
 	active: [':is(:active)'],
+	checked: ['.dropdown-item[aria-current="true"], .dropdown-item[aria-selected="true"]'],
+	'dropdown-item-with-icon': ['#user-action-menu .loggedinas ~ a, .__uclearn-help-button, .__uclearn-settings-button'],
 };
+
 let userCssEditorModel: Monaco.editor.ITextModel | null = null;
 let _stylesheet: CSSStyleSheet | null = null;
 const configHandlers = {
@@ -58,9 +61,9 @@ const configHandlers = {
 		userCssEditorModel?.setValue(src);
 		if (modified) {
 			const css = src.replaceAll(/::-moomo-([a-zA-Z0-9_-]+)/g, (match, el) => {
-				return SELECTORS[el]?.[0] ?? match;
+				return SELECTORS[el] ? `:is(${SELECTORS[el][0]})` : match;
 			}).replaceAll(/(?<!:):-moomo-([a-zA-Z0-9_-]+)/g, (match, el) => {
-				return CLASSES[el]?.[0] ?? match;
+				return CLASSES[el] ? `:is(${CLASSES[el][0]})` : match;
 			}).replaceAll(/\/\*.*?\*\//g, '').replaceAll(/\s+/g, ' ');
 			if (initOnly) initConfigValue('_userCss', css);
 			else setConfigValue('_userCss', css);
@@ -352,6 +355,7 @@ async function prepareConfigModal() {
 		label.innerHTML = icon;
 		controller.append(radio, label);
 	}
+
 	const [cssEditorContainer, innerEditor, monacoPromise] = initMonaco({
 		value: configCache.userCss,
 		language: 'css',

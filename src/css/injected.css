@@ -147,9 +147,8 @@
 .__uclearn-help-button,
 .__uclearn-settings-button {
 	svg {
+		height: 90%;
 		aspect-ratio: 1;
-		height: 1lh;
-		margin-left: -0.5rem;
 	}
 }
 

@@ -732,6 +732,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		:is(th, td),
 	.file-picker .fp-content,
 	.fp-iconview .fp-filename-field .fp-filename,
+	.popover-region-container,
 	.drawer {
 		background-color: transparent;
 	}
@@ -905,14 +906,6 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.courseindex .courseindex-item .completioninfo {
 		min-width: 0;
 		padding-inline: 0.2rem;
-	}
-
-	.dropdown-item {
-		column-gap: 0.5rem;
-
-		.icon {
-			margin-inline: -0.3rem;
-		}
 	}
 
 	#page-content #region-main-box #region-main .activity-navigation {

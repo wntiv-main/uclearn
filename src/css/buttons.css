@@ -7,7 +7,7 @@
 	#usernavigation .nav-link,
 	.drawer-toggler .btn,
 	.editmode-switch-form .input-group,
-	.list-group-item:not(:has(>.list-group-item)),
+	.list-group-item:not(:has(.list-group-item)),
 	.message-app :is(.view-overview-body, [data-region="view-contacts"]) .overview-section-toggle,
 	.block-add.btn,
 	.custom-select,
@@ -64,7 +64,7 @@
 	.message-app
 		:is(.view-overview-body, [data-region="view-contacts"])
 		.overview-section-toggle,
-	.list-group-item:not(:has(> .list-group-item)),
+	.list-group-item:not(:has(.list-group-item)),
 	.courseindex-item {
 		--uclearn-pre-shadow: inset 0 0 transparent, inset 0 0 transparent, /**/;
 

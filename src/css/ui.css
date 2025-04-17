@@ -434,6 +434,10 @@
 		padding-block: 0.2rem;
 		background-color: transparent;
 		width: auto;
+
+		&::before {
+			content: none;
+		}
 	}
 
 	#user-action-menu {
@@ -441,6 +445,53 @@
 
 		.loggedinas {
 			padding-block: 0;
+		}
+
+		.loggedinas ~ a .icon {
+			display: none;
+		}
+
+		.loggedinas ~ a::before {
+			content: "";
+			height: 90%;
+			aspect-ratio: 1;
+			background-color: currentColor;
+			mask-size: cover;
+			mask-mode: alpha;
+		}
+
+		a[href$="profile.php"]::before {
+			mask-image: var(--uclearn-icon-profile);
+		}
+		a[href*="/calendar"]::before {
+			mask-image: var(--uclearn-icon-calender);
+		}
+		a[href*="/grade"]::before {
+			mask-image: var(--uclearn-icon-chart);
+		}
+		a[href$="user/files.php"]::before {
+			mask-image: var(--uclearn-icon-folder);
+		}
+		a[href*="/reportbuilder"]::before {
+			mask-image: var(--uclearn-icon-file-report);
+		}
+		a[href$="user/preferences.php"]::before {
+			mask-image: var(--uclearn-icon-settings);
+		}
+		.carousel-navigation-link::before {
+			mask-image: var(--uclearn-icon-languages);
+		}
+		a[href*="/mail"]::before {
+			mask-image: var(--uclearn-icon-mail);
+		}
+		a[href*="id=23834"]::before {
+			mask-image: var(--uclearn-icon-info);
+		}
+		a[href*="services.canterbury.ac.nz"]::before {
+			mask-image: var(--uclearn-icon-support);
+		}
+		a[href*="logout.php"]::before {
+			mask-image: var(--uclearn-icon-logout);
 		}
 	}
 
