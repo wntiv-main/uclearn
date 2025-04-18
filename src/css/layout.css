@@ -82,6 +82,7 @@
 				min-height: 0;
 				height: fit-content;
 				margin: 0;
+				position: relative;
 
 				&::before {
 					grid-area: 1 / page-left / -1 / page-right;
@@ -96,7 +97,7 @@
 					width: 100%;
 					min-width: 0;
 
-					&:not(.secondary-navigation) {
+					&:not(.secondary-navigation, .uclearn-background-host) {
 						padding-inline: 1rem;
 					}
 				}

@@ -3,8 +3,11 @@
 	/* --uclearn-filters-src: "chrome-extension://__MSG_@@extension_id__/filters.svg"; */
 	/* chrome-extension://__MSG_@@extension_id__/filters.svg#graphTranslucent */
 	/* see: https://issues.chromium.org/issues/41001393 */
+	/* filters in /src/static/filters.svg */
+	/* encoder: https://yoksel.github.io/url-encoder/ */
 	--uclearn-graph-translucent-filter: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxmaWx0ZXIgaWQ9ImdyYXBoVHJhbnNsdWNlbnQiPjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VHcmFwaGljIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwCjAgMSAwIDAgMAowIDAgMSAwIDAKLTIgLTEgMCAyIDAiPjwvZmVDb2xvck1hdHJpeD48L2ZpbHRlcj48L3N2Zz4=#graphTranslucent);
 	--uclearn-translucent-filter: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxmaWx0ZXIgaWQ9InRyYW5zbHVjZW50QmciPjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VHcmFwaGljIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMSAwIDAgMCAwCjAgMSAwIDAgMAowIDAgMSAwIDAKLTAuODUwNCAtMi44NjA4IC0wLjI4ODggNCAwIj48L2ZlQ29sb3JNYXRyaXg+PC9maWx0ZXI+PC9zdmc+#translucentBg);
+	--uclearn-filter-noiseblur: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseblur' color-interpolation-filters='linearRGB'%3E%3CfeGaussianBlur stdDeviation='8' result='blur'%3E%3C/feGaussianBlur%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1' result='noise'%3E%3C/feTurbulence%3E%3CfeDisplacementMap in='blur' in2='noise' scale='30'%3E%3C/feDisplacementMap%3E%3C/filter%3E%3C/svg%3E#noiseblur");
 
 	/* All icons from lucide:  */
 	--uclearn-icon-lock: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWxvY2siPjxyZWN0IHdpZHRoPSIxOCIgaGVpZ2h0PSIxMSIgeD0iMyIgeT0iMTEiIHJ4PSIyIiByeT0iMiIvPjxwYXRoIGQ9Ik03IDExVjdhNSA1IDAgMCAxIDEwIDB2NCIvPjwvc3ZnPg==);
@@ -40,8 +43,8 @@
 		from var(--uclearn-foreground) h s calc(20 + 0.6 * l)
 	);
 
-	--uclearn-translucent-bg: rgb(from var(--uclearn-background) r g b / 0.5);
-	--uclearn-bg-effect: blur(10px);
+	--uclearn-translucent-bg: rgb(from var(--uclearn-background) r g b / 0.7);
+	--uclearn-bg-effect: var(--uclearn-filter-noiseblur);
 
 	--uclearn-hover-tint: #80808040;
 	--uclearn-active-tint: #80808080;
@@ -93,8 +96,8 @@
 		color-scheme: dark;
 		--uclearn-background-imageset: linear-gradient(
 				0deg,
-				var(--uclearn-translucent-bg),
-				var(--uclearn-translucent-bg)
+				rgb(from var(--uclearn-background) r g b / 0.5),
+				rgb(from var(--uclearn-background) r g b / 0.5)
 			),
 			var(--uclearn-background-image);
 		--uclearn-dark-filter: invert(1) hue-rotate(180deg) saturate(2);

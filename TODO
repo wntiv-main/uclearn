@@ -14,3 +14,5 @@
 - use shared CSSStyleSheets for shadowroot styles
 - rebrand (css vars especially) to moomo
 - document custom css selectors (can provide reference links to monaco)
+- better blur (svg) (done)
+- fix message sidebar data repo post hydrate (shows 0 chats)

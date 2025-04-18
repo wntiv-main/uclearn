@@ -396,6 +396,8 @@
 
 	.dropdown-menu,
 	.MathJax_Menu {
+		border: none;
+
 		.MathJax_MenuArrow {
 			color: transparent;
 			background-color: var(--uclearn-foreground-muted);

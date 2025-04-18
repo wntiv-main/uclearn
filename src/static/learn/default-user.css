@@ -7,8 +7,8 @@
 		from var(--uclearn-foreground) h s calc(20 + 0.6 * l)
 	);
 
-	--uclearn-translucent-bg: rgb(from var(--uclearn-background) r g b / 0.5);
-	--uclearn-bg-effect: blur(10px);
+	--uclearn-translucent-bg: rgb(from var(--uclearn-background) r g b / 0.7);
+	--uclearn-bg-effect: var(--uclearn-filter-noiseblur);
 
 	--uclearn-hover-tint: #80808040;
 	--uclearn-active-tint: #80808080;
@@ -83,14 +83,14 @@
 		margin-inline: var(--uclearn-gap);
 		border-radius: calc(var(--uclearn-radius) - var(--uclearn-gap));
 		padding: 0.3rem;
-		padding-left: 1ch;
+		padding-left: 1ch !important;
 
 		&.d-inline-flex {
 			display: grid !important;
 		}
 
 		&:-moomo-dropdown-item-with-icon {
-			padding-left: 0.3rem;
+			padding-left: 0.3rem !important;
 		}
 
 		&:-moomo-hover {

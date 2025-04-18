@@ -1,8 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg"><filter id="graphTranslucent"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0
+<!DOCTYPE svg>
+<svg>
+	<filter id="graphTranslucent">
+		<feColorMatrix in="SourceGraphic" type="matrix"
+			values="1 0 0 0 0
 0 1 0 0 0
 0 0 1 0 0
--2 -1 0 2 0"></feColorMatrix></filter></svg>
-<svg xmlns="http://www.w3.org/2000/svg"><filter id="translucentBg"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0
+-2 -1 0 2 0"></feColorMatrix>
+	</filter>
+	<filter id="translucentBg">
+		<feColorMatrix in="SourceGraphic" type="matrix"
+			values="1 0 0 0 0
 0 1 0 0 0
 0 0 1 0 0
--0.8504 -2.8608 -0.2888 4 0"></feColorMatrix></filter></svg>
+-0.8504 -2.8608 -0.2888 4 0"></feColorMatrix>
+	</filter>
+	<filter id="noiseblur" color-interpolation-filters="linearRGB">
+		<feGaussianBlur stdDeviation="8" result="blur"></feGaussianBlur>
+		<feTurbulence type="fractalNoise" baseFrequency="1" result="noise"></feTurbulence>
+		<feDisplacementMap in="blur" in2="noise" scale="30"></feDisplacementMap>
+	</filter>
+</svg>

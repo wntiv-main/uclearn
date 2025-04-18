@@ -43,8 +43,8 @@ const configCache: Partial<Config> = {};
 const SELECTORS: Record<string, [selector: string]> = {
 	vars: ['&:root, &:host'],
 	'dropdown-container': ['.dropdown-menu, #nav-popover-favourites-container .popover-region-container, .MathJax_Menu'],
-	dropdown: ['.dropdown-menu.show:not(#user-action-menu), #user-action-menu [role="menu"]:has(>.dropdown-item), #nav-popover-favourites-container .popover-region-content, .MathJax_Menu'],
-	'dropdown-item': ['.dropdown-item, .MathJax_MenuItem'],
+	dropdown: ['.dropdown-menu.show:not(#user-action-menu), #user-action-menu [role="menu"]:is(:not(.carousel-item), .active, .carousel-item-next, .carousel-item-prev):has(>.dropdown-item), #nav-popover-favourites-container .popover-region-content, .MathJax_Menu'],
+	'dropdown-item': ['.dropdown-item:not(.hidden), .MathJax_MenuItem'],
 	'dropdown-divider': ['.dropdown-divider'],
 };
 const CLASSES: Record<string, [selector: string]> = {

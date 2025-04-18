@@ -1,6 +1,9 @@
 :root:root:root:root:root:root:root:root {
 	/* Frosted */
 	.popover-region-toggle::after,
+	.popover-region-container:not(
+			#nav-popover-favourites-container .popover-region-container
+		),
 	.drawer-toggler .btn,
 	.popover,
 	.popover .arrow,
@@ -17,7 +20,7 @@
 
 	.navbar,
 	.dropdown-menu,
-	#page .main-inner,
+	#page .main-inner:not(:has(> .uclearn-background-host)),
 	.modal-content,
 	.login-container,
 	.drawer {

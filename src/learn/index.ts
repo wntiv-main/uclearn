@@ -10,6 +10,7 @@ import { initQuizWorkspace } from "./workspace-ui";
 import { initHLJS } from "./patches/highlightjs-patches";
 import { initTheme } from "./theme";
 import { patchJSXGraph } from "./patches/jsxgraph-patches";
+import { onNodeInsert, SKIP_HYDRATION_CLASS } from "./hydration";
 
 if (DEBUG) window.addEventListener("error", async (e) => {
 	(await Toast).add(e.message, { title: `ERROR in '${e.filename}':`, type: 'danger' });
@@ -58,6 +59,14 @@ let _$: unknown = undefined;
 Object.defineProperty(window, "$", {
 	get: () => _$,
 	set(v) { _$ = v ?? _$; }
+});
+
+onNodeInsert('#page', '.main-inner', el => {
+	if (!el.querySelector('.uclearn-background-host')) {
+		const bgHost = document.createElement('div');
+		bgHost.classList.add(SKIP_HYDRATION_CLASS, 'uclearn-background-host');
+		el.prepend(bgHost);
+	}
 });
 
 initQuizWorkspace();
