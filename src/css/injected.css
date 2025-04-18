@@ -335,7 +335,7 @@
 		z-index: -1;
 		background-image: var(--uclearn-background-imageset);
 		background-size: cover;
-		filter: var(--uclearn-filter-noiseblur);
+		filter: var(--uclearn-bg-effect);
 		box-shadow: inset 0 0 0 100vmax var(--uclearn-translucent-bg);
 	}
 }
