@@ -367,11 +367,10 @@ export async function initNavigator() {
 	});
 
 	window.addEventListener("popstate", async (e) => {
-		if (!DO_HYDRATION.value || !e.state) return;
+		if (!DO_HYDRATION.value) return;
 		await hydrateFromFetch(location.href, { method: 'GET' }, []);
-		if (e.state?.scrollPos) {
+		if (e.state?.scrollPos)
 			document.getElementById("page")?.scrollTo(0, e.state.scrollPos);
-		}
 	});
 }
 
