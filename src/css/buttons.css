@@ -245,11 +245,20 @@
 
 	.aabtn:not(.navbar-brand),
 	a.btn.btn-link,
-	.breadcrumb-item a {
+	.breadcrumb-item a,
+	.block_multiblock
+		.multiblock-accordion
+		.card-body:is(
+			.block_alp_player,
+			.block_ucpreviousexams,
+			.block_ucskills
+		)
+		a {
 		--uclearn-background-tint: transparent;
 		display: inline-block;
 		border-radius: calc(var(--uclearn-radius) / 2);
-		background-color: var(--uclearn-background-tint);
+		/* .block a:focus uses !important */
+		background-color: var(--uclearn-background-tint) !important;
 		color: var(--uclearn-color-link);
 		text-decoration: none;
 		text-wrap-style: balance;

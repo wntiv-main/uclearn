@@ -257,4 +257,118 @@
 			}
 		}
 	}
+
+	.block_multiblock .multiblock-accordion {
+		.block_multiblock:has(&) > .card-body {
+			padding: 0 !important;
+		}
+
+		.card {
+			border: none;
+			padding: 0;
+			border-radius: 0;
+
+			&:first-child {
+				border-top-left-radius: var(--uclearn-radius);
+				border-top-right-radius: var(--uclearn-radius);
+			}
+
+			&:last-child {
+				border-bottom-left-radius: var(--uclearn-radius);
+				border-bottom-right-radius: var(--uclearn-radius);
+			}
+
+			:has(a) {
+				border-radius: inherit;
+			}
+		}
+
+		.card-body {
+			padding: var(--uclearn-radius);
+		}
+
+		.card-body:is(
+				.block_alp_player,
+				.block_ucpreviousexams,
+				.block_ucskills
+			) {
+			padding: 0 !important;
+
+			:is(.collapse, .collapsing):has(> &) {
+				display: unset;
+			}
+
+			.card-header:has(+ * > &:not(.block_ucskills)) {
+				display: none;
+			}
+		}
+
+		.card-header {
+			padding: 0;
+			background-color: transparent;
+			border: none;
+			border-radius: inherit;
+		}
+
+		.card-header a,
+		.card-body:is(
+				.block_alp_player,
+				.block_ucpreviousexams,
+				.block_ucskills
+			)
+			a {
+			text-align: center;
+			display: inline-block;
+			width: 100%;
+			padding: var(--uclearn-radius);
+			border-radius: inherit;
+			border: none;
+		}
+
+		.card-body.block_alp_player a {
+			display: block;
+			position: relative;
+			overflow: hidden;
+
+			img {
+				position: absolute;
+				inset: 0 auto 0 0;
+				height: 100%;
+				border-top-left-radius: inherit;
+				border-bottom-left-radius: inherit;
+			}
+
+			br {
+				display: none;
+			}
+		}
+
+		.card-body.block_ucskills a {
+			position: absolute;
+			inset: 0;
+			padding: 0 !important;
+			text-align: left;
+
+			img {
+				height: 100%;
+				width: auto;
+				border-top-left-radius: inherit;
+				border-bottom-left-radius: inherit;
+			}
+		}
+
+		.card-body:is(.block_alp_player, .block_ucpreviousexams) a::after,
+		.card-header:has(+ * > .block_ucskills) a::after {
+			content: "";
+			display: inline-block;
+			height: 1.1em;
+			aspect-ratio: 1;
+			background-color: currentColor;
+			mask-image: var(--uclearn-icon-link);
+			mask-size: cover;
+			mask-mode: alpha;
+			vertical-align: calc(0.3em - 0.3lh);
+			margin-left: 0.5ch;
+		}
+	}
 }
