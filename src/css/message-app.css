@@ -55,7 +55,7 @@
 
 		:is(.view-overview-body, [data-region="view-contacts"])
 			.list-group-item {
-			column-gap: 5px;
+			column-gap: var(--uclearn-gap);
 		}
 
 		[data-region="view-contacts"] .list-group-item {
@@ -154,7 +154,7 @@
 			padding: 0 !important;
 			align-items: baseline;
 			justify-content: flex-end;
-			column-gap: 5px;
+			column-gap: var(--uclearn-gap);
 			outline: none;
 
 			.tail {
@@ -438,8 +438,8 @@
 			padding: 0.5rem 3px !important;
 
 			.btn-link {
-				border-radius: 5px;
-				padding: 5px;
+				border-radius: calc(var(--uclearn-radius) / 2);
+				padding: var(--uclearn-gap);
 				line-height: 1;
 			}
 		}

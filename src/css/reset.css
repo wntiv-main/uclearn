@@ -43,7 +43,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 			box-shadow: inset 0 0 0 100vmax var(--uclearn-translucent-bg);
 			border: 1px solid currentColor;
 			border-radius: var(--uclearn-radius);
-			padding: calc(var(--uclearn-radius) / 2);
+			padding: var(--uclearn-gap);
 			outline: none;
 			transition: box-shadow var(--uclearn-transition-short);
 
@@ -631,7 +631,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	}
 
 	.card-block-wrapper {
-		gap: 10px;
+		gap: var(--uclearn-gap);
 
 		.card-block {
 			margin: 0;
@@ -742,7 +742,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	}
 
 	.aabtn:has(> .userinitials:only-child) {
-		padding: calc(var(--uclearn-radius) / 2);
+		padding: var(--uclearn-gap);
 		border-radius: 50%;
 	}
 
@@ -805,7 +805,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 
 	.list-unstyled {
 		margin: 0;
-		gap: 0.5rem;
+		gap: var(--uclearn-gap);
 
 		> li {
 			padding: 0 !important;
@@ -815,7 +815,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 
 	#page .main-inner {
 		background-color: transparent;
-		padding: 15px 0;
+		padding: var(--uclearn-gap-large) 0;
 	}
 
 	.text-primary {
@@ -927,5 +927,9 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		td {
 			border: 1px solid currentColor;
 		}
+	}
+
+	.block-myoverview .row {
+		align-items: center;
 	}
 }

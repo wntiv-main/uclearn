@@ -101,16 +101,16 @@
 	display: grid;
 	grid-template-columns: repeat(
 		auto-fill,
-		minmax(calc(1.4em + var(--uclearn-radius)), max-content)
+		minmax(calc(1.4em + var(--uclearn-gap) * 2), max-content)
 	);
-	gap: calc(var(--uclearn-radius) / 2);
-	margin-top: calc(var(--uclearn-radius) / 2);
+	gap: var(--uclearn-gap);
+	margin-top: var(--uclearn-gap);
 	align-items: stretch;
 
 	button {
 		border: none;
 		border-radius: var(--uclearn-radius);
-		padding: calc(var(--uclearn-radius) / 2);
+		padding: var(--uclearn-gap);
 		background-color: transparent;
 		transition: background-color var(--uclearn-transition-short);
 
@@ -176,7 +176,7 @@
 	}
 
 	button {
-		padding: calc(var(--uclearn-radius) / 2);
+		padding: var(--uclearn-gap);
 		border: none;
 
 		&:first-child {
@@ -209,7 +209,7 @@
 	.uclearn-bg-select {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-		gap: 0.5rem;
+		gap: var(--uclearn-gap);
 		width: min-content;
 		min-width: 100%;
 
@@ -230,7 +230,7 @@
 			justify-content: center;
 			aspect-ratio: 16 / 9;
 			border-radius: var(--uclearn-radius);
-			padding: calc(var(--uclearn-radius) / 2);
+			padding: var(--uclearn-gap);
 			transition: background-color var(--uclearn-transition-short);
 			min-width: 0;
 			min-height: 0;
@@ -246,7 +246,7 @@
 
 			img {
 				width: 100%;
-				border-radius: calc(var(--uclearn-radius) / 2);
+				border-radius: calc(var(--uclearn-radius) - var(--uclearn-gap));
 				max-height: 100%;
 				object-fit: cover;
 			}
@@ -273,7 +273,7 @@
 
 		label {
 			transition: background-color var(--uclearn-transition-short);
-			padding: calc(var(--uclearn-radius) / 2);
+			padding: var(--uclearn-gap);
 			margin: 0;
 
 			svg {
@@ -297,7 +297,7 @@
 	grid-row: 1 / -1;
 	/* Above drawers, below nav */
 	z-index: 1018;
-	margin-block: -15px;
+	margin-block: calc(-1 * var(--uclearn-gap-large));
 }
 
 .excalidraw {

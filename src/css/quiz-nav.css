@@ -14,7 +14,7 @@
 			margin-right: 0;
 			border-radius: var(--uclearn-radius);
 			height: calc(1lh + 10px);
-			padding-block: calc(var(--uclearn-radius) / 2);
+			padding-block: var(--uclearn-gap);
 			overflow: hidden;
 			color: inherit !important;
 			text-shadow: 1px 1px 6px var(--uclearn-shadow-color);

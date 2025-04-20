@@ -87,7 +87,7 @@
 	/* Modals */
 	.moodle-dialogue {
 		border-radius: 1rem;
-		bottom: 5px;
+		bottom: var(--uclearn-gap);
 		overflow: hidden;
 		pointer-events: none;
 
@@ -142,7 +142,7 @@
 		}
 
 		.modal-body {
-			padding: 15px;
+			padding: var(--uclearn-gap-large);
 		}
 	}
 
@@ -214,7 +214,7 @@
 
 	#MathJax_Zoom {
 		border: none;
-		padding: calc(var(--uclearn-radius) / 2);
+		padding: var(--uclearn-gap);
 		border-radius: var(--uclearn-radius);
 		box-shadow: 1px 2px 5px var(--uclearn-shadow-color);
 	}
@@ -355,7 +355,7 @@
 		background-color: var(--uclearn-translucent-bg);
 		border: 1px solid currentColor;
 		border-radius: var(--uclearn-radius);
-		padding: calc(var(--uclearn-radius) / 2);
+		padding: var(--uclearn-gap);
 		outline: none;
 		transition: box-shadow var(--uclearn-transition-short);
 
@@ -386,7 +386,7 @@
 
 	/* Dropdowns */
 	.MathJax_Menu {
-		bottom: 5px;
+		bottom: var(--uclearn-gap);
 		max-height: max-content;
 		min-height: 0;
 		height: -moz-available;
@@ -499,7 +499,7 @@
 
 	/* Pagination */
 	ul.pagination {
-		margin-block: 5px;
+		margin-block: var(--uclearn-gap);
 		background-color: var(--uclearn-translucent-bg);
 		border-radius: var(--uclearn-radius);
 
@@ -544,7 +544,7 @@
 		overflow: hidden;
 
 		.ui-widget-content {
-			padding: calc(var(--uclearn-radius) / 2);
+			padding: var(--uclearn-gap);
 		}
 	}
 

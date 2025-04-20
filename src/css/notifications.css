@@ -44,7 +44,7 @@
 		}
 
 		.popover-region-header-container {
-			padding: 5px 10px;
+			padding: var(--uclearn-gap) calc(var(--uclearn-gap) + 5px);
 			height: auto;
 			display: flow-root;
 		}
@@ -55,7 +55,7 @@
 			min-height: 100px;
 
 			.empty-message {
-				padding: 20px;
+				padding: var(--uclearn-gap-large);
 			}
 		}
 

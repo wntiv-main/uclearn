@@ -2,7 +2,7 @@
 	.block-region {
 		display: flex;
 		flex-flow: column;
-		gap: 1.5rem;
+		gap: var(--uclearn-gap-large);
 
 		> :empty {
 			display: none;
@@ -124,7 +124,7 @@
 	.card-carousel {
 		margin: -1rem !important;
 		padding: 1rem;
-		gap: 1rem;
+		gap: var(--uclearn-gap-large);
 
 		.col {
 			margin: 0 !important;
@@ -162,6 +162,10 @@
 		.coursename {
 			text-overflow: ellipsis;
 			white-space: nowrap;
+
+			.multiline {
+				white-space: inherit;
+			}
 		}
 	}
 
@@ -182,7 +186,7 @@
 
 	.multiblock .row {
 		align-items: stretch;
-		gap: 10px;
+		gap: var(--uclearn-gap-large);
 		margin-inline: 0;
 
 		> * {
