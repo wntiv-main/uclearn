@@ -29,6 +29,7 @@
 
 	--uclearn-radius: 10px;
 	--uclearn-gap: 5px;
+	--uclearn-gap-large: 15px;
 
 	--uclearn-focus-shadow: 0 0 0 0.15rem #0f6cbf, 0 0 0 0.3rem #0f6cbfbf;
 	--uclearn-focus-shadow-inset: inset 0 0 0 0.15rem #0f6cbf,
@@ -84,6 +85,7 @@
 		border-radius: calc(var(--uclearn-radius) - var(--uclearn-gap));
 		padding: 0.3rem;
 		padding-left: 1ch !important;
+		text-overflow: ellipsis;
 
 		&.d-inline-flex {
 			display: grid !important;

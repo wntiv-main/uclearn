@@ -477,7 +477,7 @@ async function prepareConfigModal() {
 	});
 	dialog.applyAndTrapFocus = () => { };
 	dialog.trapFocus = () => { };
-	dialog.after('visibleChange', () => reloadOnExit && location.reload());
+	dialog.after('visibleChange', () => reloadOnExit && window.navigation ? window.navigation.reload({ info: { hydrate: false } }) : location.reload());
 	return dialog;
 }
 

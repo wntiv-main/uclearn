@@ -45,6 +45,10 @@ const parser = new DOMParser();
 async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hydrationHints: HydrationHint[] = []) {
 	hydrationController?.abort('Hydrating from new target');
 	hydrationController = new AbortController();
+	if (options.signal) {
+		options.signal.addEventListener('abort', hydrationController.abort.bind(hydrationController));
+	}
+	hydrationController.signal.addEventListener("abort", () => setTimeout(() => updateProgress([], "closed", 0), 0));
 	const [resp, content] = await safeFetch(url, {
 		...options,
 		signal: hydrationController.signal,
@@ -53,12 +57,15 @@ async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hy
 		onError: () =>
 			updateProgress([], 'closed', 0),
 	});
-	hydrationController.signal.addEventListener("abort", () => updateProgress([], 'closed', 0));
 	const startTime = performance.now();
 	const contentType = resp.headers.get("Content-Type")?.split(";")[0] ?? 'text/html';
 	if (!contentType.includes("html")) {
 		// We shoudln't handle this, load page normally
-		location.assign(resp.url) as never;
+		if (window.navigation) {
+			window.navigation.navigate(resp.url, { history: 'push', info: { hydrate: false } });
+		} else {
+			location.assign(resp.url) as never;
+		}
 	}
 	updateProgress([], 'parsing', 0);
 	const updated = parser.parseFromString(
@@ -180,7 +187,9 @@ async function safeFetch(input: RequestInfo | URL, { onProgress, onError, ...ini
 				buttons: { save: 'Follow link anyway', cancel: 'Remain here' },
 				removeOnClose: true,
 			});
-			modal.getRoot().on(ModalEvents.save, () => location.assign(input instanceof Request ? input.url : input));
+			modal.getRoot().on(ModalEvents.save, () => window.navigation
+				? window.navigation.navigate(typeof input === 'string' ? input : input instanceof Request ? input.url : input.href, { history: 'push', info: { hydrate: false } })
+				: location.assign(input instanceof Request ? input.url : input));
 			modal.show();
 			onError?.(err);
 			throw err;
@@ -256,7 +265,84 @@ function updateProgress(stages: _HydrationStages, stage: HydrationStage, percent
 	loadingEl.style.width = `${100 * totalProgress}%`;
 }
 
+function mapEqual<M extends Map<unknown, unknown> | URLSearchParams>(a: M, b: M) {
+	if (a.size !== b.size) return false;
+	for (const [key, value] of a.entries()) {
+		if (b.get(key as never /* fkign typescript */) !== value)
+			return false;
+	}
+	return true;
+}
+
 export async function initNavigator() {
+	const navigation = window.navigation;
+	if (navigation) {
+		navigation.addEventListener('navigate', e => {
+			if (!DO_HYDRATION.value || e.downloadRequest || !e.canIntercept)
+				return;
+			if (!((e.info as undefined | { hydrate?: boolean; })?.hydrate ?? true))
+				return;
+			if ((e.info as undefined | { skip?: boolean; })?.skip) {
+				e.intercept();
+				return;
+			}
+			const oldLocation = new URL(location.href);
+			navigation.updateCurrentEntry({ state: { scrollPos: document.getElementById("page")?.scrollTop } });
+			if (e.destination.sameDocument) return e.intercept({
+				async handler() {
+					document.getElementById('page')?.scrollTo(0, (e.destination.getState() as undefined | { scrollPos?: number; })?.scrollPos ?? 0);
+					if (new URL(e.destination.url).hash) e.scroll();
+					navigation.updateCurrentEntry({ state: { scrollPos: document.getElementById("page")?.scrollTop } });
+				},
+				focusReset: 'manual',
+				scroll: 'manual',
+			});
+			e.intercept({
+				async handler() {
+					const toHydrate: HydrationHint[] = [];
+					if (e.formData && e.sourceElement?.classList.contains('submit')) {
+						const question = e.sourceElement.closest('.que');
+						if (question?.id) {
+							toHydrate.push(["#mod_quiz_navblock", { updateUpTree: true, weight: 2 }]);
+							toHydrate.push([`#${question.id}`, { updateUpTree: true, weight: 4 }]);
+							toHydrate.push(["#responseform .submitbtns"]);
+							toHydrate.push([[
+								'#responseform>*>input[type="hidden"], #responseform input[name*="sequencecheck"]',
+								(el, dom) =>
+									dom.getElementsByName(el.getAttribute("name") ?? "never")[0],
+							], { evadeDebugging: true }]);
+						}
+					} else if (e.sourceElement?.classList.contains('mod_quiz-next-nav') || e.sourceElement?.classList.contains('mod_quiz-prev-nav')) {
+						toHydrate.push(['#mod_quiz_navblock', { updateUpTree: true, weight: 2 }]);
+						toHydrate.push(['#region-main', { updateUpTree: true, weight: 5 }]);
+						toHydrate.push(['#page-footer']);
+					} else if (e.sourceElement?.id.startsWith('quiznavbutton')
+						|| e.sourceElement?.classList.contains('mod_quiz-next-nav')
+						|| e.sourceElement?.classList.contains('mod_quiz-prev-nav')) {
+						toHydrate.push(['#mod_quiz_navblock', { updateUpTree: true, weight: 2 }]);
+						toHydrate.push(['#region-main', { updateUpTree: true, weight: 5 }]);
+						toHydrate.push(['#page-footer']);
+					}
+					const resp = await hydrateFromFetch(e.destination.url, {
+						method: e.formData ? 'POST' : 'GET',
+						body: e.formData,
+						signal: e.signal,
+					}, toHydrate);
+					const newLoc = new URL(resp.url);
+					if (newLoc.pathname !== oldLocation.pathname || !mapEqual(newLoc.searchParams, oldLocation.searchParams)) {
+						document.getElementById('page')?.scrollTo(0, (e.destination.getState() as undefined | { scrollPos?: number; })?.scrollPos ?? 0);
+						if (newLoc.hash) e.scroll();
+					}
+					navigation.navigate(resp.url, { info: { skip: true }, history: 'replace', state: { scrollPos: document.getElementById("page")?.scrollTop } });
+				},
+				focusReset: e.formData ? 'manual' : 'after-transition',
+				scroll: 'manual',
+			});
+		});
+		return;
+	}
+
+	if (DO_HYDRATION.value) history.scrollRestoration = 'manual';
 	// vjs = await videoJS;
 	window.addEventListener(
 		"submit",
@@ -268,7 +354,7 @@ export async function initNavigator() {
 			if (form.getAttribute('method') === 'dialog') return;
 			e.preventDefault();
 			if (!form.reportValidity()) return; // bad input, cancel here
-			const scrollPos = document.getElementById("page")?.scrollTop;
+			history.replaceState({ scrollPos: document.getElementById("page")?.scrollTop }, "");
 			if (!e.submitter?.classList.contains('submit'))
 				document.getElementById("page")?.scrollTo(0, 0);
 			const toHydrate: HydrationHint[] = [];
@@ -307,7 +393,7 @@ export async function initNavigator() {
 				}
 			}
 			if (location.pathname !== newLocation.pathname || !searchesMatch)
-				history.pushState({ scrollPos }, "", resp.url);
+				history.pushState({ scrollPos: document.getElementById("page")?.scrollTop }, "", resp.url);
 		}
 	);
 
@@ -320,7 +406,7 @@ export async function initNavigator() {
 		const target = new URL(link.href);
 		if (target.origin !== location.origin) return; // Cross-origin
 		e.preventDefault();
-		const scrollPos = document.getElementById("page")?.scrollTop;
+		history.replaceState({ scrollPos: document.getElementById("page")?.scrollTop }, "");
 		// TODO: is this good
 		if (target.host === location.host && target.pathname === location.pathname && target.search === location.search) {
 			// hash change only
@@ -363,14 +449,26 @@ export async function initNavigator() {
 		const targetEl = newLocation.hash && document.querySelector(newLocation.hash);
 		if (targetEl) targetEl.scrollIntoView({ behavior: 'instant', block: 'start' });
 		if (location.pathname !== newLocation.pathname || !searchesMatch)
-			history.pushState({ scrollPos }, "", resp.url);
+			history.pushState({ scrollPos: document.getElementById("page")?.scrollTop }, "", resp.url);
 	});
 
 	window.addEventListener("popstate", async (e) => {
-		if (!DO_HYDRATION.value) return;
+		if (!DO_HYDRATION.value || !e.state) return;
+		const { scrollPos } = e.state;
 		await hydrateFromFetch(location.href, { method: 'GET' }, []);
-		if (e.state?.scrollPos)
-			document.getElementById("page")?.scrollTo(0, e.state.scrollPos);
+		if ((scrollPos || false) ?? true) {
+			const page = document.getElementById("page");
+			if (!page) return;
+			page.scrollTo(0, scrollPos);
+			const heightObserver = new ResizeObserver(() => {
+				page.scrollTo(0, scrollPos);
+			});
+			const main = page.querySelector('.main-inner');
+			if (main) heightObserver.observe(main);
+			setTimeout(() => {
+				heightObserver.disconnect();
+			}, 2e3);
+		}
 	});
 }
 
