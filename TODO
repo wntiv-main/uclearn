@@ -18,3 +18,9 @@
 - better blur (svg) (done)
 - fix message sidebar data repo post hydrate (shows 0 chats)
 - thematic imaging with proper detection
+- turnitin button not working sometimes??
+- date picker in calender > new event
+- .tii_checkagainstnote, .tii_anonblindmarkingnote, .tii_genspeednote - turnitin alert classes need coloring
+- overflow in moodle file upload for assignments
+- dropdown in grades <https://learn.canterbury.ac.nz/grade/report/overview/index.php?id=22733>, and overflowing line
+- secondary nav more dropdown hover

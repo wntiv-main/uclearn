@@ -1,7 +1,7 @@
 import { EXT_URL } from "./constants";
 import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } from "./db";
 import { SKIP_HYDRATION_CLASS } from "./hydration";
-import { HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON } from "./icons";
+import { EDIT_ICON, HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON, WRENCH_ICON } from "./icons";
 import { getRequire, getYUIInstance, requireModule } from "./patches/lib-hook";
 import type Monaco from "monaco-editor";
 import { DO_HYDRATION, onPostHydrate } from "./navigation";
@@ -11,6 +11,7 @@ import { baseUrl } from "marked-base-url";
 import { setDefaultPlaybackRate } from "./patches/videojs-patches";
 import { _setTheme } from "./theme";
 import { DEBUG } from "../global/constants";
+import { WORKSPACE_ITEMS } from "./workspace-ui";
 
 type Config = {
 	userCss: string;
@@ -43,7 +44,13 @@ const configCache: Partial<Config> = {};
 const SELECTORS: Record<string, [selector: string]> = {
 	vars: ['&:root, &:host'],
 	'dropdown-container': ['.dropdown-menu, #nav-popover-favourites-container .popover-region-container, .MathJax_Menu'],
-	dropdown: ['.dropdown-menu.show:not(#user-action-menu), #user-action-menu [role="menu"]:is(:not(.carousel-item), .active, .carousel-item-next, .carousel-item-prev):has(>.dropdown-item), #nav-popover-favourites-container .popover-region-content, .MathJax_Menu'],
+	dropdown: [[
+		'.dropdown-menu.show:not(#user-action-menu)',
+		'#user-action-menu [role="menu"]:is(:not(.carousel-item), .active, .carousel-item-next, .carousel-item-prev):has(>.dropdown-item)',
+		'#nav-popover-favourites-container .popover-region-content',
+		'.MathJax_Menu',
+		'.__uclearn-workspace-tools .dropdown-toggle:is(:hover, :focus-visible) + .dropdown-menu',
+		'.__uclearn-workspace-tools .dropdown-menu:is(:hover, :focus-within)'].join()],
 	'dropdown-item': ['.dropdown-item:not(.hidden), .MathJax_MenuItem'],
 	'dropdown-divider': ['.dropdown-divider'],
 };
@@ -51,7 +58,7 @@ const CLASSES: Record<string, [selector: string]> = {
 	hover: [':is(:hover, :focus-visible, :active)'],
 	active: [':is(:active)'],
 	checked: ['.dropdown-item[aria-current="true"], .dropdown-item[aria-selected="true"]'],
-	'dropdown-item-with-icon': ['#user-action-menu .loggedinas ~ a, .__uclearn-help-button, .__uclearn-settings-button'],
+	'dropdown-item-with-icon': ['#user-action-menu .loggedinas ~ a, .__uclearn-help-button, .__uclearn-settings-button, .__uclearn-workspace-tools > .dropdown-toggle, .__uclearn-workspace-tools > .dropdown-menu > .dropdown-item'],
 };
 
 let userCssEditorModel: Monaco.editor.ITextModel | null = null;
@@ -594,11 +601,31 @@ export async function initConfig() {
 	helpButton.innerHTML = `${HELP_ICON}MooMo Help`;
 	helpButton.classList.add('dropdown-item', '__uclearn-help-button', SKIP_HYDRATION_CLASS);
 	helpButton.addEventListener('click', () => showHelpModal());
+	const workspaceDropDown = (() => {
+		const container = document.createElement('div');
+		container.classList.add('dropdown', '__uclearn-workspace-tools', SKIP_HYDRATION_CLASS);
+		const activeButton = document.createElement('button');
+		activeButton.innerHTML = `${WRENCH_ICON}Workspace Tools`;
+		activeButton.classList.add('dropdown-toggle', 'dropdown-item');
+		const menu = document.createElement('div');
+		menu.classList.add('dropdown-menu');
+		menu.append(...WORKSPACE_ITEMS.map(({ name, icon, classes, action }) => {
+			const btn = document.createElement('button');
+			btn.classList.add('dropdown-item', ...classes);
+			btn.addEventListener('click', () => action());
+			btn.innerHTML = icon;
+			btn.append(name);
+			return btn;
+		}));
+		container.append(activeButton, menu);
+		return container;
+	})();
 	const installButton = () =>
 		document
 			.querySelector('#user-action-menu a[href*="preferences"]')
-			?.before(settingsButton, helpButton);
+			?.before(settingsButton, helpButton, workspaceDropDown);
 	onPostHydrate(installButton);
+	installButton();
 	if (!configCache.hasSeenHelpMenu) {
 		await showHelpModal();
 		const store = await uclearnDB.openStore('userConfig', 'readwrite');

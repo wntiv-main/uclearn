@@ -9,6 +9,8 @@ import { copyTextToClipboard } from "./clipboard";
 import { h, render } from "preact";
 import htm from 'htm';
 import { EXT_URL } from "./constants";
+import { getTheme } from "./theme";
+import { DEBUG } from "../global/constants";
 
 declare global {
 	interface Window {
@@ -20,8 +22,21 @@ window.EXCALIDRAW_ASSET_PATH = `${EXT_URL}/excalidraw/`;
 
 import { Excalidraw } from '@excalidraw/excalidraw';
 import type { ExcalidrawProps } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
-import { getTheme } from "./theme";
-import { DEBUG } from "../global/constants";
+
+export const WORKSPACE_ITEMS = [
+	{
+		name: 'Math Field',
+		icon: `<div class="__uclearn-icon-grid">${PLUS_ICON}${TIMES_ICON}${MINUS_ICON}${DIVIDE_ICON}</div>`,
+		classes: ['__uclearn-workspace-math'],
+		action: createMathModal,
+	},
+	{
+		name: "Drawing Overlay",
+		icon: `${EDIT_ICON}`,
+		classes: ["__uclearn-workspace-draw"],
+		action: createExcalidrawWorkspace,
+	}
+] as const;
 
 async function createMathModal(value = '') {
 	const Dialog = await getMoodleDialog();
@@ -198,7 +213,18 @@ function createWorkspaceButtons(host: Element) {
 			e.stopPropagation();
 			createExcalidrawWorkspace();
 		});
-		form.append(mathButton, drawButton);
+		form.append(...WORKSPACE_ITEMS.map(({ name, icon, classes, action }) => {
+			const btn = document.createElement('button');
+			btn.innerHTML = icon;
+			btn.title = `Open ${name}`;
+			btn.classList.add(...classes);
+			btn.addEventListener('click', e => {
+				e.preventDefault();
+				e.stopPropagation();
+				action();
+			});
+			return btn;
+		}));
 	}
 	host.append(form);
 }

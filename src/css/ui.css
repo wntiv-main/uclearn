@@ -134,6 +134,7 @@
 	.modal-dialog {
 		.modal-content {
 			box-shadow: none;
+			border: none;
 			transition: box-shadow var(--uclearn-transition-short);
 		}
 
@@ -245,6 +246,26 @@
 			border: none;
 			border-radius: 0;
 			background-color: transparent;
+		}
+	}
+
+	.fdate_time_selector {
+		font-size: 0;
+
+		> * {
+			margin: 0 !important;
+			font-size: 1rem;
+		}
+
+		> :not(:first-child) .custom-select {
+			border-top-left-radius: 0;
+			border-bottom-left-radius: 0;
+		}
+
+		> :has(.custom-select):not(:last-of-type) .custom-select {
+			border-top-right-radius: 0;
+			border-bottom-right-radius: 0;
+			border-right: 0;
 		}
 	}
 
