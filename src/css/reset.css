@@ -722,6 +722,8 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.filter-ace-inline-output-display,
 	.activity,
 	.coderunner-test-results,
+	.filter-ace-inline-output-html,
+	.filter-ace-inline-html,
 	.que.coderunner :is(th, td),
 	.unread,
 	.unread .row.header,
@@ -854,6 +856,10 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		border-radius: 0;
 		background-color: transparent;
 		overflow: visible;
+	}
+
+	.filter-ace-inline-html p[style*="monospace"] {
+		padding-block: 0 !important;
 	}
 
 	.course-section .section-summary-activities .icon,

@@ -208,6 +208,7 @@
 	pre:has(> code),
 	pre:not(:has(> :not(span:empty))),
 	.filter-ace-inline-output-text,
+	.filter-ace-inline-html p[style*="monospace"],
 	.que:is(.coderunner) pre:not(.ace_tooltip pre) {
 		user-select: all;
 		text-shadow: none;
