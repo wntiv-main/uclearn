@@ -63,10 +63,11 @@ async function hydrateFromFetch(url: RequestInfo | URL, options: RequestInit, hy
 	if (!contentType.includes("html")) {
 		// We shoudln't handle this, load page normally
 		if (window.navigation) {
-			window.navigation.navigate(resp.url, { history: 'push', info: { hydrate: false } });
+			window.navigation.navigate(resp.url, { history: 'replace', info: { hydrate: false } });
 		} else {
 			location.assign(resp.url) as never;
 		}
+		throw 'cancel hydration';
 	}
 	updateProgress([], 'parsing', 0);
 	const updated = parser.parseFromString(
@@ -279,7 +280,7 @@ export async function initNavigator() {
 	const navigation = window.navigation;
 	if (navigation) {
 		navigation.addEventListener('navigate', e => {
-			if (!DO_HYDRATION.value || e.downloadRequest || !e.canIntercept)
+			if (!DO_HYDRATION.value || !((e.downloadRequest && false) ?? true) || !e.canIntercept)
 				return;
 			if (!((e.info as undefined | { hydrate?: boolean; })?.hydrate ?? true))
 				return;
