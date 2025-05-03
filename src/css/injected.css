@@ -342,7 +342,7 @@
 	z-index: 1018;
 	margin-block: calc(-1 * var(--uclearn-gap-large));
 	position: absolute;
-	height: 100%;
+	height: calc(100% + 2 * var(--uclearn-gap-large));
 }
 
 .excalidraw {

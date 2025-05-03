@@ -137,6 +137,11 @@
 	}
 
 	body#page-mod-quiz-attempt #page-wrapper #page {
+		.__uclearn-excalidraw-overlay {
+			position: static;
+			height: auto;
+		}
+
 		#page-header {
 			display: grid;
 			grid-template: subgrid / subgrid;
