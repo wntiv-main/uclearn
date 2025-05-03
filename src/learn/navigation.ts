@@ -335,7 +335,8 @@ export async function initNavigator() {
 					}, toHydrate);
 					const newLoc = new URL(resp.url);
 					if (newLoc.pathname !== oldLocation.pathname || !mapEqual(newLoc.searchParams, oldLocation.searchParams)) {
-						document.getElementById('page')?.scrollTo(0, (e.destination.getState() as undefined | { scrollPos?: number; })?.scrollPos ?? 0);
+						document.getElementById('page')?.scrollTo(0,
+							+(newLoc.searchParams.get('mdlscrollto') ?? (e.destination.getState() as undefined | { scrollPos?: number; })?.scrollPos ?? 0));
 						if (newLoc.hash) e.scroll();
 					}
 					navigation.navigate(resp.url, { info: { skip: true }, history: 'replace', state: { scrollPos: document.getElementById("page")?.scrollTop } });
