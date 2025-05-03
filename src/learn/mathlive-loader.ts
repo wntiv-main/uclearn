@@ -92,7 +92,7 @@ class LatexParser {
 	parse() {
 		try {
 			const result = this.parseExpression(true);
-			this.#commit();
+			if (result) this.#commit();
 			if (this.#i[0] < this.#latex.length)
 				return [null, new Error(`Could not parse '${this.#latex.slice(this.#i[0])}'`)] as const;
 			return [result, null] as const;
@@ -219,7 +219,10 @@ class LatexParser {
 			break;
 			// biome-ignore lint/style/noNonNullAssertion: #i must always be of atleast length 1
 		} while (this.#i.at(-1)! < this.#latex.length);
-		if (allowEmpty && !sums && !products) return '';
+		if (allowEmpty && !sums && !products) {
+			this.#pop();
+			return "";
+		}
 		if (!prodIsStable) throw new Error(`Incomplete expression: '${products + sums}'`);
 		return sums + products;
 	}

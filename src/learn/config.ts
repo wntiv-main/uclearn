@@ -1,7 +1,7 @@
 import { EXT_URL } from "./constants";
 import { DatabaseHandler, type DBStoreValue, type KeyValue, type WithKeyPath } from "./db";
 import { SKIP_HYDRATION_CLASS } from "./hydration";
-import { EDIT_ICON, HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON, WRENCH_ICON } from "./icons";
+import { HELP_ICON, MONITOR_ICON, MOON_ICON, SETTINGS_ICON, SUN_ICON, UPLOAD_ICON, WRENCH_ICON } from "./icons";
 import { getRequire, getYUIInstance, requireModule } from "./patches/lib-hook";
 import type Monaco from "monaco-editor";
 import { DO_HYDRATION, onPostHydrate } from "./navigation";

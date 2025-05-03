@@ -7,6 +7,7 @@ import { update } from '../global/util';
 import { hydrate, initDocumentParts, SKIP_HYDRATION_CLASS } from './hydration';
 import { getYUIInstance, modals, Toast } from './patches/lib-hook';
 import { contentTransformer } from './html-patcher';
+import { isElementTag } from './domutil';
 
 export const DO_HYDRATION: { value: boolean; } = { value: true };
 
@@ -323,6 +324,10 @@ export async function initNavigator() {
 						toHydrate.push(['#region-main', { updateUpTree: true, weight: 5 }]);
 						toHydrate.push(['#page-footer']);
 					}
+					const btn = e.sourceElement;
+					// Attach submitter button details
+					if (e.formData && btn && (isElementTag(btn, 'input') || isElementTag(btn, 'button')) && btn.type === 'submit' && (btn.name || btn.id))
+						e.formData.append(btn.name || btn.id, btn.value || btn.innerText || '1');
 					const resp = await hydrateFromFetch(e.destination.url, {
 						method: e.formData ? 'POST' : 'GET',
 						body: e.formData,
