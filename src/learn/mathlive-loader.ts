@@ -326,9 +326,12 @@ class LatexParser {
 
 	parseFunction() {
 		const fnSym = this.parseSymbol(true);
-		const fn = fnSym || this.parseMacro(
-			/arc(?:cos|sin|tan)|csc|cosec|sec|(?:cos|sin|tan|cot)h?|exp(?!onentialE)|ln|sqrt|ker|det|arg|dim|gcd|argmin|argmax|plim/)
-			?.map(name => ({ cosec: 'csc' }[name] ?? name));
+		const fn = fnSym
+			|| this.parseMacro(/operatorname\*?/, [{ parse: () => this.parseSymbol() }])
+				?.map((_, [{ value: name }]) => name)
+			|| this.parseMacro(
+				/arc(?:cos|sin|tan)|csc|cosec|sec|(?:cos|sin|tan|cot)h?|exp(?!onentialE)|ln|sqrt|ker|det|arg|dim|gcd|argmin|argmax|plim/)
+				?.map(name => ({ cosec: 'csc' }[name] ?? name));
 		const sup = fn && this.parseExp();
 		const args = fn && LatexParser.#close(this.parseGroup(/(?:\\(?:left)?)?\(|{/) || (!fnSym && this.parseObjects()));
 		if (!args) {
