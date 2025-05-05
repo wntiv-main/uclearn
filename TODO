@@ -24,3 +24,19 @@
 - overflow in moodle file upload for assignments
 - dropdown in grades <https://learn.canterbury.ac.nz/grade/report/overview/index.php?id=22733>, and overflowing line
 - secondary nav more dropdown hover
+- pyodide for python execution in-browser
+  - IO can be fed through streams from main to worker (worker stalled sync, but can message back in stdin handler)
+  - patch into pyodides virtual fs to access installed packages for types?? (numpy, matplotlib)
+- mathjax performace (many style recalcs??)
+  - move to shadowroot? POC:
+
+    ```js
+    MathJax.Hub.Register.MessageHook("New Math Pending", ([, id]) => { const el = MathJax.Hub.getJaxFor(id).SourceElement().previousElementSibling; el.attachShadow({ mode: 'open' }).append(...el.children) })
+    ```
+
+  - ~50% better perf (tested with excalidraw overlay passthrough-matching), -1k nodes from dom in some cases
+  - <https://github.com/mathjax/MathJax/issues/2162>
+- fix styling for mathjax context menu
+- css nav-height variable not being set properly on cosc quiz server???
+- hydrate performance on cosc quizzes seems suboptimal
+- history pushed twice for static non-html files e.g. pdfs with navigator api

@@ -112,7 +112,7 @@ function createExcalidrawWorkspace() {
 	let canvasActive = false;
 	let canvasNeverActive = false;
 	const isRelevant = (x: number, y: number) => {
-		if (DEBUG) for (const node of document.querySelectorAll('.test')) node.remove();
+		// if (DEBUG) for (const node of document.querySelectorAll('.test')) node.remove();
 		const topEl = document.elementsFromPoint(x, y).find(el => el !== wrapper && (!DEBUG || !el.classList.contains('test')));
 		if (!topEl) return false;
 		if (topEl.closest(".MathJax, a, img, video, picture, map, [tabindex], button, input, textarea, select, embed, fencedframe, iframe, object, svg, math, canvas, dialog, [contenteditable], [draggable]")) return true;
@@ -121,27 +121,36 @@ function createExcalidrawWorkspace() {
 			const range = document.createRange();
 			range.selectNode(child);
 			const rects = range.getClientRects();
-			if (DEBUG) for (const rect of rects) {
-				const overlay = document.createElement("div");
-				overlay.classList.add("test");
-				overlay.style.position = "fixed";
-				overlay.style.backgroundColor = "#8080FF60";
-				overlay.style.pointerEvents = "none";
-				overlay.style.zIndex = "9999";
-				overlay.style.inset = `${rect.top}px ${window.innerWidth - rect.right}px ${window.innerHeight - rect.bottom}px ${rect.left}px`;
-				document.body.append(overlay);
-			}
+			// if (DEBUG) for (const rect of rects) {
+			// 	const overlay = document.createElement("div");
+			// 	overlay.classList.add("test");
+			// 	overlay.style.position = "fixed";
+			// 	overlay.style.backgroundColor = "#8080FF60";
+			// 	overlay.style.pointerEvents = "none";
+			// 	overlay.style.zIndex = "9999";
+			// 	overlay.style.inset = `${rect.top}px ${window.innerWidth - rect.right}px ${window.innerHeight - rect.bottom}px ${rect.left}px`;
+			// 	document.body.append(overlay);
+			// }
 			if (([] as DOMRect[]).some.call(rects, (rect) => x > rect.left && x < rect.right && y > rect.top && y < rect.bottom))
 				return true;
 		}
 		return false;
 	};
-	const moveCb = (e: MouseEvent) => {
+	let selectionInvalidated = true;
+	let _selectionCollapsed = false;
+	const selectionCollapsed = () => {
+		if (!selectionInvalidated) return _selectionCollapsed;
+		selectionInvalidated = false;
 		const selection = document.getSelection();
+		_selectionCollapsed = !selection || selection.isCollapsed;
+		return _selectionCollapsed;
+	};
+	const moveCb = (e: MouseEvent) => {
 		wrapper.style.pointerEvents = !canvasNeverActive
 			&& (canvasActive || e.shiftKey
-				|| ((!selection || selection.isCollapsed) && !isRelevant(e.pageX, e.pageY))) ? 'all' : 'none';
+				|| (selectionCollapsed() && !isRelevant(e.pageX, e.pageY))) ? 'all' : 'none';
 	};
+	document.addEventListener('selectionchange', () => { selectionInvalidated = true; });
 	document.addEventListener('mousemove', moveCb, { capture: true });
 	wrapper.addEventListener('wheel', e => {
 		// Prevent excalidraw's default scroll handling

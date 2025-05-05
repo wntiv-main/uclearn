@@ -70,6 +70,8 @@ async function workerLanguageServer(url: string, name: string) {
 			signatureHelp: true,
 		},
 	});
+	// (languageProvider as unknown as { $messageController: MessageController; })
+	// 	.$messageController.init({}, {}, '');
 	return languageProvider;
 }
 
