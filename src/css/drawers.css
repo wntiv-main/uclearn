@@ -155,14 +155,6 @@
 		scrollbar-width: thin;
 	}
 
-	.drawer-right {
-		transform: scaleX(-1);
-
-		> * {
-			transform: scaleX(-1);
-		}
-	}
-
 	.drawer-toggles {
 		display: contents !important;
 
