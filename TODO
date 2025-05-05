@@ -40,3 +40,4 @@
 - css nav-height variable not being set properly on cosc quiz server???
 - hydrate performance on cosc quizzes seems suboptimal
 - history pushed twice for static non-html files e.g. pdfs with navigator api
+- workspace buttons focus indicator
