@@ -290,7 +290,7 @@ export async function initNavigator() {
 			}
 			const oldLocation = new URL(location.href);
 			navigation.updateCurrentEntry({ state: { scrollPos: document.getElementById("page")?.scrollTop } });
-			if (e.destination.sameDocument) return e.intercept({
+			if (e.navigationType === 'traverse' ? e.hashChange : e.destination.sameDocument) return e.intercept({
 				async handler() {
 					document.getElementById('page')?.scrollTo(0, (e.destination.getState() as undefined | { scrollPos?: number; })?.scrollPos ?? 0);
 					if (new URL(e.destination.url).hash) e.scroll();
