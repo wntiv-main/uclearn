@@ -108,33 +108,42 @@ class LatexParser {
 	// TODO: pdiff, binom
 	// https://cortexjs.io/mathfield/reference/commands
 
-	parseObject(acceptLeadingSign = true): string | false {
-		const obj = this.parseNum() || this.parseMacro(/sqrt\d/)?.map(name => `sqrt(${name.slice(-1)})`) || this.parseFunction() || this.parseSymbol() || this.parseD() || this.parseGroup() || this.parsePDiff()
-			|| this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])
-				?.map((_, [num, denom]) => `(${LatexParser.#closeFactor(num.value)}/${LatexParser.#closeFactor(denom.value)})`)
-			|| this.parseMacro(/[dt]?frac\d{2}/)?.map(name => {
-				const [n, d] = [...name.slice(-2)].map(n => Number.parseInt(n));
-				return `(${n}/${d})`;
-			})
+	parseObject(acceptLeadingSign = true, acceptSecondary = true): string | false {
+		const parse = acceptSecondary ? this.parseExpression : () => this.parseObject(acceptLeadingSign, false);
+		const obj = acceptSecondary && (this.parseNum() ||
+			this.parseMacro(/sqrt\d/)?.map((name) => `sqrt(${name.slice(-1)})`) ||
+			this.parseFunction())
+			|| this.parseSymbol()
+			|| acceptSecondary && (this.parseD() ||
+				this.parseGroup() ||
+				this.parsePDiff() ||
+				this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])?.map(
+					(_, [num, denom]) =>
+						`(${LatexParser.#closeFactor(num.value)}/${LatexParser.#closeFactor(denom.value)})`,
+				) ||
+				this.parseMacro(/[dt]?frac\d{2}/)?.map((name) => {
+					const [n, d] = [...name.slice(-2)].map((n) => Number.parseInt(n));
+					return `(${n}/${d})`;
+				}))
 			|| this.parseMacro(/(?:display|text|script|scriptscript)style|math(?:punct|inner|ord|bfit|bf|it|tt|sf|frak|scr|cal|bb|rm)|boxed|boldsymbol|bold|bm|emph|tiny|small|[lL]arge|LARGE|[hH]uge|(?:script|footnote|normal)size|displaylines/,
-				[{}])?.map((_, args) => {
+				[{ parse }])?.map((_, args) => {
 					return args[0].value;
 				})
-			|| this.parseMacro('mathopen', [{}])?.map((_, args) => {
+			|| this.parseMacro('mathopen', [{ parse }])?.map((_, args) => {
 				return `${args[0].value} `;
 			})
-			|| this.parseMacro('mathclose', [{}])?.map((_, args) => {
+			|| this.parseMacro('mathclose', [{ parse }])?.map((_, args) => {
 				return ` ${args[0].value}`;
 			})
-			|| this.parseMacro(/math(?:op|rel|bin)/, [{}])?.map((_, args) => {
+			|| this.parseMacro(/math(?:op|rel|bin)/, [{ parse }])?.map((_, args) => {
 				return ` ${args[0].value} `;
 			})
 			|| this.parseMacro(/(?:text)?color|colorbox/,
-				[{ parse: this.parseText }, {}])?.map((_, args) => {
+				[{ parse: this.parseText }, { parse }])?.map((_, args) => {
 					return args[1].value;
 				})
 			|| this.parseMacro('fcolorbox',
-				[{ parse: this.parseText }, { parse: this.parseText }, {}])?.map((_, args) => {
+				[{ parse: this.parseText }, { parse: this.parseText }, { parse }])?.map((_, args) => {
 					return args[2].value;
 				})
 			|| this.parseMacro(/text(?:rm|md|bf|up|it|sl|tt|sf|normal)?|mbox/, [{ parse: this.parseText }])?.map((_, args) => args[0].value)
@@ -157,7 +166,7 @@ class LatexParser {
 		if (!collector) return false;
 		/* eslint-disable-next-line no-cond-assign
 		*/// biome-ignore lint/suspicious/noAssignInExpressions: i want it tho
-		for (let obj: string | false; obj = this.parseObject(false);) {
+		for (let obj: string | false; obj = this.parseObject(false, false);) {
 			collector += `*${obj}`;
 			this.#commit();
 		}
