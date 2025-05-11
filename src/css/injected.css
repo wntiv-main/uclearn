@@ -361,7 +361,6 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	justify-self: center;
-	justify-content: center;
 	overflow: clip;
 	position: absolute;
 	height: 100%;
@@ -377,7 +376,6 @@
 		top: 0;
 		left: 0;
 		margin: -100%;
-		justify-self: center;
 		z-index: -1;
 		background-image: var(--uclearn-background-imageset);
 		background-size: cover;
