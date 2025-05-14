@@ -840,6 +840,7 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 		color: var(--uclearn-foreground-muted) !important;
 	}
 
+	.notification-area .content-area .header .timestamp,
 	caption {
 		color: var(--uclearn-foreground-muted);
 	}
