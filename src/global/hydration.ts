@@ -23,6 +23,7 @@ export type HydrationNode = { nodeId: number; } & (({
 	id: string;
 	rawId: string;
 	classes: string[];
+	persistentClasses: string[];
 	attributes: Map<string, string>;
 	content: string;
 	debugging?: boolean;

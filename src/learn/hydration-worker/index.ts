@@ -50,6 +50,7 @@ function updateNode(tasks: HydrationTasks, dom: HydrationElement, updated: Hydra
 	const newClasses = [...updated.classes];
 	if (dom.classes.includes('jsenabled')) newClasses.push('jsenabled');
 	if (!compareClasses(dom.classes, newClasses)) {
+		newClasses.push(...dom.persistentClasses);
 		tasks.push({
 			type: 'setAttr',
 			element: dom.nodeId,
