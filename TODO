@@ -34,3 +34,4 @@
 - hydrate performance on cosc quizzes seems suboptimal
 - history pushed twice for static non-html files e.g. pdfs with navigator api
 - workspace buttons focus indicator
+- close modals after hydrate (if? their buttons caused the hydrate)
