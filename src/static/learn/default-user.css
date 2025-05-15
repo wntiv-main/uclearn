@@ -73,12 +73,6 @@
 	padding-block: var(--uclearn-gap);
 
 	::-moomo-dropdown-item {
-		display: grid;
-		grid-auto-flow: column;
-		grid-template-columns: max-content;
-		grid-auto-columns: auto;
-		gap: 0.8ch;
-		align-items: center;
 		transition: background-color var(--uclearn-transition-short),
 			box-shadow var(--uclearn-transition-short);
 		margin-inline: var(--uclearn-gap);
@@ -86,12 +80,18 @@
 		padding: 0.3rem;
 		padding-left: 1ch !important;
 		text-overflow: ellipsis;
-
+		
 		&.d-inline-flex {
 			display: grid !important;
 		}
-
-		&:-moomo-dropdown-item-with-icon {
+		
+		&:-moomo-dropdown-item-with-icon, &:-moomo-checked {
+			display: grid;
+			grid-auto-flow: column;
+			grid-template-columns: max-content;
+			grid-auto-columns: auto;
+			gap: 0.8ch;
+			align-items: center;
 			padding-left: 0.3rem !important;
 		}
 
