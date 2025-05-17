@@ -204,9 +204,9 @@
 		user-select: all;
 	}
 
-	code:not(:empty, :has(> :not(span:empty)), pre > code, .hljs),
+	code:not(:empty, :has(> :not(span:empty, br)), pre > code, .hljs),
 	pre:has(> code),
-	pre:not(:has(> :not(span:empty))),
+	pre:not(:has(> :not(span:empty, br))),
 	.filter-ace-inline-output-text,
 	.filter-ace-inline-html p[style*="monospace"],
 	.que:is(.coderunner) pre:not(.ace_tooltip pre) {
