@@ -76,7 +76,8 @@ input:is([type="text" i], [type="search" i], [type="number" i]) {
 	.stackinputfeedback {
 		display: none;
 
-		:root.__uclearn-mathlive-debug & {
+		:root.__uclearn-mathlive-debug &,
+		:is(.__uclearn-mathlive-debug, :has(> .__uclearn-mathlive-debug)) ~ & {
 			display: inline-block;
 			opacity: 0.2;
 		}

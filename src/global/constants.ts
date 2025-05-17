@@ -5,7 +5,7 @@ declare const process: {
 	};
 };
 
-((typeof window !== 'undefined' ? window : self) as { process: typeof process; }).process = { env: {} };
+(globalThis as { process: typeof process; }).process = { env: {} };
 
 export const DEBUG = !!+(process.env.UCLEARN_DEBUG ?? 0);
 const DEBUG_FLAGS = DEBUG ? (process.env.UCLEARN_DEBUG_FLAGS ?? "").toLowerCase().split(/,\s*/g).filter(x => x) : [];

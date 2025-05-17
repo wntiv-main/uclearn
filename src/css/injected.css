@@ -83,7 +83,8 @@
 		) {
 		display: none !important;
 
-		:root.__uclearn-mathlive-debug & {
+		:root.__uclearn-mathlive-debug &,
+		.__uclearn-mathlive-debug + & {
 			display: inline-block !important;
 			opacity: 0.2;
 			field-sizing: content;

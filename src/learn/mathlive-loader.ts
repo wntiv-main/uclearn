@@ -200,6 +200,10 @@ class LatexParser {
 
 			const sum = (prodIsStable || !products) && this.#consume(/[+=-]/) || this.parseMacro('pm')?.map(() => '#pm#');
 			if (sum) {
+				if (sum === '=' && !products) {
+					this.#pop();
+					continue;
+				}
 				this.#commit();
 				sums += !products.trimEnd() ? sum : `${products.trimEnd()} ${sum} `;
 				products = '';
@@ -467,7 +471,15 @@ export function initMathField(mf: MathfieldElement) {
 	mf.smartSuperscript = true;
 	mf.classList.add(MATHLIVE_FIELD_CLASS);
 	mf.addEventListener('mount', () => {
-		mf.menuItems = mf.menuItems.filter(item => !/color|variant|decoration/.test((item as { id?: string; }).id ?? ''));
+		const menu = mf.menuItems.filter(item => !/color|variant|decoration/.test((item as { id?: string; }).id ?? ''));
+		menu.push({
+			type: 'command',
+			label: 'Toggle STACK field',
+			visible: (modifiers) => modifiers.shift,
+			id: 'moomo-debug',
+			onMenuSelect: () => mf.classList.toggle('__uclearn-mathlive-debug'),
+		});
+		mf.menuItems = menu;
 		mf.keybindings = [
 			...mf.keybindings,
 			{ key: 'alt+,', ifMode: 'math', command: 'addColumnAfter' },
