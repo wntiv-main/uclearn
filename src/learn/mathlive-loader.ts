@@ -199,12 +199,9 @@ class LatexParser {
 				continue;
 			}
 
-			const sum = (prodIsStable || !products) && this.#consume(/[+=-]/) || this.parseMacro('pm')?.map(() => '#pm#');
+			const sum = (prodIsStable || !products) && (
+				this.#consume(/[+-]/) || (products && this.#consume('=')) || this.parseMacro('pm')?.map(() => '#pm#'));
 			if (sum) {
-				if (sum === '=' && !products) {
-					this.#pop();
-					continue;
-				}
 				this.#commit();
 				sums += !products.trimEnd() ? sum : `${products.trimEnd()} ${sum} `;
 				products = '';
