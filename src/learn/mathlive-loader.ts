@@ -109,7 +109,7 @@ class LatexParser {
 	// https://cortexjs.io/mathfield/reference/commands
 
 	parseObject(acceptLeadingSign = true, acceptSecondary = true): string | false {
-		const parse = acceptSecondary ? this.parseExpression : () => this.parseObject(acceptLeadingSign, false);
+		const parse = acceptSecondary ? () => this.parseExpression() : () => this.parseObject(acceptLeadingSign, false);
 		const obj = acceptSecondary && (this.parseNum() ||
 			this.parseMacro(/sqrt\d/)?.map((name) => `sqrt(${name.slice(-1)})`) ||
 			this.parseFunction())
@@ -139,15 +139,15 @@ class LatexParser {
 				return ` ${args[0].value} `;
 			})
 			|| this.parseMacro(/(?:text)?color|colorbox/,
-				[{ parse: this.parseText }, { parse }])?.map((_, args) => {
+				[{ parse: () => this.parseText() }, { parse }])?.map((_, args) => {
 					return args[1].value;
 				})
 			|| this.parseMacro('fcolorbox',
-				[{ parse: this.parseText }, { parse: this.parseText }, { parse }])?.map((_, args) => {
+				[{ parse: () => this.parseText() }, { parse: () => this.parseText() }, { parse }])?.map((_, args) => {
 					return args[2].value;
 				})
-			|| this.parseMacro(/text(?:rm|md|bf|up|it|sl|tt|sf|normal)?|mbox/, [{ parse: this.parseText }])?.map((_, args) => args[0].value)
-			|| this.parseMacro('textsc', [{ parse: this.parseText }])?.map((_, args) => args[0].value.toUpperCase());
+			|| this.parseMacro(/text(?:rm|md|bf|up|it|sl|tt|sf|normal)?|mbox/, [{ parse: () => this.parseText() }])?.map((_, args) => args[0].value)
+			|| this.parseMacro('textsc', [{ parse: () => this.parseText() }])?.map((_, args) => args[0].value.toUpperCase());
 		if (!acceptLeadingSign && obj && /^[+-]/.test(obj)) {
 			this.#pop();
 			return false;
@@ -180,7 +180,8 @@ class LatexParser {
 		let prodIsStable = false;
 		do {
 			if (this.#consume(/\s+/)) this.#commit();
-			if (this.parseMacro(/[,.:;]|enskip|enspace|q?quad|strut|mathstrut/) || this.parseMacro(/hspace\*?/, [{ parse: this.parseText }])) {
+			if (this.parseMacro(/[,.:;]|enskip|enspace|q?quad|strut|mathstrut/)
+				|| this.parseMacro(/hspace\*?/, [{ parse: () => this.parseText() }])) {
 				if (products && !products.endsWith(' ')) products += ' ';
 				else if (sums && !sums.endsWith(' ')) sums += ' ';
 				this.#commit();
