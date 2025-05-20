@@ -16,7 +16,7 @@
 	</filter>
 	<filter id="noiseblur" color-interpolation-filters="linearRGB">
 		<feGaussianBlur stdDeviation="8" result="blur"></feGaussianBlur>
-		<feTurbulence type="fractalNoise" baseFrequency="1" result="noise"></feTurbulence>
+		<feTurbulence type="fractalNoise" baseFrequency="0.99" result="noise"></feTurbulence>
 		<feDisplacementMap in="blur" in2="noise" scale="30"></feDisplacementMap>
 	</filter>
 </svg>
