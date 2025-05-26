@@ -13,20 +13,20 @@ import './yui-modal';
 let _require_promise: Promise<Require>;
 export async function getRequire() {
 	return (
-		window.require ??
-		// biome-ignore lint/suspicious/noAssignInExpressions: shhh
-		(await (_require_promise ??= new Promise((res) => {
-			let _require: Require | undefined = undefined;
-			Object.defineProperty(window, "require", {
-				get() {
-					return _require;
-				},
-				set(value) {
-					_require = value;
-					if (_require instanceof Function) res(_require);
-				},
-			});
-		})))
+		typeof window.require === 'function' ? window.require :
+			// biome-ignore lint/suspicious/noAssignInExpressions: shhh
+			(await (_require_promise ??= new Promise((res) => {
+				let _require: Require | undefined = undefined;
+				Object.defineProperty(window, "require", {
+					get() {
+						return _require;
+					},
+					set(value) {
+						_require = value;
+						if (typeof _require === 'function') res(_require);
+					},
+				});
+			})))
 	);
 }
 
