@@ -422,4 +422,37 @@
 			--uclearn-accent-color: var(--uclearn-color-error);
 		}
 	}
+
+	.stack table td > .matrixnobrackets {
+		padding: 0;
+		min-width: 100%;
+
+		table {
+			min-width: 100%;
+			max-width: none;
+			display: inline-table !important;
+			table-layout: fixed;
+
+			td {
+				padding: 0;
+
+				&:not(:has(*)) {
+					display: none;
+					overflow: hidden;
+					width: 0;
+					max-width: 0;
+				}
+
+				input {
+					max-width: none;
+					min-width: 100%;
+					field-sizing: content;
+				}
+			}
+		}
+
+		td:has(> &) {
+			padding: 0;
+		}
+	}
 }

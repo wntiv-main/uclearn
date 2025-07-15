@@ -2,10 +2,10 @@ export function initKeybindings() {
 	document.addEventListener("keydown", e => {
 		const el = e.target as Element;
 		if (e.key?.startsWith('Arrow')) {
-			const sstField = el.closest<HTMLInputElement>('.sst input');
+			const sstField = el.closest<HTMLInputElement>('.sst input, .stack table input');
 			if (sstField) {
 				// biome-ignore lint/style/noNonNullAssertion: must be present
-				const sst = sstField.closest('.sst')!;
+				const sst = sstField.closest('.sst, .stack table')!;
 				if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
 					e.preventDefault();
 					const cell = sstField.closest('td, th');
@@ -15,7 +15,8 @@ export function initKeybindings() {
 							+ (e.key === 'ArrowUp' ? -1 : 1)) % rows.length);
 					nextRow?.children[([] as typeof cell[]).indexOf.call(cell?.parentElement?.children, cell)]?.querySelector('input')?.focus();
 				} else if (sstField.selectionStart != null && sstField.selectionStart === sstField.selectionEnd) {
-					const fields = [...sst.querySelectorAll("input")];
+					const fullTable = sst.classList.contains('matrixtable') ? sst.parentElement?.closest('.stack table') ?? sst : sst;
+					const fields = [...fullTable.querySelectorAll("input")];
 					if (e.key === 'ArrowLeft' && sstField.selectionStart <= 0) {
 						e.preventDefault();
 						fields.at(fields.indexOf(sstField) - 1)?.focus();
