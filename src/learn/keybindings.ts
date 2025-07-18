@@ -16,6 +16,17 @@ export function initKeybindings() {
 					nextRow?.children[([] as typeof cell[]).indexOf.call(cell?.parentElement?.children, cell)]?.querySelector('input')?.focus();
 				} else if (sstField.selectionStart != null && sstField.selectionStart === sstField.selectionEnd) {
 					const fullTable = sst.classList.contains('matrixtable') ? sst.parentElement?.closest('.stack table') ?? sst : sst;
+					if (fullTable !== sst) {
+						const outerRow = sst.closest('tr');
+						const innerRow = sstField.closest('tr');
+						const rowIdx = Array.prototype.indexOf.call(outerRow?.parentElement?.children ?? [], outerRow)
+							+ Array.prototype.indexOf.call(innerRow?.parentElement?.children ?? [], innerRow);
+
+						const outerCell = sst.closest('td');
+						const innerCell = sstField.closest('td');
+						const colIdx = Array.prototype.indexOf.call(outerRow?.children ?? [], outerRow)
+							+ Array.prototype.indexOf.call(innerRow?.parentElement?.children ?? [], innerRow);
+					}
 					const fields = [...fullTable.querySelectorAll("input")];
 					if (e.key === 'ArrowLeft' && sstField.selectionStart <= 0) {
 						e.preventDefault();
