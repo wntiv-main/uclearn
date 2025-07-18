@@ -385,3 +385,7 @@
 		box-shadow: inset 0 0 0 100vmax var(--uclearn-translucent-bg);
 	}
 }
+
+:root #mathlive-suggestion-popover {
+	z-index: 10000;
+}
