@@ -24,8 +24,8 @@ export function initKeybindings() {
 
 						const outerCell = sst.closest('td');
 						const innerCell = sstField.closest('td');
-						const colIdx = Array.prototype.indexOf.call(outerRow?.children ?? [], outerRow)
-							+ Array.prototype.indexOf.call(innerRow?.parentElement?.children ?? [], innerRow);
+						const colIdx = Array.prototype.indexOf.call(outerRow?.children ?? [], outerCell)
+							+ Array.prototype.indexOf.call(innerRow?.children ?? [], innerCell);
 					}
 					const fields = [...fullTable.querySelectorAll("input")];
 					if (e.key === 'ArrowLeft' && sstField.selectionStart <= 0) {

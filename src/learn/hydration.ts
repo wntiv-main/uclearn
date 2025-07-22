@@ -269,6 +269,7 @@ function handleNodeInsert(parent: Node, node: Node, collectors: NodeCollectors) 
 	// 		...newNode.querySelectorAll<HTMLVideoElement>("video.video-js"),
 	// 	);
 	if (
+		node.classList.contains("matrixnobrackets") ||
 		node.classList.contains("matrixsquarebrackets") ||
 		node.classList.contains("matrixroundbrackets") ||
 		node.classList.contains("matrixbarbrackets")
@@ -277,7 +278,7 @@ function handleNodeInsert(parent: Node, node: Node, collectors: NodeCollectors) 
 	else
 		collectors.matrixFields.push(
 			...node.querySelectorAll<HTMLElement>(
-				":is(.matrixsquarebrackets, .matrixroundbrackets, .matrixbarbrackets)",
+				":is(.matrixnobrackets, .matrixsquarebrackets, .matrixroundbrackets, .matrixbarbrackets)",
 			),
 		);
 	for (const [parentSel, selector, handler] of insertHandlers) {

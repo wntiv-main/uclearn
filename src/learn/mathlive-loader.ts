@@ -17,15 +17,18 @@ if (DEBUG_MATHLIVE) {
 	document.documentElement.classList.add('__uclearn-mathlive-debug');
 }
 
-function latexToStack(latex: string) {
-	return (new LatexParser(latex)).parse();
+function latexToStack(latex: string, matrixFormat: 'function' | 'grid' = 'function') {
+	return (new LatexParser(latex, matrixFormat)).parse();
 }
 
+type falsey = false | 0 | "" | undefined | null | void;
 class LatexParser {
 	readonly #latex: string;
+	readonly #matrixFormat: 'grid' | 'function';
 	#i = [0];
-	constructor (latex: string) {
+	constructor (latex: string, matrixFormat: 'grid' | 'function' = 'function') {
 		this.#latex = latex;
+		this.#matrixFormat = matrixFormat;
 	}
 
 	_depth() {
@@ -115,7 +118,9 @@ class LatexParser {
 			this.parseFunction())
 			|| this.parseSymbol()
 			|| acceptSecondary && (this.parseD() ||
+				this.parseGroup(/(?:\\(?:left)?)?[[(]/, undefined, () => this.parseMatrix(), false) ||
 				this.parseGroup() ||
+				this.parseMatrix() ||
 				this.parsePDiff() ||
 				this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])?.map(
 					(_, [num, denom]) =>
@@ -173,6 +178,43 @@ class LatexParser {
 		return collector;
 	}
 
+	parseMatrix() {
+		const beginEnv = this.parseMacro('begin', [{ parse: () => this.#consume(/[pbvBV]?matrix|smallmatrix/) }])
+			|| this.parseMacro('begin', [{ parse: () => this.#consume('array') }, { optional: true, parse: () => this.#consume(/[^{}]*/) }]);
+		if (!beginEnv) return false;
+		const first = this.#parseMatrixRow();
+		if (!first) return false;
+		const rows = [first];
+		/* eslint-disable-next-line no-cond-assign
+		*/// biome-ignore lint/suspicious/noAssignInExpressions: i want it tho
+		for (let row: string[] | falsey; row = this.#consume('\\\\') && (this.#parseMatrixRow() || this.#pop());) {
+			this.#commit(2);
+			rows.push(row);
+		}
+		const endEnv = this.parseMacro('end', [{ parse: () => this.#consume(beginEnv.args[0].value) }]);
+		if (!endEnv) {
+			this.#pop(2);
+			return false;
+		}
+		this.#commit(2);
+		return this.#matrixFormat == "grid"
+			? rows.map(row => row.join(' ')).join('\n')
+			: `matrix([${rows.map(row => row.join(', ')).join('], [')}])`;
+	}
+
+	#parseMatrixRow() {
+		const first = this.parseExpression();
+		if (!first) return false;
+		const exprs = [first];
+		/* eslint-disable-next-line no-cond-assign
+		*/// biome-ignore lint/suspicious/noAssignInExpressions: i want it tho
+		for (let expr: string | falsey; expr = this.#consume('&') && (this.parseExpression() || this.#pop());) {
+			this.#commit(2);
+			exprs.push(expr);
+		}
+		return exprs;
+	}
+
 	parseExpression(allowEmpty = false) {
 		this.#push();
 		let sums = '';
@@ -209,12 +251,12 @@ class LatexParser {
 				continue;
 			}
 
-			const dot = prodIsStable && this.parseMacro(/cdot|cross/);
+			const dot = prodIsStable && this.parseMacro(/cdot|times/);
 			if (dot) {
 				this.#commit();
 				if (products) {
 					products = products.trimEnd();
-					products += { cdot: " . ", cross: " * " }[dot.name];
+					products += { cdot: " . ", times: " * " }[dot.name];
 				}
 				prodIsStable = false;
 				continue;
@@ -244,7 +286,7 @@ class LatexParser {
 		if (n && this.#consume(/\s+/)) this.#commit();
 		const argValues: (ItemOf<typeof args> & { value: string; })[] = [];
 		if (n) for (const [i, { id, parse, optional }] of enumerate(args)) {
-			const value = this.parseGroup('{', '}', parse);
+			const value = this.parseGroup('{', '}', parse, false);
 			if (!optional && !value) {
 				this.#pop(+!!bs + +!!n + i);
 				return;
@@ -362,7 +404,7 @@ class LatexParser {
 		return `(${fn}${args})^${LatexParser.#closeExponent(sup)}`;
 	}
 
-	parseGroup(open?: string | RegExp, close?: string | RegExp, internals: () => string | false | undefined = () => this.parseExpression()) {
+	parseGroup(open?: string | RegExp, close?: string | RegExp, internals: () => string | false | undefined = () => this.parseExpression(), wrap = true) {
 		const openFound = this.#consume(open ?? /(?:\\(?:left)?)?[{([]/);
 		const expr = openFound && internals();
 		const closeFound = expr && this.#consume(close ?? (
@@ -370,7 +412,7 @@ class LatexParser {
 			+ { '{': '}', '(': ')', '[': ']' }[openFound.slice(-1) ?? '']));
 		if (closeFound) {
 			this.#commit(2);
-			return openFound === '{' ? expr : `${openFound.slice(-1)}${expr}${closeFound.slice(-1)}`;
+			return !wrap || (!open && openFound === '{') ? expr : `${openFound.slice(-1)}${expr}${closeFound.slice(-1)}`;
 		}
 		this.#pop(+!!openFound + +!!expr);
 		return false;
@@ -495,13 +537,46 @@ export function initMathField(mf: MathfieldElement) {
 
 export function initMatrixField(field: HTMLElement) {
 	const mathField = new MathfieldElement({});
-	mathField.readOnly = true;
 	const internals = initMathField(mathField);
 	const rows = [...field.querySelectorAll('tr')];
 	const env = field.classList.contains('matrixroundbrackets') ? 'pmatrix'
 		: field.classList.contains('matrixsquarebrackets') ? 'bmatrix'
 			: field.classList.contains('matrixbarbrackets') ? 'vmatrix'
 				: 'matrix';
+	const textarea = field.querySelector<HTMLTextAreaElement>('textarea:only-child');
+	if (textarea) {
+		const fieldValue = textarea.value.match(/;"__uclearn-mltex-\(";(".*");"__uclearn-mltex-\)"/);
+		mathField.setValue(fieldValue ?
+			JSON.parse(fieldValue[1])
+				.replaceAll(/;([;s])/g,
+					(_: string, m: string) => m === 's' ? ' ' : m)
+			: `\
+			\\begin{${env}}
+				\\placeholder{}
+			\\end{${env}}`);
+		const inputCb = (e: Event) => {
+			const fieldLatex = mathField.getValue('latex');
+			const [stack, err] = latexToStack(fieldLatex, 'grid');
+			if (err) {
+				mathField.style.borderColor = 'red';
+				if (DEBUG) console.error(err);
+				internals.setValidity({ customError: true }, err.message);
+				return;
+			}
+			internals.setValidity({});
+			mathField.style.borderColor = 'currentColor';
+			textarea.value = `${stack};"__uclearn-mltex-(";${JSON.stringify(fieldLatex)
+				.replaceAll(';', ';;')
+				.replaceAll(' ', ';s')};"__uclearn-mltex-)"`;
+			textarea.dispatchEvent(new InputEvent(e.type, e));
+		};
+		mathField.addEventListener('input', inputCb);
+		mathField.addEventListener('change', inputCb);
+		field.before(mathField);
+		return;
+	}
+	mathField.readOnly = true;
+	mathField.style.borderColor = 'transparent';
 	const lockStates: Record<string, boolean> = {};
 	mathField.setValue(`\
 		\\begin{${env}}
@@ -533,7 +608,7 @@ export function initMatrixField(field: HTMLElement) {
 			field.dispatchEvent(new InputEvent(e.type, e));
 		}
 		internals.setValidity({});
-		mathField.style.borderColor = 'currentColor';
+		mathField.style.borderColor = 'transparent';
 	};
 	mathField.addEventListener('input', inputCb);
 	mathField.addEventListener('change', inputCb);
