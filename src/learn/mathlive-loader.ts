@@ -111,29 +111,11 @@ class LatexParser {
 	// TODO: pdiff, binom
 	// https://cortexjs.io/mathfield/reference/commands
 
-	parseObject(acceptLeadingSign = true, acceptSecondary = true): string | false {
-		const parse = acceptSecondary ? () => this.parseExpression() : () => this.parseObject(acceptLeadingSign, false);
-		const obj = acceptSecondary && (this.parseNum() ||
-			this.parseMacro(/sqrt\d/)?.map((name) => `sqrt(${name.slice(-1)})`) ||
-			this.parseFunction())
-			|| this.parseSymbol()
-			|| acceptSecondary && (this.parseD() ||
-				this.parseGroup(/(?:\\(?:left)?)?[[(]/, undefined, () => this.parseMatrix(), false) ||
-				this.parseGroup() ||
-				this.parseMatrix() ||
-				this.parsePDiff() ||
-				this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])?.map(
-					(_, [num, denom]) =>
-						`(${LatexParser.#closeFactor(num.value)}/${LatexParser.#closeFactor(denom.value)})`,
-				) ||
-				this.parseMacro(/[dt]?frac\d{2}/)?.map((name) => {
-					const [n, d] = [...name.slice(-2)].map((n) => Number.parseInt(n));
-					return `(${n}/${d})`;
-				}))
-			|| this.parseMacro(/(?:display|text|script|scriptscript)style|math(?:punct|inner|ord|bfit|bf|it|tt|sf|frak|scr|cal|bb|rm)|boxed|boldsymbol|bold|bm|emph|tiny|small|[lL]arge|LARGE|[hH]uge|(?:script|footnote|normal)size|displaylines/,
-				[{ parse }])?.map((_, args) => {
-					return args[0].value;
-				})
+	parseStyle(parse: () => string | falsey) {
+		return this.parseMacro(/(?:display|text|script|scriptscript)style|math(?:punct|inner|ord|bfit|bf|it|tt|sf|frak|scr|cal|bb|rm)|boxed|boldsymbol|bold|bm|emph|tiny|small|[lL]arge|LARGE|[hH]uge|(?:script|footnote|normal)size|displaylines/,
+			[{ parse }])?.map((_, args) => {
+				return args[0].value;
+			})
 			|| this.parseMacro('mathopen', [{ parse }])?.map((_, args) => {
 				return `${args[0].value} `;
 			})
@@ -151,11 +133,41 @@ class LatexParser {
 				[{ parse: () => this.parseText() }, { parse: () => this.parseText() }, { parse }])?.map((_, args) => {
 					return args[2].value;
 				})
+			|| false;
+	}
+
+	parseObject(acceptLeadingSign = true, acceptSecondary = true): string | false {
+		const leadingLNot = acceptLeadingSign && (this.parseMacro(/lnot|neg/)
+			|| this.parseStyle(() => this.parseMacro(/lnot|neg/)?.name));
+		let obj = acceptSecondary && (this.parseNum() ||
+			this.parseMacro(/sqrt\d/)?.map((name) => `sqrt(${name.slice(-1)})`) ||
+			this.parseFunction())
+			|| this.parseSymbol()
+			|| acceptSecondary && (this.parseD() ||
+				this.parseGroup(/(?:\\(?:left)?)?[[(]/, undefined, () => this.parseMatrix(), false) ||
+				this.parseGroup() ||
+				this.parseMatrix() ||
+				this.parsePDiff() ||
+				this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])?.map(
+					(_, [num, denom]) =>
+						`(${LatexParser.#closeFactor(num.value)}/${LatexParser.#closeFactor(denom.value)})`,
+				) ||
+				this.parseMacro(/[dt]?frac\d{2}/)?.map((name) => {
+					const [n, d] = [...name.slice(-2)].map((n) => Number.parseInt(n));
+					return `(${n}/${d})`;
+				}))
+			|| this.parseStyle(acceptSecondary ? () => this.parseExpression() : () => this.parseObject(acceptLeadingSign, false))
 			|| this.parseMacro(/text(?:rm|md|bf|up|it|sl|tt|sf|normal)?|mbox/, [{ parse: () => this.parseText() }])?.map((_, args) => args[0].value)
 			|| this.parseMacro('textsc', [{ parse: () => this.parseText() }])?.map((_, args) => args[0].value.toUpperCase());
 		if (!acceptLeadingSign && obj && /^[+-]/.test(obj)) {
-			this.#pop();
+			this.#pop(1 + +!!leadingLNot);
 			return false;
+		}
+		if (leadingLNot && obj) {
+			this.#commit();
+			obj = `not ${obj}`;
+		} else if (leadingLNot) {
+			this.#pop();
 		}
 		const sup = obj && this.parseExp();
 		if (sup) {
@@ -229,7 +241,7 @@ class LatexParser {
 				this.#commit();
 			}
 
-			const obj = this.parseObjects(!products);
+			const obj = this.parseObjects(!(products && prodIsStable));
 			if (obj) {
 				this.#commit();
 				if (prodIsStable) {
@@ -242,7 +254,10 @@ class LatexParser {
 			}
 
 			const sum = (prodIsStable || !products) && (
-				this.#consume(/[+-]/) || (products && this.#consume('=')) || this.parseMacro('pm')?.map(() => '#pm#'));
+				this.#consume(/[+-]/) || (products && this.#consume('='))
+				|| this.parseMacro('pm')?.map(() => '#pm#'))
+				|| this.parseMacro(/rarr|rightarrow/)?.map(() => 'implies')
+				|| this.parseMacro(/lrarr|leftrightarrow/)?.map(() => 'xnor');
 			if (sum) {
 				this.#commit();
 				sums += !products.trimEnd() ? sum : `${products.trimEnd()} ${sum} `;
@@ -251,12 +266,12 @@ class LatexParser {
 				continue;
 			}
 
-			const dot = prodIsStable && this.parseMacro(/cdot|times/);
+			const dot = prodIsStable && this.parseMacro(/cdot|times|lor|land/);
 			if (dot) {
 				this.#commit();
 				if (products) {
 					products = products.trimEnd();
-					products += { cdot: " . ", times: " * " }[dot.name];
+					products += { cdot: " . ", times: " * ", lor: ' or ', land: ' and ' }[dot.name];
 				}
 				prodIsStable = false;
 				continue;
@@ -276,11 +291,15 @@ class LatexParser {
 			this.#pop();
 			return "";
 		}
-		if (!prodIsStable) throw new Error(`Incomplete expression: '${products + sums}'`);
+		if (!prodIsStable) throw new Error(
+			`Incomplete expression: '${products + sums}'\n`
+			+ `While parsing '${this.#latex}' from index ${this.#i.at(-2)} to ${this.#i.at(-1)}\n`
+			+ `               ${new Array(this.#i.at(-2)).fill(' ').join('')}^(started here)\n`
+			+ `               ${new Array(this.#i.at(-1)).fill(' ').join('')}^(got here)`);
 		return sums + products;
 	}
 
-	parseMacro<T>(name: string | RegExp, args: ({ id?: T, parse?: () => string | false | undefined, optional?: boolean; })[] = []) {
+	parseMacro<T>(name: string | RegExp, args: ({ id?: T, parse?: () => string | falsey, optional?: boolean; })[] = []) {
 		const bs = this.#consume('\\');
 		const n = bs && this.#consume(name);
 		if (n && this.#consume(/\s+/)) this.#commit();
@@ -404,7 +423,7 @@ class LatexParser {
 		return `(${fn}${args})^${LatexParser.#closeExponent(sup)}`;
 	}
 
-	parseGroup(open?: string | RegExp, close?: string | RegExp, internals: () => string | false | undefined = () => this.parseExpression(), wrap = true) {
+	parseGroup(open?: string | RegExp, close?: string | RegExp, internals: () => string | falsey = () => this.parseExpression(), wrap = true) {
 		const openFound = this.#consume(open ?? /(?:\\(?:left)?)?[{([]/);
 		const expr = openFound && internals();
 		const closeFound = expr && this.#consume(close ?? (
