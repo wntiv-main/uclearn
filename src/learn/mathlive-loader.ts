@@ -548,7 +548,9 @@ export function initMathField(mf: MathfieldElement) {
 		];
 		mf.inlineShortcuts = {
 			...mf.inlineShortcuts,
-			pd: '\\operatorname{pd}'
+			pd: '\\operatorname{pd}',
+			implies: '\\rightarrow',
+			xnor: '\\leftrightarrow',
 		};
 	});
 	return (mf as unknown as { _internals: ElementInternals; })._internals;
