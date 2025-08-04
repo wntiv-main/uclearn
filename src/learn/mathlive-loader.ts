@@ -553,6 +553,9 @@ export function initMathField(mf: MathfieldElement) {
 			pd: '\\operatorname{pd}',
 			implies: '\\rightarrow',
 			xnor: '\\leftrightarrow',
+			'<-': '\\leftarrow',
+			'->': '\\rightarrow',
+			'<->': '\\leftrightarrow',
 		};
 	});
 	return (mf as unknown as { _internals: ElementInternals; })._internals;
