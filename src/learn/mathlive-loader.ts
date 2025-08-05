@@ -254,7 +254,9 @@ class LatexParser {
 			}
 
 			const sum = (prodIsStable || !products) && (
-				this.#consume(/[+-]/) || (products && this.#consume('='))
+				this.#consume(/[+-]/) || (products && (
+					this.parseMacro(/[gl][te]/)?.map((name) => ({ 'g': '>', 'l': '<' }[name[0]] + name[1] == 'e' ? '=' : ''))
+					|| this.#consume(/[<=>]/)))
 				|| this.parseMacro('pm')?.map(() => '#pm#'))
 				|| this.parseMacro(/rarr|rightarrow/)?.map(() => 'implies')
 				|| this.parseMacro(/lrarr|leftrightarrow/)?.map(() => 'xnor');
