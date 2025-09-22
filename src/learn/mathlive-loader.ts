@@ -427,15 +427,18 @@ class LatexParser {
 	}
 
 	parseGroup(open?: string | RegExp, close?: string | RegExp, internals: () => string | falsey = () => this.parseExpression(), wrap = true) {
-		const openFound = this.#consume(open ?? /(?:\\(?:left)?)?[([]|(?:(?:\\left)?\\)?\{|(?:\\left)\\lbrace/);
+		const openFound = this.#consume(open ?? /(?:\\(?:left)?)?[([]|(?:(?:\\left)?\\)?\{|(?:\\left)\\lbrac[ek]/);
 		const expr = openFound && internals();
 		const endTokLen = openFound && (openFound.endsWith('brace') ? 6 : 1) || 0;
 		const closeFound = expr && this.#consume(close ?? (
 			openFound.replace('left', 'right').slice(0, -endTokLen)
-			+ { '{': '}', '(': ')', '[': ']', 'lbrace': 'rbrace' }[openFound.slice(-endTokLen) ?? '']));
+			+ { '{': '}', '(': ')', '[': ']', 'lbrace': 'rbrace', 'lbrack': 'rbrack' }[openFound.slice(-endTokLen) ?? '']));
 		if (closeFound) {
 			this.#commit(2);
-			return !wrap || (!open && openFound === '{') ? expr : openFound.endsWith('lbrace') ? `{${expr}}` : `${openFound.slice(-1)}${expr}${closeFound.slice(-1)}`;
+			return !wrap || (!open && openFound === '{') || openFound == '\\[' || openFound == '\\(' ? expr
+				: openFound.endsWith('lbrace') ? `{${expr}}`
+					: openFound.endsWith('lbrack') ? `[${expr}]`
+						: `${openFound.slice(-1)}${expr}${closeFound.slice(-1)}`;
 		}
 		this.#pop(+!!openFound + +!!expr);
 		return false;
