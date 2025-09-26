@@ -141,6 +141,7 @@ class LatexParser {
 			|| this.parseStyle(() => this.parseMacro(/lnot|neg/)?.name));
 		let obj = acceptSecondary && (this.parseNum() ||
 			this.parseMacro(/sqrt\d/)?.map((name) => `sqrt(${name.slice(-1)})`) ||
+			this.parseMacro('sqrt', [{}])?.map((name, [inner]) => `sqrt(${inner.value})`) ||
 			this.parseFunction())
 			|| this.parseSymbol()
 			|| acceptSecondary && (this.parseD() ||
@@ -405,7 +406,7 @@ class LatexParser {
 			|| this.parseMacro(/operatorname\*?/, [{ parse: () => this.parseSymbol() }])
 				?.map((_, [{ value: name }]) => name)
 			|| this.parseMacro(
-				/arc(?:cos|sin|tan)|csc|cosec|sec|(?:cos|sin|tan|cot)h?|exp(?!onentialE)|ln|sqrt|ker|det|arg|dim|gcd|argmin|argmax|plim/)
+				/arc(?:cos|sin|tan)|csc|cosec|sec|(?:cos|sin|tan|cot)h?|exp(?!onentialE)|ln|ker|det|arg|dim|gcd|argmin|argmax|plim/)
 				?.map(name => ({ cosec: 'csc' }[name] ?? name));
 		const sup = fn && this.parseExp();
 		const args = fn && LatexParser.#close(this.parseGroup(/(?:\\(?:left)?)?\(|{/) || (!fnSym && this.parseObjects()));
@@ -435,7 +436,7 @@ class LatexParser {
 			+ { '{': '}', '(': ')', '[': ']', 'lbrace': 'rbrace', 'lbrack': 'rbrack' }[openFound.slice(-endTokLen) ?? '']));
 		if (closeFound) {
 			this.#commit(2);
-			return !wrap || (!open && openFound === '{') || openFound == '\\[' || openFound == '\\(' ? expr
+			return !wrap || openFound === '{' || openFound == '\\[' || openFound == '\\(' ? expr
 				: openFound.endsWith('lbrace') ? `{${expr}}`
 					: openFound.endsWith('lbrack') ? `[${expr}]`
 						: `${openFound.slice(-1)}${expr}${closeFound.slice(-1)}`;
