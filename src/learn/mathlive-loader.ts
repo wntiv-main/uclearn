@@ -95,7 +95,7 @@ class LatexParser {
 	parse() {
 		try {
 			const result = this.parseExpression(true);
-			if (result) this.#commit();
+			this.#commit();
 			if (this.#i[0] < this.#latex.length)
 				return [null, new Error(`Could not parse '${this.#latex.slice(this.#i[0])}'`)] as const;
 			return [result, null] as const;
@@ -145,8 +145,8 @@ class LatexParser {
 			this.parseFunction())
 			|| this.parseSymbol()
 			|| acceptSecondary && (this.parseD() ||
-				this.parseGroup(/(?:\\(?:left)?)?[[(]/, undefined, () => this.parseMatrix(), false) ||
-				this.parseGroup() ||
+				this.parseGroup(/(?:\\left)?(?:[[(]]|\\lbrack)/, undefined, () => this.parseMatrix(), false) ||
+				this.parseGroup(/(?:\\left)?(?:[{[(]]|\\lbrac[ek])/, undefined, () => this.parseExpression(true)) ||
 				this.parseMatrix() ||
 				this.parsePDiff() ||
 				this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])?.map(
@@ -292,7 +292,6 @@ class LatexParser {
 			// biome-ignore lint/style/noNonNullAssertion: #i must always be of atleast length 1
 		} while (this.#i.at(-1)! < this.#latex.length);
 		if (allowEmpty && !sums && !products) {
-			this.#pop();
 			return "";
 		}
 		if (!prodIsStable) throw new Error(
@@ -430,8 +429,8 @@ class LatexParser {
 	parseGroup(open?: string | RegExp, close?: string | RegExp, internals: () => string | falsey = () => this.parseExpression(), wrap = true) {
 		const openFound = this.#consume(open ?? /(?:\\(?:left)?)?[([]|(?:(?:\\left)?\\)?\{|(?:\\left)\\lbrac[ek]/);
 		const expr = openFound && internals();
-		const endTokLen = openFound && (openFound.endsWith('brace') ? 6 : 1) || 0;
-		const closeFound = expr && this.#consume(close ?? (
+		const endTokLen = openFound && (openFound.endsWith('brace') || openFound.endsWith('brack') ? 6 : 1) || 0;
+		const closeFound = openFound && (expr || expr === '') && this.#consume(close ?? (
 			openFound.replace('left', 'right').slice(0, -endTokLen)
 			+ { '{': '}', '(': ')', '[': ']', 'lbrace': 'rbrace', 'lbrack': 'rbrack' }[openFound.slice(-endTokLen) ?? '']));
 		if (closeFound) {
@@ -478,7 +477,7 @@ if (DEBUG) for (const key of Object.getOwnPropertyNames(LatexParser.prototype)) 
 		const startDepth = this._depth();
 		const result = _inner.call(this, ...args);
 		const depth = this._depth();
-		if (depth !== startDepth + +!!result) {
+		if (depth !== startDepth + +(!!result || result === '')) {
 			reportError(new Error(
 				result
 					? `${key} consumed '${result}', left stack in unexpected state (${startDepth} -> ${depth})`
