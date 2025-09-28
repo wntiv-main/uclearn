@@ -145,8 +145,8 @@ class LatexParser {
 			this.parseFunction())
 			|| this.parseSymbol()
 			|| acceptSecondary && (this.parseD() ||
-				this.parseGroup(/(?:\\left)?(?:[[(]]|\\lbrack)/, undefined, () => this.parseMatrix(), false) ||
-				this.parseGroup(/(?:\\left)?(?:[{[(]]|\\lbrac[ek])/, undefined, () => this.parseExpression(true)) ||
+				this.parseGroup(/(?:\\left)?(?:[[(]|\\lbrack)/, undefined, () => this.parseMatrix(), false) ||
+				this.parseGroup(/(?:\\left)?(?:[{[(]|\\lbrac[ek])/, undefined, () => this.parseExpression(true)) ||
 				this.parseMatrix() ||
 				this.parsePDiff() ||
 				this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])?.map(
