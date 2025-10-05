@@ -25,6 +25,7 @@
 		"clean:dev": "(rm -r -f src/static/learn/index.js src/static/learn/hydration-worker.js src/static/learn/index.css src/static/timetable/index.js src/static/timetable/index.css src/static/learn/ace-code-shadow.css src/static/learn/videojs-shadow.css || true) && cmd /C \"rd src\\static\\learn\\highlight.js & rd src\\static\\learn\\mathlive & rd src\\static\\learn\\vs & rd src\\static\\excalidraw & rd build\" || true"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^2.2.0",
 		"@eslint/js": "^9.21.0",
 		"@trevorhanus/mathquill-types": "https://github.com/trevorhanus/mathquill-types",
 		"@types/bun": "latest",

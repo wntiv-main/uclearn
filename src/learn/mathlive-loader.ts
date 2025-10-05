@@ -210,7 +210,7 @@ class LatexParser {
 			return false;
 		}
 		this.#commit(2);
-		return this.#matrixFormat == "grid"
+		return this.#matrixFormat === "grid"
 			? rows.map(row => row.join(' ')).join('\n')
 			: `matrix([${rows.map(row => row.join(', ')).join('], [')}])`;
 	}
@@ -256,7 +256,7 @@ class LatexParser {
 
 			const sum = (prodIsStable || !products) && (
 				this.#consume(/[+-]/) || (products && (
-					this.parseMacro(/[gl](?:t|eq?)/)?.map((name) => ({ 'g': '>', 'l': '<' }[name[0]] + (name[1] == 'e' ? '=' : '')))
+					this.parseMacro(/[gl](?:t|eq?)/)?.map((name) => ({ 'g': '>', 'l': '<' }[name[0]] + (name[1] === 'e' ? '=' : '')))
 					|| this.parseMacro(/rarr|rightarrow/)?.map(() => 'implies')
 					|| this.parseMacro(/lrarr|leftrightarrow/)?.map(() => 'xnor')
 					|| this.#consume(/[<=>]/)))
@@ -435,7 +435,7 @@ class LatexParser {
 			+ { '{': '}', '(': ')', '[': ']', 'lbrace': 'rbrace', 'lbrack': 'rbrack' }[openFound.slice(-endTokLen) ?? '']));
 		if (closeFound) {
 			this.#commit(2);
-			return !wrap || openFound === '{' || openFound == '\\[' || openFound == '\\(' ? expr
+			return !wrap || openFound === '{' || openFound === '\\[' || openFound === '\\(' ? expr
 				: openFound.endsWith('lbrace') ? `{${expr}}`
 					: openFound.endsWith('lbrack') ? `[${expr}]`
 						: `${openFound.slice(-1)}${expr}${closeFound.slice(-1)}`;
