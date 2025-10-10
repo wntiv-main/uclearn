@@ -149,14 +149,17 @@ class LatexParser {
 				this.parseGroup(/(?:\\left)?(?:[{[(]|\\lbrac[ek])/, undefined, () => this.parseExpression(true)) ||
 				this.parseMatrix() ||
 				this.parsePDiff() ||
-				this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{}, {}])?.map(
+				this.parseMacro(/binom/, [{ allowNumeric: true }, { allowNumeric: true }])
+					?.map((_, [n, r]) => `binomial(${n.value}, ${r.value})`) ||
+				this.parseMacro(/[dt]?frac|cfrac\[[lr]\]/, [{ allowNumeric: true }, { allowNumeric: true }])?.map(
 					(_, [num, denom]) =>
 						`(${LatexParser.#closeFactor(num.value)}/${LatexParser.#closeFactor(denom.value)})`,
-				) ||
-				this.parseMacro(/[dt]?frac\d{2}/)?.map((name) => {
-					const [n, d] = [...name.slice(-2)].map((n) => Number.parseInt(n));
-					return `(${n}/${d})`;
-				}))
+				)// ||
+				// this.parseMacro(/[dt]?frac\d{2}/)?.map((name) => {
+				// 	const [n, d] = [...name.slice(-2)].map((n) => Number.parseInt(n));
+				// 	return `(${n}/${d})`;
+				// })
+				)
 			|| this.parseStyle(acceptSecondary ? () => this.parseExpression() : () => this.parseObject(acceptLeadingSign, false))
 			|| this.parseMacro(/text(?:rm|md|bf|up|it|sl|tt|sf|normal)?|mbox/, [{ parse: () => this.parseText() }])?.map((_, args) => args[0].value)
 			|| this.parseMacro('textsc', [{ parse: () => this.parseText() }])?.map((_, args) => args[0].value.toUpperCase());
@@ -302,13 +305,13 @@ class LatexParser {
 		return sums + products;
 	}
 
-	parseMacro<T>(name: string | RegExp, args: ({ id?: T, parse?: () => string | falsey, optional?: boolean; })[] = []) {
+	parseMacro<T>(name: string | RegExp, args: ({ id?: T, parse?: () => string | falsey, optional?: boolean; allowNumeric?: boolean })[] = []) {
 		const bs = this.#consume('\\');
 		const n = bs && this.#consume(name);
 		if (n && this.#consume(/\s+/)) this.#commit();
 		const argValues: (ItemOf<typeof args> & { value: string; })[] = [];
-		if (n) for (const [i, { id, parse, optional }] of enumerate(args)) {
-			const value = this.parseGroup('{', '}', parse, false);
+		if (n) for (const [i, { id, parse, optional, allowNumeric }] of enumerate(args)) {
+			const value = this.parseGroup('{', '}', parse, false) || (allowNumeric && this.#consume(/\d/));
 			if (!optional && !value) {
 				this.#pop(+!!bs + +!!n + i);
 				return;
