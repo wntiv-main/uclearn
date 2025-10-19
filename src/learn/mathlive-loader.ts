@@ -140,8 +140,8 @@ class LatexParser {
 		const leadingLNot = acceptLeadingSign && (this.parseMacro(/lnot|neg/)
 			|| this.parseStyle(() => this.parseMacro(/lnot|neg/)?.name));
 		let obj = acceptSecondary && (this.parseNum() ||
-			this.parseMacro(/sqrt\d/)?.map((name) => `sqrt(${name.slice(-1)})`) ||
-			this.parseMacro('sqrt', [{}])?.map((name, [inner]) => `sqrt(${inner.value})`) ||
+			// this.parseMacro(/sqrt\d/)?.map((name) => `sqrt(${name.slice(-1)})`) ||
+			this.parseMacro('sqrt', [{allowNumeric: true}])?.map((name, [inner]) => `sqrt(${inner.value})`) ||
 			this.parseFunction())
 			|| this.parseSymbol()
 			|| acceptSecondary && (this.parseD() ||
@@ -190,6 +190,10 @@ class LatexParser {
 		for (let obj: string | false; obj = this.parseObject(false, false);) {
 			collector += `*${obj}`;
 			this.#commit();
+		}
+		if(this.#consume('!')) {
+			this.#commit();
+			return `${collector}!`;
 		}
 		return collector;
 	}
